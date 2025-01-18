@@ -10,6 +10,9 @@ import Orders from '@/pages/Orders';
 import AddOrder from '@/pages/AddOrder';
 import Itmes from '@/pages/Itmes';
 import AddItem from '@/pages/AddItem'
+import AddShipment from '@/pages/AddShipment';
+import Storage from '@/pages/Storage';
+import Dashboard from '@/pages/Dashboard';
 
 const LogedInHome = () => {
     const {activeMenu} = useStateContext() ;
@@ -52,6 +55,13 @@ const LogedInHome = () => {
                                 {/* Itmes */}
                                 <Route path='/items' element={<Itmes/>}/>
                                 <Route path='/additem' element={<AddItem/>}/>
+                                
+                                {/* shipment */}
+                                <Route path='/addShipment' element={<AddShipment/>}/>
+                                <Route path='/Storage' element={<Storage/>}/>
+                                
+                                {/* DashBoard */}
+                                <Route path='/dashboard' element={<Dashboard/>}/>
                                 
                             </Routes>
                     </div>

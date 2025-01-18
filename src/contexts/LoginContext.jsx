@@ -61,8 +61,7 @@ export const LoginProvider = ({ children }) => {
         }
 
         const data = resp.json();
-        console.log(data.token);
-        setLogedin(true);
+        setLogedin(false);
         return data;
     }
 

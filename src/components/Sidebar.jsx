@@ -74,6 +74,30 @@ export default function Sidebar() {
                         <span className="capitalize">add item</span>
                       </NavLink>
                 </div>
+                <div >
+                  <p className="text-slate-900 m-3 mt-4 uppercase" >
+                    Storage
+                  </p>
+                      <NavLink to={`/Storage`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
+                        {/* {link.icon} */}
+                        <span className="capitalize">Storage</span>
+                      </NavLink>
+
+                      <NavLink to={`/addShipment`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
+                        {/* {link.icon} */}
+                        <span className="capitalize">add Shipment</span>
+                      </NavLink>
+                </div>
+
+                <div >
+                  <p className="text-slate-900 m-3 mt-4 uppercase" >
+                    Dashboard
+                  </p>
+                  <NavLink to={`/dashboard`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
+                    {/* {link.icon} */}
+                    <span className="capitalize">dashboard</span>
+                  </NavLink>
+                </div>
           </div>
         </>
       )}
