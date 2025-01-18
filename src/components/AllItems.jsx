@@ -1,62 +1,75 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Center from "@/components/Center";
+import axios from "axios";
+
+const API = import.meta.env.VITE_API ;
 
 function AllItems() {
-  const API = import.meta.env.VITE_API ;
   
-  const [items, setItems] = useState([]);
+    const [items, setItems] = useState([]);
 
     useEffect(() => {
         fetchItems();
-    }, []);
+        }, []);
 
-    const fetchItems = async () => {
-        const target = API + 'item';
+        const fetchItems = async () => {
+        const target = `${API}item`;
         try {
-            const response = await fetch(target);
-            if (response.ok) {
-                const data = await response.json();
-                setItems(data);
+            const token = localStorage.getItem("token");
+            const response = await axios.get(target, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+            
+            if (response.status === 200) {
+            setItems(response.data);
             } else {
-                console.error("Failed to fetch items.");
+            console.error("Failed to fetch items.");
             }
         } catch (error) {
             console.error("Error fetching items:", error);
         }
-    };
-
-    const deleteItem = async (sku) => {
-        const target = API + 'item/delete/' + sku;
-        const request = {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
         };
 
+        const deleteItem = async (sku) => {
+        const target = `${API}item/delete/${sku}`;
         try {
-            const response = await fetch(target, request);
-            if (response.ok) {
-                const newItems = items.filter(item => item.sku !== sku) ;
-                setItems(newItems);
-                
-                toast.success("deleted", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    });
+            const token = localStorage.getItem("token");
+            const response = await axios.delete(target, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            });
+
+            if (response.status === 200) {
+            const newItems = items.filter((item) => item.sku !== sku);
+            setItems(newItems);
+
+            toast.success("Deleted successfully", {
+                position: "top-right",
+                autoClose: 3000,
+            });
             } else {
-                toast.error("error", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    });
+            toast.error("Failed to delete item", {
+                position: "top-right",
+                autoClose: 3000,
+            });
             }
         } catch (error) {
             console.error("Error deleting item:", error);
+            toast.error("Error deleting item", {
+            position: "top-right",
+            autoClose: 3000,
+            });
         }
     };
 
     return (
         <Center>
-            <div className="flex flex-col items-center gap-4 w-full md:w-[90%]">
+            <div className="flex flex-col items-center gap-4 w-full md:w-[90%] ">
                 <h2 className="textGradient text-3xl text-white font-semibold">Items List</h2>
     
                 <div className="w-full text-white text-lg shadow-lg shadow-slate-500 rounded-b-lg">

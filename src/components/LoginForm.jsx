@@ -9,22 +9,31 @@ const LoginForm = () => {
     const {signin} = useLogin() ;
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-
+    const [ Email ,setEmail] = useState("")
 
     const evokeSignin = () => {
-        if (!username || !password) {
+        if (!username || !password || !Email) {
             toast.error("plese enter your username & password",{
                 autoClose:3000
             })
             return;
         }
     
-        const creds = { username, password };
+        const creds = {
+            username: username,
+            password: password,
+            email: Email,
+        };
         signin(creds).then(data => {
             if (!data) {
                 toast.error("Sign-in failed. Please check your credentials.")
             } else {
-                toast.success("Sign-in successful!")
+                toast.success("Sign-in successful!",{
+                    autoClose:3000
+                })
+                setTimeout(()=>{
+                    window.location.href="/"
+                } , 1500)
                 console.log(data);
             }
         });
@@ -33,13 +42,18 @@ const LoginForm = () => {
   return (
     <Center >
         <h1 className="textGradient text-5xl md:text-6xl md:h-20 text-white">sign in</h1>
-        <div className="flex flex-col gap-12 mt-4 items-center w-[90%] md:w-[50%] py-8 border border-white text-white rounded-lg shadow-lg shadow-slate-500">
-            <div className="flex flex-col items-start gap-4 w-[80%]">
+        <div className="flex flex-col gap-8 mt-4 items-center w-[90%] md:w-[50%] py-8 border border-white text-white rounded-lg shadow-lg shadow-slate-500 bg-slate-950 opacity-90 z-10">
+            <div className="flex flex-col items-start gap-2 w-[80%]">
                 <label>Username: </label>
                 <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="Username..." onChange={e => setUsername(e.target.value)} type='text' />
             </div>
-
-            <div className="flex flex-col items-start gap-4 w-[80%]">
+            
+            <div className="flex flex-col items-start gap-2 w-[80%]">
+                <label>Email: </label>
+                <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="example@gmail.com" onChange={e => setEmail(e.target.value)} type='email' />
+            </div>
+            
+            <div className="flex flex-col items-start gap-2 w-[80%]">
                 <label>Password: </label>
                 <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="Password..." onChange={e => setPassword(e.target.value)} type='password' />
             </div>

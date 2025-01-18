@@ -15,7 +15,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="ml-3 h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10  shadow-[10px_0px_10px_rgba(255,255,255,0.1)]">
+    <div className="ml-3 h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10 shadow-[10px_0px_10px_rgba(255,255,255,0.1)]">
       {activeMenu && (
         <>
           <div className="flex justify-between items-center">
@@ -27,20 +27,22 @@ export default function Sidebar() {
               </button>
           </div>
           <div className="mt-10 ">
-                <div >
-                  <p className="text-slate-900 m-3 mt-4 uppercase" >
-                    account 
-                  </p>
-                      <NavLink to={`/signup`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
-                        {/* {link.icon} */}
-                        <span className="capitalize">Sign up</span>
-                      </NavLink>
+                {
+                  // <div >
+                  // <p className="text-slate-900 m-3 mt-4 uppercase" >
+                  //   account 
+                  // </p>
+                  //     <NavLink to={`/signup`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
+                  //       {/* {link.icon} */}
+                  //       <span className="capitalize">Sign up</span>
+                  //     </NavLink>
 
-                      <NavLink to={`/login`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
-                        {/* {link.icon} */}
-                        <span className="capitalize">Login</span>
-                      </NavLink>
-                </div>
+                  //     <NavLink to={`/login`} onClick={HandelColseSidebar} style={({isActive})=>(isActive ? {backgroundColor:"#3F465A"} : {backgroundColor:""})} className={({isActive})=> isActive ? activeLink : normalLink  }>
+                  //       {/* {link.icon} */}
+                  //       <span className="capitalize">Login</span>
+                  //     </NavLink>
+                  // </div>
+                }
 
                 <div >
                   <p className="text-slate-900 m-3 mt-4 uppercase" >

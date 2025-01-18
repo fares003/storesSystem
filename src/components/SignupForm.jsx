@@ -27,6 +27,9 @@ const SignupForm = () => {
           position: "top-right",
           autoClose: 3000,
         });
+        setTimeout(()=>{
+          window.location.href="/"
+      } , 1500)
       } else {
         toast.error("Error creating user. Please try again.", {
           position: "top-right",
@@ -40,26 +43,26 @@ const SignupForm = () => {
       });
       console.error(error);
     }
-  };
+};
 
   return (
     <Center>
       <h1 className="textGradient text-5xl md:text-6xl md:h-20 text-white mb-6">Create account</h1>
-      <div className="flex flex-col gap-2 items-center w-[90%] md:w-[50%] py-8 border border-white text-white rounded-lg shadow-lg shadow-slate-500">
+      <div className="flex flex-col gap-2 items-center w-[90%] md:w-[50%] py-8 border border-white text-white rounded-lg shadow-lg shadow-slate-500 bg-slate-950 z-10 opacity-90">
           <div className="flex flex-col items-start gap-2 w-[80%]">
               <label>Username: </label>
               <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="Username..." type = 'text' onChange={e=>setUsername(e.target.value)}/><br/>
           </div>
 
           <div className="flex flex-col items-start gap-2 w-[80%]">
+              <label>Email: </label>
+              <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="example@gmail.com" type='email' onChange={e=>setEmail(e.target.value)}/><br/>
+          </div>
+          <div className="flex flex-col items-start gap-2 w-[80%]">
               <label>Password: </label>
               <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="Password..." type = 'password' onChange={e=>setPassword(e.target.value)}/><br/>
           </div>
           
-          <div className="flex flex-col items-start gap-2 w-[80%]">
-              <label>Email: </label>
-              <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="example@gmail.com" type='email' onChange={e=>setEmail(e.target.value)}/><br/>
-          </div>
           <p> have an account ? | <a href="/login" className="text-blue-400">sign in</a> </p>
           <button className="text-white px-6 py-2 rounded-lg gradient-btn duration-300  bg-[#4C5365] hover:bg-[#5A6172]"  onClick = {evokeSignup}>Submit</button>
       </div>

@@ -1,4 +1,5 @@
 import Center from "@/components/Center";
+import axios from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -51,17 +52,19 @@ function AddNewItem() {
         description: formData.description,
       });
 
-      const target = API + "item/create";
-      const request = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsedData),
-      };
+      const token = localStorage.getItem("token");
+      const target = `${API}item/create`;
 
-      const response = await fetch(target, request);
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
+      
+      const response = await axios.post(target, parsedData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        console.log(response.data);
         toast.success("Item added successfully", {
           position: "top-right",
           autoClose: 3000,
@@ -88,10 +91,14 @@ function AddNewItem() {
         });
       } else {
         console.error("Error adding item:", error);
+        toast.error("Unexpected error occurred", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     }
   };
-
+  
   return (
     <Center>
       <div className="flex flex-col gap-4 items-center w-full ">
