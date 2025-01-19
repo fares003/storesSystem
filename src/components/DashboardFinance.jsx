@@ -1,168 +1,181 @@
-import { DollarSign } from 'lucide-react';
-import React, { useEffect, useState } from 'react'
+import { BoxesIcon, DollarSign } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 
-import {GoDotFill} from "react-icons/go"
-const API = import.meta.env.VITE_API ;
+import { GoDotFill } from "react-icons/go";
+import { MdMoney } from 'react-icons/md';
+import { FaUserFriends } from 'react-icons/fa';
+
+const API = import.meta.env.VITE_API;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-
 const DashboardFinance = () => {
-    const [earningData , setEarningData] = useState([]) ;
-    const [total , setTotal] = useState(0) ; 
-    const [barChartData , setbarChartData] = useState([]) ;
-    
+    const [earningData, setEarningData] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [barChartData, setBarChartData] = useState([
+        { month: 'Jan', value: 15000 },
+        { month: 'Feb', value: 12000 },
+        { month: 'Mar', value: 18000 },
+        { month: 'Apr', value: 20000 },
+        { month: 'May', value: 17000 },
+        { month: 'Jun', value: 19000 },
+        { month: 'Jul', value: 22000 },
+    ]);
 
-    const GetData = async ()=>{
-        const target = API + "Data/finances";
-        const resp = await fetch(target);
-        const data = await resp.json();
-        setEarningData(data);
-    }
-
-    useEffect(()=>{
-        GetData()
-    }, [])
+    const GetData = async () => {
+        try {
+            const target = `${API}Data/finances`;
+            const resp = await fetch(target);
+            const data = await resp.json();
+            setEarningData(data);
+        } catch (error) {
+            console.error("Error fetching earnings data:", error);
+        }
+    };
 
     useEffect(() => {
-        let tempTotal = 0;
-        earningData.forEach((item) => {
-            tempTotal += item.value;
-        });
+        GetData();
+    }, []);
+
+    useEffect(() => {
+        const tempTotal = earningData.reduce((acc, item) => acc + item.value, 0);
         setTotal(tempTotal);
     }, [earningData]);
 
-
-    const getRevenue = async ()=>{
-        const target = API + "Data/stores";
-        const resp = await fetch(target);
-        const data = await resp.json();
-        setbarChartData(data);
-    }
-
-    useEffect(()=>{
-        getRevenue() ; 
-    })
     const barData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: barChartData.map((item) => item.month),
         datasets: [
-          {
-            label: 'Earnings',
-            data: [12000, 15000, 8000, 18000, 22000, 25000, 20000],
-            backgroundColor: 'rgba(80, 80, 80, 0.7)',
-            borderColor: 'rgba(80, 80, 80, 1)',
-            borderWidth: 1,
-          },
+            {
+                label: 'Monthly Earnings',
+                data: barChartData.map((item) => item.value),
+                backgroundColor: 'rgba(79, 209, 197, 0.8)',
+                borderColor: 'rgba(47, 128, 237, 1)',
+                borderWidth: 2,
+            },
         ],
-      };
-    
-      const barOptions = {
+    };
+
+    const barOptions = {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'top',
-          },
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#4B5563',
+                    font: {
+                        size: 14,
+                        family: 'Poppins, sans-serif',
+                    },
+                },
+            },
+            title: {
+                display: true,
+                text: 'Earnings Overview',
+                color: '#1F2937',
+                font: {
+                    size: 18,
+                    family: 'Poppins, sans-serif',
+                },
+            },
         },
-      };
+    };
 
     return (
-        <div className="mt-12">
-            <div className="flex flex-wrap lg:flex-nowrap justify-center">
+        <div className="min-h-screen bg-gray-100 p-6">
+            <div className="container mx-auto space-y-6">
                 {/* Earnings Section */}
-                <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-xl w-full lg:w-80 p-8 pt-9 m-3 bg-no-repeat bg-cover bg-center flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                        <p className="font-bold text-gray-400 dark:text-gray-200">Earnings</p>
-                        <p className="text-2xl">{total}$</p>
-                        </div>
-                        {/* Download Button */}
-                        <div className="mt-6 flex justify-center">
-                            <button className="bg-slate-800 hover:bg-slate-700 duration-200 text-white px-3 py-2 rounded-md">
-                            Download
+                <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg p-6 shadow-md">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="text-2xl font-bold">Earnings</h2>
+                                <p className="text-4xl font-extrabold mt-2">{total}$</p>
+                            </div>
+                            <button className="bg-white text-indigo-500 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200">
+                                Download
                             </button>
                         </div>
                     </div>
 
-                    {/* Earnings Data */}
-                    <div className="flex flex-wrap gap-4">
-                        {earningData.map((item, index) => (
-                        <div
-                            key={index}
-                            className="bg-slate-700 dark:text-gray-200 dark:bg-secondary-dark-bg p-4 rounded-lg flex flex-col items-center text-center flex-1 min-w-[120px]"
-                        >
-                            <button
-                            type="button"
-                            className="text-2xl opacity-90 rounded-full p-3 mb-3 hover:shadow-sm hover:shadow-white "
-                            >
-                                <DollarSign />
-                            </button>
-                            <p className="text-lg font-semibold">{item.value} $</p>
-                            <p className="text-sm text-gray-400 mt-1">{item.name}</p>
-                        </div>
-                        ))}
-                        
+                    {/* Earnings Data Table */}
+                    <div>
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Earnings Breakdown</h3>
+                        {earningData.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="table-auto w-full text-left border-collapse rounded-lg overflow-hidden shadow-lg">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="px-4 py-2 text-gray-600 font-semibold">ID</th>
+                                            <th className="px-4 py-2 text-gray-600 font-semibold">Name</th>
+                                            <th className="px-4 py-2 text-gray-600 font-semibold">Value</th>
+                                            <th className="px-4 py-2 text-gray-600 font-semibold">Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {earningData.map((item, index) => (
+                                            <tr
+                                                key={index}
+                                                className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                            >
+                                                <td className="px-4 py-2">{item.id}</td>
+                                                <td className="px-4 py-2">{item.name}</td>
+                                                <td className="px-4 py-2 text-green-600 font-semibold">${item.value}</td>
+                                                <td className="px-4 py-2">{new Date(item.date).toLocaleDateString()}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="text-gray-500">No data available.</p>
+                        )}
                     </div>
-
-                    
                 </div>
-            </div>
 
-            <div className="flex gap-10 flex-wrap justify-center">
-                <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg m-3 p-4 rounded-2xl md:w-780">
-                    <div className="flex justify-between">
-                    <p className="font-semibold text-xl">Revenue Updates</p>
-                    <div className="flex items-center gap-4">
-                        <p className="flex items-center gap-2 text-gray-600 hover:drop-shadow-xl">
-                        <span>
-                            <GoDotFill />
-                        </span>
-                        <span> Expense </span>
-                        </p>
 
-                        <p className="flex items-center gap-2 text-green-400 hover:drop-shadow-xl">
-                        <span>
-                            <GoDotFill />
-                        </span>
-                        <span> Budget </span>
-                        </p>
-                    </div>
-                    </div>
-                    <div className="mt-10 flex gap-10 flex-wrap justify-between items-center">
-                    <div className="border-r-1 border-color m-4 pr-10">
-                        <div>
-                        <p>
-                            <span className="text-3xl font-semibold">$220.654</span>
-                            <span className="p-1.5 hover:drop-shadow-xl cursor-pointer rounded-full text-white bg-green-400 ml-3 text-xs">
-                            23%
+                {/* Revenue Updates */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-xl font-semibold">Revenue Updates</h3>
+                        <div className="flex items-center space-x-4">
+                            <span className="flex items-center text-gray-500">
+                                <GoDotFill className="text-gray-500" /> Expense
                             </span>
-                        </p>
-                        <p className="text-gray-500 mt-1">Budget</p>
-                        </div>
-
-                        <div className="mt-8">
-                        <p>
-                            <span className="text-3xl font-semibold">$21,547</span>
-                        </p>
-                        <p>Expense</p>
-                        </div>
-
-                        <div className="mt-10">
-                        <button className="bg-slate-800 hover:bg-slate-700 duration-200 text-white px-2 py-2 rounded-md">
-                            Download Report
-                        </button>
+                            <span className="flex items-center text-green-500">
+                                <GoDotFill className="text-green-500" /> Budget
+                            </span>
                         </div>
                     </div>
-
-                    {/* بار شارت */}
-                    <div className="flex-1 min-w-[300px] max-w-[500px]">
-                        <Bar data={barData} options={barOptions} />
+                    <div className="flex flex-col md:flex-row mt-6 space-y-6 md:space-y-0 md:space-x-6">
+                        <div className="md:w-1/3">
+                            <h4 className="text-3xl font-bold">$220.654</h4>
+                            <p className="text-sm text-gray-500 mt-2">Budget</p>
+                        </div>
+                        <div className="md:w-2/3">
+                            <Bar data={barData} options={barOptions} />
+                        </div>
                     </div>
+                </div>
+
+                {/* Top Products */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                    <h3 className="text-xl font-semibold mb-4">Top Products</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <div className="bg-gray-50 rounded-xl shadow-lg p-4">
+                            <img
+                                src="https://cdn-1.hosting.anfa.media/upload/q_50/https://waheteter.com/wp-content/uploads/2022/06/Dior-Sauvage.jpg"
+                                alt="Sauvage Dior"
+                                className="w-full h-40 object-cover rounded-md"
+                            />
+                            <h4 className="text-lg font-semibold mt-4">Sauvage Dior</h4>
+                            <p className="text-xl font-bold text-indigo-600">$300</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-  )
-}
+    );
+};
 
-export default DashboardFinance
+export default DashboardFinance;

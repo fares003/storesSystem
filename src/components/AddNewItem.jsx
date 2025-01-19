@@ -11,8 +11,8 @@ const itemSchema = z.object({
     price: z
       .union([z.number().positive(), z.string().refine((val) => !isNaN(parseFloat(val)), "Price is required and must be a valid number")])
       .transform((val) => parseFloat(val)),
-    cost: z
-      .union([z.number().positive(), z.string().refine((val) => !isNaN(parseFloat(val)), "Cost is required and must be a valid number")])
+    minimumAmount: z
+      .union([z.number().positive(), z.string().refine((val) => !isNaN(parseFloat(val)), "minimumAmount is required and must be a valid number")])
       .transform((val) => parseFloat(val)),
     stock: z
       .union([z.number().int().nonnegative(), z.string().refine((val) => !isNaN(parseInt(val)), "Stock is required and must be a valid integer")])
@@ -28,7 +28,7 @@ function AddNewItem() {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    cost: "",
+    minimumAmount: "",
     stock: "",
     sku: "",
     description: "",
@@ -46,7 +46,7 @@ function AddNewItem() {
       const parsedData = itemSchema.parse({
         name: formData.name,
         price: parseFloat(formData.price),
-        cost: parseFloat(formData.cost),
+        minimumAmount: parseInt(formData.minimumAmount),
         stock: parseInt(formData.stock),
         sku: formData.sku,
         description: formData.description,
@@ -72,7 +72,7 @@ function AddNewItem() {
         setFormData({
           name: "",
           price: "",
-          cost: "",
+          minimumAmount: "",
           stock: "",
           sku: "",
           description: "",
@@ -127,12 +127,12 @@ function AddNewItem() {
             />
           </div>
           <div className="col-span-5 flex flex-col gap-2">
-            <label className="text-white text-lg">Cost</label>
+            <label className="text-white text-lg">Minimum Amout</label>
             <input
-              name="cost"
+              name="minimumAmount"
               type="number"
               className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.cost}
+              value={formData.minimumAmount}
               onChange={handleInputChange}
             />
           </div>

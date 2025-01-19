@@ -1,66 +1,103 @@
-import {useEffect} from 'react'
-import { MdKeyboardArrowDown } from 'react-icons/md'
-import { useStateContext } from '../contexts/ContextProvider'
-import avatar from "../assets/react.svg"
+import { useEffect } from 'react';
+import { MdKeyboardArrowDown, MdNotifications } from 'react-icons/md';
 import { FaBars } from 'react-icons/fa';
-import { useLogin } from '@/contexts/LoginContext';
 import { NavLink } from 'react-router-dom';
+import { useStateContext } from '../contexts/ContextProvider';
+import { useLogin } from '@/contexts/LoginContext';
+import avatar from "../assets/react.svg";
 
 export default function Navbar() {
-  const {activeMenu , setActiveMenu ,screenSize ,setScreenSize } = useStateContext() ; 
-  useEffect(()=>{
-    let handleRezise = () =>{
-      setScreenSize(window.innerWidth)
-    }
-    window.addEventListener("resize" , handleRezise);
-    handleRezise() ;
+  const {
+    activeMenu,
+    setActiveMenu,
+    screenSize,
+    setScreenSize,
+    activeNotification,
+    setActiveNotification,
+    newNotification ,
+  } = useStateContext();
 
-    return ()=>{ window.removeEventListener('resize' ,handleRezise)}
-  } , [])
-  useEffect(()=>{
-    if(screenSize <= 900){
-      setActiveMenu(false)
+  const { logedin } = useLogin();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenSize(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setScreenSize]);
+
+  useEffect(() => {
+    if (screenSize <= 900) {
+      setActiveMenu(false);
+    } else {
+      setActiveMenu(true);
     }
-    else{
-      setActiveMenu(true)
-    }
-  } , [screenSize])
-  const {logedin} = useLogin() ; 
+  }, [screenSize, setActiveMenu]);
+
   return (
-    (
-      logedin ? 
-
-      <div className="flex items-center justify-between p-2 md:mx-6 relative">
-        <FaBars className='cursor-pointer text-2xl text-white' onClick={()=>{setActiveMenu(!activeMenu)}}/>
-        <div className="flex items-center gap-2 cursor-pointer p-1 hover:bg-light-gray rounded-lg" >
-          <img src={avatar} className="rounded-full w-8 h-8" />
-          <p><span className="text-gray-400 text-14">Hi,</span> <span className="text-gray-400 font-bold ml-1 text-14">Admin</span></p>
-        </div>
-      </div> : 
-      
-      <div className=" text-white flex items-center justify-between p-2 md:mx-6 relative">
-        
-        
-        <NavLink to={`/`}>
-          <div className='italic font-semibold text-2xl'>
-            StoresSystem 
+    <div className="flex items-center justify-between p-4 bg-gray-800 text-white shadow-md">
+      <div className="flex items-center gap-4">
+        {logedin && (
+          <FaBars
+            className="cursor-pointer text-2xl"
+            onClick={() => setActiveMenu(!activeMenu)}
+          />
+        )}
+        <NavLink to="/">
+          <div className="italic font-semibold text-xl">
+            StoresSystem
           </div>
         </NavLink>
-        
-        <div className="flex items-center gap-4 cursor-pointer p-1 hover:bg-light-gray rounded-lg text-lg" >
-          <NavLink to={`/`}>
-            <span className="capitalize">Contact</span>
+      </div>
+
+      {logedin ? (
+        <div className="flex items-center gap-6">
+          <div
+            className="relative cursor-pointer"
+            onClick={() => setActiveNotification(!activeNotification)}
+          >
+            <MdNotifications className="text-2xl" />
+            {
+              newNotification !=0 && (
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {newNotification}
+                  </span>
+                )
+            }
+          </div>
+          <div className="flex items-center gap-2">
+            <img src={avatar} alt="User Avatar" className="w-8 h-8 rounded-full" />
+            <p className="text-sm">
+              <span className="text-gray-400">Hi,</span>{' '}
+              <span className="font-bold">Admin</span>
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-4">
+          <NavLink
+            to="/"
+            className="capitalize text-sm hover:text-yellow-400"
+          >
+            Contact
           </NavLink>
-          
-          <NavLink to={`/login`}>
-            <span className="capitalize">Log in</span>
+          <NavLink
+            to="/login"
+            className="capitalize text-sm hover:text-yellow-400"
+          >
+            Log in
           </NavLink>
-          
-          <NavLink to={`/signup`}>
-            <span className="capitalize">Sign up</span>
+          <NavLink
+            to="/signup"
+            className="capitalize text-sm hover:text-yellow-400"
+          >
+            Sign up
           </NavLink>
         </div>
-      </div>
-    )
-  )
+      )}
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
 import AllItems from '@/components/AllItems'
 import React from 'react'
 
-const Itmes = () => {
+const Items = () => {
   return (
     <div>
       <AllItems/>
@@ -9,4 +9,4 @@ const Itmes = () => {
   )
 }
 
-export default Itmes
+export default Items
