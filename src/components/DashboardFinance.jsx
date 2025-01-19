@@ -23,19 +23,28 @@ const DashboardFinance = () => {
         { month: 'Jul', value: 22000 },
     ]);
 
-    const GetData = async () => {
+    const [products, setProducts] = useState([]);
+    const [lowStock, setLowStock] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [stores, setStores] = useState([]);
+
+    const fetchData = async (endpoint, setter) => {
         try {
-            const target = `${API}Data/finances`;
+            const target = `${API}${endpoint}`;
             const resp = await fetch(target);
             const data = await resp.json();
-            setEarningData(data);
+            setter(data);
         } catch (error) {
-            console.error("Error fetching earnings data:", error);
+            console.error(`Error fetching data from ${endpoint}:`, error);
         }
     };
 
     useEffect(() => {
-        GetData();
+        fetchData('Data/finances', setEarningData);
+        fetchData('Data/products', setProducts);
+        fetchData('Data/low-stock', setLowStock);
+        fetchData('Data/orders', setOrders);
+        fetchData('Data/stores', setStores);
     }, []);
 
     useEffect(() => {
@@ -134,44 +143,50 @@ const DashboardFinance = () => {
                 </div>
 
 
-                {/* Revenue Updates */}
+                {/* barchart */}
                 <div className="bg-white rounded-xl shadow-md p-6">
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-xl font-semibold">Revenue Updates</h3>
-                        <div className="flex items-center space-x-4">
-                            <span className="flex items-center text-gray-500">
-                                <GoDotFill className="text-gray-500" /> Expense
-                            </span>
-                            <span className="flex items-center text-green-500">
-                                <GoDotFill className="text-green-500" /> Budget
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col md:flex-row mt-6 space-y-6 md:space-y-0 md:space-x-6">
-                        <div className="md:w-1/3">
-                            <h4 className="text-3xl font-bold">$220.654</h4>
-                            <p className="text-sm text-gray-500 mt-2">Budget</p>
-                        </div>
-                        <div className="md:w-2/3">
-                            <Bar data={barData} options={barOptions} />
-                        </div>
+                    <h3 className="text-xl font-semibold mb-4">Monthly Earnings Overview</h3>
+                    <div className="h-72">
+                        <Bar data={barData} options={barOptions} />
                     </div>
                 </div>
-
-                {/* Top Products */}
+                
+                {/* Products Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
-                    <h3 className="text-xl font-semibold mb-4">Top Products</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        <div className="bg-gray-50 rounded-xl shadow-lg p-4">
+                <h3 className="text-xl font-semibold mb-4">Top Products</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {products.map((product, index) => (
+                        <div key={index} className="bg-gray-50 rounded-xl shadow-lg p-4">
                             <img
-                                src="https://cdn-1.hosting.anfa.media/upload/q_50/https://waheteter.com/wp-content/uploads/2022/06/Dior-Sauvage.jpg"
-                                alt="Sauvage Dior"
-                                className="w-full h-40 object-cover rounded-md"
+                                src={product.image || "https://www.dior.com/dw/image/v2/BGXS_PRD/on/demandware.static/-/Sites-master_dior/default/dwdc4fbc47/Y0998004/Y0998004_C099600455_E03_GHC.jpg?sw=800"}
+                                alt={product.name}
+                                className="w-full h-40 object-cover rounded-lg mb-4"
                             />
-                            <h4 className="text-lg font-semibold mt-4">Sauvage Dior</h4>
-                            <p className="text-xl font-bold text-indigo-600">$300</p>
+                            <h4 className="text-lg font-semibold">{product.name}</h4>
+                            <p className="text-sm text-gray-500">Available: {product.available}</p>
+                            <p className="text-lg font-bold text-indigo-600">${product.price}</p>
                         </div>
-                    </div>
+                    ))}
+                </div>
+            </div>
+
+                {/* Low Stock Section */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                    <h3 className="text-xl font-semibold mb-4">Low Stock Products</h3>
+                    <ul className="space-y-4">
+                        {lowStock.map((item, index) => (
+                            <li key={index} className="flex justify-between items-center bg-red-100 p-4 rounded-lg">
+                                <span className="font-medium text-red-600">{item.name}</span>
+                                <span className="text-sm">Available: {item.available}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Orders Section */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                    <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
+                    <p className="text-3xl font-bold">Total Revenue: ${orders.reduce((acc, item) => acc + item.revenue, 0)}</p>
                 </div>
             </div>
         </div>
