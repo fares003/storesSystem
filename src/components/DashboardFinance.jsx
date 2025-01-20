@@ -1,11 +1,12 @@
 import { BoxesIcon, DollarSign } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState} from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-
+import { motion } from "framer-motion";
 import { GoDotFill } from "react-icons/go";
 import { MdMoney } from 'react-icons/md';
 import { FaUserFriends } from 'react-icons/fa';
+import useInView from "@/Hooks/useInView"; 
 
 const API = import.meta.env.VITE_API;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -106,22 +107,43 @@ const DashboardFinance = () => {
         },
     };
 
+    const earningSectionRef = useRef(null);
+    const barChartRef = useRef(null);
+    const lowStockRef = useRef(null);
+
+    const isEarningVisible = useInView(earningSectionRef, { threshold: 0.2 });
+    const isBarChartVisible = useInView(barChartRef, { threshold: 0.4 });
+    const isLowStockVisible = useInView(lowStockRef, { threshold: 0.2 });
+
+
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             <div className="container mx-auto space-y-6">
                 {/* Earnings Section */}
                 <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
-                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg p-6 shadow-md">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="text-2xl font-bold">Earnings</h2>
-                                <p className="text-4xl font-extrabold mt-2">{total}$</p>
+                    <motion.div
+                    ref={earningSectionRef}
+                    className="bg-white rounded-xl shadow-md p-6 space-y-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isEarningVisible ? { opacity: 1, y: 0 } : {} }
+                    transition={{ duration: 0.5 }}
+                    >
+                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg p-6 shadow-md">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-2xl font-bold">Earnings</h2>
+                                    <p className="text-4xl font-extrabold mt-2">{total}$</p>
+                                </div>
+                                <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="bg-white text-indigo-500 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200"
+                                >
+                                    Download
+                                </motion.button>
                             </div>
-                            <button className="bg-white text-indigo-500 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200">
-                                Download
-                            </button>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Earnings Data Table */}
                     <div>
@@ -160,12 +182,19 @@ const DashboardFinance = () => {
 
 
                 {/* barchart */}
-                <div className="bg-white rounded-xl shadow-md p-6">
-                    <h3 className="text-xl font-semibold mb-4">Monthly Earnings Overview</h3>
-                    <div className="h-72">
-                        <Bar data={barData} options={barOptions} />
-                    </div>
-                </div>
+                <motion.div
+                ref={barChartRef}
+                className="bg-white rounded-xl shadow-md p-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={ isBarChartVisible ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                        <h3 className="text-xl font-semibold mb-4">Monthly Earnings Overview</h3>
+                        <div className="h-72">
+                            <Bar data={barData} options={barOptions} />
+                        </div>
+                </motion.div>
+
 
                 {/* Products Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
@@ -187,17 +216,29 @@ const DashboardFinance = () => {
                 </div>
 
                 {/* Low Stock Section */}
-                <div className="bg-white rounded-xl shadow-md p-6">
+                <motion.div
+                ref={lowStockRef}
+                className="bg-white rounded-xl shadow-md p-6"
+                initial={{ x: -50, opacity: 0 }}
+                animate={isLowStockVisible ? { x: 0, opacity: 1 } :{}}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                >
                     <h3 className="text-xl font-semibold mb-4">Low Stock Products</h3>
                     <ul className="space-y-4">
                         {lowStock.map((item, index) => (
-                            <li key={index} className="flex justify-between items-center bg-red-100 p-4 rounded-lg">
+                            <motion.li
+                                key={index}
+                                className="flex justify-between items-center bg-red-100 p-4 rounded-lg"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: index * 0.1 }}
+                            >
                                 <span className="font-medium text-red-600">{item.name}</span>
                                 <span className="text-sm">Available: {item.available}</span>
-                            </li>
+                            </motion.li>
                         ))}
                     </ul>
-                </div>
+                </motion.div>
 
                 {/* Orders Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
