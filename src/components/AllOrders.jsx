@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Center from "./Center";
 import Popup from "./Popup";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import useInView from "@/Hooks/useInView";
 
 function AllOrders() {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ function AllOrders() {
       const resp = await fetch(target);
       const data = await resp.json();
       setOrders(data);
+
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -184,7 +187,6 @@ const handleSaveCode = async () => {
   }
 };
 
-
   const handleCompleteClick = (order) => {
     setCompletePopupData({
       id: order.id,
@@ -194,93 +196,100 @@ const handleSaveCode = async () => {
 
   return (
     <Center>
-      <div className="flex flex-col items-center gap-6 w-full md:w-[100%] overflow-y-auto scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300 ">
+      <div className="flex flex-col items-center gap-6 w-full md:w-[100%] px-2 overflow-y-auto scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300 ">
         <h2 className="textGradient text-4xl font-bold text-white">
           Orders List
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {orders.map((item, i) => (
-            <div
-              key={i}
-              className="bg-gray-800 text-white rounded-lg shadow-lg p-6 flex flex-col gap-4"
-            >
-              <div className="flex flex-col gap-2">
-                <div>
-                  <span className="font-semibold text-gray-400">Username:</span>{" "}
-                  {item.customer.username}
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-400">Status:</span>{" "}
-                  {item.status}
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-400">Total:</span>{" "}
-                  <span className="text-green-400 font-bold">${item.total}</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Cart Items:</h3>
-                <ul className="list-disc pl-6 text-sm text-gray-300">
-                  {item.cart.map((product, j) => (
-                    <li key={j}>
-                      {product.name} (x{product.quantity}) - ${product.price}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex justify-between mt-4">
-                <button
-                  className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-500 transition"
-                  onClick={() => handleUpdateOrder(item)}
-                >
-                  Update
-                </button>
-                {item.status === "New" && (
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => confirmOrder(item.id)}
-                >
-                  Confirm
-                </button>
-                )}
-                {item.status === "Ready for Shipping" && (
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => deliverOrder(item.id)}
+            {orders.map((item, i) => { 
+                
+                return(
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: i * 0.2 }}
+                    className="bg-gray-800 text-white rounded-lg shadow-lg p-6 flex flex-col gap-4"
                   >
-                    Deliver
-                  </button>
-                )}
+                    <div className="flex flex-col gap-2">
+                      <div>
+                        <span className="font-semibold text-gray-400">Username:</span>{" "}
+                        {item.customer.username}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-400">Status:</span>{" "}
+                        {item.status}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-400">Total:</span>{" "}
+                        <span className="text-green-400 font-bold">${item.total}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Cart Items:</h3>
+                      <ul className="list-disc pl-6 text-sm text-gray-300">
+                        {item.cart.map((product, j) => (
+                          <li key={j}>
+                            {product.name} (x{product.quantity}) - ${product.price}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex justify-between mt-4">
+                      <button
+                        className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-500 transition"
+                        onClick={() => handleUpdateOrder(item)}
+                      >
+                        Update
+                      </button>
+                      {item.status === "New" && (
+                      <button
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => confirmOrder(item.id)}
+                      >
+                        Confirm
+                      </button>
+                      )}
+                      {item.status === "Ready for Shipping" && (
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => deliverOrder(item.id)}
+                        >
+                          Deliver
+                        </button>
+                      )}
 
-                {item.status === "In preparation" && (
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => navigate("/prepareToShipment", { state: { orderId: item.id} })}
-                  >
-                    Prepare
-                  </button>
-                )}
+                      {item.status === "In preparation" && (
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => navigate("/prepareToShipment", { state: { orderId: item.id} })}
+                        >
+                          Prepare
+                        </button>
+                      )}
 
-                {item.status === "Delivered" && (
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => {
-                      handleCompleteClick(item) ;
-                    }}
-                  >
-                    Complete
-                  </button>
-                )}
+                      {item.status === "Delivered" && (
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => {
+                            handleCompleteClick(item) ;
+                          }}
+                        >
+                          Complete
+                        </button>
+                      )}
 
-                <button
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition"
-                  onClick={() => deleteOrder(item.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+                      <button
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition"
+                        onClick={() => deleteOrder(item.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </motion.div>
+                )
+            })}
+
         </div>
 
         {popupData && (

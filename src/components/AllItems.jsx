@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Center from "@/components/Center";
 import axios from "axios";
-
+import { delay, motion } from "framer-motion";
 const API = import.meta.env.VITE_API ;
 
 function AllItems() {
@@ -84,8 +84,11 @@ function AllItems() {
                     </thead>
                     <tbody>
                         {items.map((item, i) => (
-                            <tr
+                            <motion.tr
                                 key={item.sku}
+                                initial={{ opacity : 0 , y:50}}
+                                animate={{opacity : 1 ,y:0}}
+                                transition={{ duration: 0.8 , delay : i*0.2}}
                                 className={`text-center ${
                                     i % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
                                 } hover:bg-gray-600 transition-colors duration-200`}
@@ -106,7 +109,7 @@ function AllItems() {
                                         Delete
                                     </button>
                                 </td>
-                            </tr>
+                            </motion.tr>
                         ))}
                     </tbody>
                 </table>

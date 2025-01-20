@@ -16,7 +16,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`ml-3 h-screen md:overflow-auto overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300 
+      className={`z-[1000] ml-3 h-screen md:overflow-auto overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300 
         ${activeMenu ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
     >
       {activeMenu && (

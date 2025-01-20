@@ -25,7 +25,7 @@ const LogedInHome = () => {
         <div className="flex relative bg-[#323949]">
           {/* Sidebar */}
         {activeMenu ? (
-          <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-[#323949] transition-all duration-300 ease-in-out">
+          <div className="z-20 w-72 fixed sidebar dark:bg-secondary-dark-bg bg-[#323949] transition-all duration-300 ease-in-out">
             <Sidebar />
           </div>
         ) : (
@@ -44,7 +44,7 @@ const LogedInHome = () => {
             }`}
           >
             {/* Navbar */}
-            <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+            <div className="z-30 fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
               <Navbar />
             </div>
 

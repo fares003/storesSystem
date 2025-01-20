@@ -7,7 +7,7 @@ import { MdOutlineCancel } from 'react-icons/md';
 const API = import.meta.env.VITE_API;
 
 const Notifications = () => {
-  const { activeNotification, setActiveNotification  , setNewNotification } = useStateContext();
+  const { activeNotification, setActiveNotification  , setNewNotification ,} = useStateContext();
   const [notificationsData, setNotificationsData] = useState([]);
 
 
@@ -20,10 +20,11 @@ const Notifications = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.status === 200) {
-        if(response.data.length != notificationsData){
-          setNewNotification(response.data.length - notificationsData);
+        if (response.data.length !== notificationsData.length) {
+          const newNotifs = response.data.length - notificationsData.length;
+          setNewNotification(newNotifs); 
         }
         setNotificationsData(response.data);
       } else {
@@ -33,13 +34,14 @@ const Notifications = () => {
       console.error("Error fetching notifications:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchNotifications();
 
     const interval = setInterval(() => {
       fetchNotifications();
-    }, 60000);
+      
+    }, 600000);
 
     return () => clearInterval(interval);
   }, []);
@@ -67,7 +69,7 @@ const Notifications = () => {
       {/* Notifications List */}
       <div className="p-4">
         {notificationsData.length > 0 ? (
-          notificationsData.map((notif) => (
+          notificationsData.slice().reverse().map((notif) => (
             <div
               key={notif.id}
               className="mb-4 p-3 bg-gray-100 rounded-lg shadow hover:bg-gray-200"

@@ -112,7 +112,7 @@ const DashboardFinance = () => {
     const lowStockRef = useRef(null);
 
     const isEarningVisible = useInView(earningSectionRef, { threshold: 0.2 });
-    const isBarChartVisible = useInView(barChartRef, { threshold: 0.4 });
+    const isBarChartVisible = useInView(barChartRef, { threshold: 0.3 });
     const isLowStockVisible = useInView(lowStockRef, { threshold: 0.2 });
 
 

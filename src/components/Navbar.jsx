@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { MdKeyboardArrowDown, MdNotifications } from 'react-icons/md';
+import { MdNotifications } from 'react-icons/md';
 import { FaBars } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import { useStateContext } from '../contexts/ContextProvider';
@@ -15,6 +15,7 @@ export default function Navbar() {
     activeNotification,
     setActiveNotification,
     newNotification ,
+    setNewNotification, 
   } = useStateContext();
 
   const { logedin } = useLogin();
@@ -57,7 +58,7 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           <div
             className="relative cursor-pointer"
-            onClick={() => setActiveNotification(!activeNotification)}
+            onClick={() => {setActiveNotification(!activeNotification) ; setNewNotification(0) ;}}
           >
             <MdNotifications className="text-2xl" />
             {
@@ -68,6 +69,7 @@ export default function Navbar() {
                 )
             }
           </div>
+          
           <div className="flex items-center gap-2">
             <img src={avatar} alt="User Avatar" className="w-8 h-8 rounded-full" />
             <p className="text-sm">

@@ -10,7 +10,7 @@ export const ContextProvider = ({children}) => {
     let [newNotification  , setNewNotification] = useState(0);
     return (
 
-        <StateContext.Provider value={{activeMenu , setActiveMenu  ,screenSize , setScreenSize, activeNotification , setActiveNotification ,newNotification  , setNewNotification }}>
+        <StateContext.Provider value={{activeMenu , setActiveMenu  ,screenSize , setScreenSize, activeNotification , setActiveNotification ,newNotification  , setNewNotification}}>
             {children}
         </StateContext.Provider>
     )
