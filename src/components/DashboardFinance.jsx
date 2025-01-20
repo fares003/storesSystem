@@ -1,14 +1,14 @@
 import { BoxesIcon, DollarSign } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
 import { GoDotFill } from "react-icons/go";
 import { MdMoney } from 'react-icons/md';
 import { FaUserFriends } from 'react-icons/fa';
 
 const API = import.meta.env.VITE_API;
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const DashboardFinance = () => {
     const [earningData, setEarningData] = useState([]);
@@ -52,6 +52,22 @@ const DashboardFinance = () => {
         setTotal(tempTotal);
     }, [earningData]);
 
+    // Pie chart data
+    const pieData = {
+        labels: ['Store A', 'Store B', 'Store C'], // Static store names
+        datasets: [
+            {
+                label: 'Order Revenue by Store',
+                data: [3000, 4500, 2300], // Static revenue data for each store
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',  // Red
+                    'rgba(54, 162, 235, 0.7)',  // Blue
+                    'rgba(255, 206, 86, 0.7)'   // Yellow
+                ], // Static colors for each store
+                borderWidth: 1,
+            },
+        ],
+    };
     const barData = {
         labels: barChartData.map((item) => item.month),
         datasets: [
@@ -150,25 +166,25 @@ const DashboardFinance = () => {
                         <Bar data={barData} options={barOptions} />
                     </div>
                 </div>
-                
+
                 {/* Products Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
-                <h3 className="text-xl font-semibold mb-4">Top Products</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {products.map((product, index) => (
-                        <div key={index} className="bg-gray-50 rounded-xl shadow-lg p-4">
-                            <img
-                                src={product.image || "https://www.dior.com/dw/image/v2/BGXS_PRD/on/demandware.static/-/Sites-master_dior/default/dwdc4fbc47/Y0998004/Y0998004_C099600455_E03_GHC.jpg?sw=800"}
-                                alt={product.name}
-                                className="w-full h-40 object-cover rounded-lg mb-4"
-                            />
-                            <h4 className="text-lg font-semibold">{product.name}</h4>
-                            <p className="text-sm text-gray-500">Available: {product.available}</p>
-                            <p className="text-lg font-bold text-indigo-600">${product.price}</p>
-                        </div>
-                    ))}
+                    <h3 className="text-xl font-semibold mb-4">Top Products</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {products.map((product, index) => (
+                            <div key={index} className="bg-gray-50 rounded-xl shadow-lg p-4">
+                                <img
+                                    src={product.image || "https://www.dior.com/dw/image/v2/BGXS_PRD/on/demandware.static/-/Sites-master_dior/default/dwdc4fbc47/Y0998004/Y0998004_C099600455_E03_GHC.jpg?sw=800"}
+                                    alt={product.name}
+                                    className="w-full h-40 object-cover rounded-lg mb-4"
+                                />
+                                <h4 className="text-lg font-semibold">{product.name}</h4>
+                                <p className="text-sm text-gray-500">Available: {product.available}</p>
+                                <p className="text-lg font-bold text-indigo-600">${product.price}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
                 {/* Low Stock Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
@@ -187,6 +203,13 @@ const DashboardFinance = () => {
                 <div className="bg-white rounded-xl shadow-md p-6">
                     <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
                     <p className="text-3xl font-bold">Total Revenue: ${orders.reduce((acc, item) => acc + item.revenue, 0)}</p>
+                        {/* Pie Chart for Orders Overview */}
+                        <div className="bg-white rounded-xl shadow-md p-6">
+                            <h3 className="text-xl font-semibold mb-4">Orders Overview by Store</h3>
+                            <div className="h-72">
+                                <Pie data={pieData} />
+                            </div>
+                        </div>
                 </div>
             </div>
         </div>
