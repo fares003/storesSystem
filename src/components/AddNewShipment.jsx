@@ -3,6 +3,7 @@ import Center from "./Center";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { z } from "zod";
+import { motion } from "framer-motion";
 
 const API = import.meta.env.VITE_API;
 
@@ -116,92 +117,135 @@ const AddNewShipment = () => {
   };
 
   return (
-    <Center>
-      <div className="flex flex-col gap-4 items-center w-full">
-        <h2 className="textGradient text-5xl md:text-6xl font-semibold text-white">
-          Add Shipment
-        </h2>
-        <form
-          onSubmit={addShipment}
-          className="grid grid-cols-12 w-[90%] md:w-[50%] gap-y-8 gap-x-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6 max-h-[50vh] overflow-y-auto"
+  <Center>
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex flex-col gap-4 items-center w-full"
+    >
+      <motion.h2
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="textGradient text-5xl md:text-6xl font-semibold text-white"
+      >
+        Add Shipment
+      </motion.h2>
+      <motion.form
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        onSubmit={addShipment}
+        className="grid grid-cols-12 w-[90%] md:w-[50%] gap-y-8 gap-x-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6 max-h-[50vh] overflow-y-auto"
+      >
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="col-span-6 flex flex-col gap-2"
         >
-          <div className="col-span-6 flex flex-col gap-2">
-            <label className="text-white text-lg">Cost</label>
-            <input
-              type="number"
-              name="cost"
-              className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.cost || ""}
-              onChange={handleInputChange}
-            />
-          </div>
+          <label className="text-white text-lg">Cost</label>
+          <input
+            type="number"
+            name="cost"
+            className="p-2 rounded-md bg-transparent border text-white"
+            value={formData.cost || ""}
+            onChange={handleInputChange}
+          />
+        </motion.div>
 
-          <div className="col-span-6 flex flex-col gap-2">
-            <label className="text-white text-lg">Date</label>
-            <input
-              type="date"
-              name="date"
-              className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.date}
-              onChange={handleInputChange}
-            />
-          </div>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="col-span-6 flex flex-col gap-2"
+        >
+          <label className="text-white text-lg">Date</label>
+          <input
+            type="date"
+            name="date"
+            className="p-2 rounded-md bg-transparent border text-white"
+            value={formData.date}
+            onChange={handleInputChange}
+          />
+        </motion.div>
 
-          {formData.products.map((item, i) => (
-            <React.Fragment key={i}>
-              <div className="col-span-4 flex flex-col gap-2">
-                <label className="text-white text-lg">SKU</label>
-                <input
-                  name="sku"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.sku}
-                  onChange={(e) => handleItemChange(i, e)}
-                />
-              </div>
-
-              <div className="col-span-4 flex flex-col gap-2">
-                <label className="text-white text-lg">Quantity</label>
-                <input
-                  type="number"
-                  name="amount"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.amount || ""}
-                  onChange={(e) => handleItemChange(i, e)}
-                />
-              </div>
-
-              <div className="col-span-4 flex flex-col gap-2">
-                <label className="text-white text-lg">Cost</label>
-                <input
-                  type="number"
-                  name="cost"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.cost || ""}
-                  onChange={(e) => handleItemChange(i, e)}
-                />
-              </div>
-            </React.Fragment>
-          ))}
-
-          <div className="col-span-12 flex items-center justify-center gap-4">
-            <button
-              type="submit"
-              className="text-white px-6 py-2 rounded-lg bg-[#4C5365] hover:bg-[#5A6172] gradient-btn duration-300"
+        {formData.products.map((item, i) => (
+          <React.Fragment key={i}>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
+              className="col-span-4 flex flex-col gap-2"
             >
-              Submit
-            </button>
+              <label className="text-white text-lg">SKU</label>
+              <input
+                name="sku"
+                className="p-2 rounded-md bg-transparent border text-white"
+                value={item.sku}
+                onChange={(e) => handleItemChange(i, e)}
+              />
+            </motion.div>
 
-            <button
-              type="button"
-              className="text-white text-2xl font-semibold px-6 py-1 rounded-lg bg-green-600 hover:bg-green-800 gradient-btn duration-300"
-              onClick={addNewItem}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
+              className="col-span-4 flex flex-col gap-2"
             >
-              +
-            </button>
-          </div>
-        </form>
-      </div>
-    </Center>
+              <label className="text-white text-lg">Quantity</label>
+              <input
+                type="number"
+                name="amount"
+                className="p-2 rounded-md bg-transparent border text-white"
+                value={item.amount || ""}
+                onChange={(e) => handleItemChange(i, e)}
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
+              className="col-span-4 flex flex-col gap-2"
+            >
+              <label className="text-white text-lg">Cost</label>
+              <input
+                type="number"
+                name="cost"
+                className="p-2 rounded-md bg-transparent border text-white"
+                value={item.cost || ""}
+                onChange={(e) => handleItemChange(i, e)}
+              />
+            </motion.div>
+          </React.Fragment>
+        ))}
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="col-span-12 flex items-center justify-center gap-4"
+        >
+          <button
+            type="submit"
+            className="text-white px-6 py-2 rounded-lg bg-[#4C5365] hover:bg-[#5A6172] gradient-btn duration-300"
+          >
+            Submit
+          </button>
+
+          <button
+            type="button"
+            className="text-white text-2xl font-semibold px-6 py-1 rounded-lg bg-green-600 hover:bg-green-800 gradient-btn duration-300"
+            onClick={addNewItem}
+          >
+            +
+          </button>
+        </motion.div>
+      </motion.form>
+    </motion.div>
+  </Center>
   );
 };
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import { motion } from "framer-motion";
 
 const itemSchema = z.object({
     name: z
@@ -55,7 +56,6 @@ function AddNewItem() {
       const token = localStorage.getItem("token");
       const target = `${API}item/create`;
 
-      
       const response = await axios.post(target, parsedData, {
         headers: {
           "Content-Type": "application/json",
@@ -98,16 +98,34 @@ function AddNewItem() {
       }
     }
   };
-  
+
   return (
     <Center>
-      <div className="flex flex-col gap-4 items-center w-full ">
-        <h2 className="textGradient text-5xl md:text-6xl font-semibold text-white">Add Item</h2>
-        <form
-          onSubmit={addItem}
-          className="grid grid-cols-10 w-[90%] md:w-[50%]  gap-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6"
+      <motion.div
+        className="flex flex-col gap-4 items-center w-full"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.h2 
+          className="textGradient text-5xl md:text-6xl font-semibold text-white"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <div className="col-span-5 flex flex-col gap-2">
+          Add Item
+        </motion.h2>
+        <motion.form
+          onSubmit={addItem}
+          className="grid grid-cols-10 w-[90%] md:w-[50%] gap-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div
+            className="col-span-5 flex flex-col gap-2"
+            whileHover={{ scale: 1.05 }}
+          >
             <label className="text-white text-lg">Name</label>
             <input
               name="name"
@@ -115,8 +133,11 @@ function AddNewItem() {
               value={formData.name}
               onChange={handleInputChange}
             />
-          </div>
-          <div className="col-span-5 flex flex-col gap-2">
+          </motion.div>
+          <motion.div
+            className="col-span-5 flex flex-col gap-2"
+            whileHover={{ scale: 1.05 }}
+          >
             <label className="text-white text-lg">Price</label>
             <input
               name="price"
@@ -125,8 +146,11 @@ function AddNewItem() {
               value={formData.price}
               onChange={handleInputChange}
             />
-          </div>
-          <div className="col-span-5 flex flex-col gap-2">
+          </motion.div>
+          <motion.div
+            className="col-span-5 flex flex-col gap-2"
+            whileHover={{ scale: 1.05 }}
+          >
             <label className="text-white text-lg">Minimum Amout</label>
             <input
               name="minimumAmount"
@@ -135,8 +159,11 @@ function AddNewItem() {
               value={formData.minimumAmount}
               onChange={handleInputChange}
             />
-          </div>
-          <div className="col-span-5 flex flex-col gap-2">
+          </motion.div>
+          <motion.div
+            className="col-span-5 flex flex-col gap-2"
+            whileHover={{ scale: 1.05 }}
+          >
             <label className="text-white text-lg">Stock</label>
             <input
               name="stock"
@@ -145,8 +172,11 @@ function AddNewItem() {
               value={formData.stock}
               onChange={handleInputChange}
             />
-          </div>
-          <div className="col-span-10 flex flex-col gap-2">
+          </motion.div>
+          <motion.div
+            className="col-span-10 flex flex-col gap-2"
+            whileHover={{ scale: 1.05 }}
+          >
             <label className="text-white text-lg">SKU</label>
             <input
               name="sku"
@@ -154,8 +184,11 @@ function AddNewItem() {
               value={formData.sku}
               onChange={handleInputChange}
             />
-          </div>
-          <div className="col-span-10 flex flex-col gap-2">
+          </motion.div>
+          <motion.div
+            className="col-span-10 flex flex-col gap-2"
+            whileHover={{ scale: 1.05 }}
+          >
             <label className="text-white text-lg">Description</label>
             <textarea
               name="description"
@@ -163,17 +196,20 @@ function AddNewItem() {
               value={formData.description}
               onChange={handleInputChange}
             />
-          </div>
-          <div className="col-span-10 flex items-center justify-center">
+          </motion.div>
+          <motion.div
+            className="col-span-10 flex items-center justify-center"
+            whileHover={{ scale: 1.1 }}
+          >
             <button
               type="submit"
               className="text-white px-6 py-2 rounded-lg bg-[#4C5365] hover:bg-[#5A6172] gradient-btn duration-300"
             >
               Submit
             </button>
-          </div>
-        </form>
-      </div>
+          </motion.div>
+        </motion.form>
+      </motion.div>
     </Center>
   );
 }
