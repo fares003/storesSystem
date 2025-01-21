@@ -15,6 +15,7 @@ import AddShipment from '@/pages/AddShipment';
 import Storage from '@/pages/Storage';
 import Dashboard from '@/pages/Dashboard';
 import PrepareToShipment from '@/pages/PrepareToShipment';
+import Admin from '@/pages/Admin';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -62,6 +63,7 @@ const LogedInHome = () => {
                 <Route path="/Storage" element={<Storage />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/prepareToShipment" element={<PrepareToShipment />} />
+                <Route path="/adminpanel" element={<Admin/>} />
               </Routes>
             </div>
           </div>

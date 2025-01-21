@@ -115,6 +115,21 @@ export default function Sidebar() {
               </NavLink>
 
             </div>
+            <div>
+
+              <p className="text-slate-900 m-3 mt-4 uppercase">
+                admin panel
+              </p>
+              <NavLink
+                to={`/adminpanel`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">mange Authority</span>
+              </NavLink>
+
+            </div>
+
           </div>
         </>
       )}
