@@ -5,12 +5,14 @@ import { toast } from 'react-toastify';
 
 const AdminPanel = () => {
   const [authorities, setAuthorities] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [newRole, setNewRole] = useState('');
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedEmpId, setSelectedEmpId] = useState('');
+  const [selectedRoleId, setSelectedRoleId] = useState('');
   const [loading, setLoading] = useState(false);
   const API = import.meta.env.VITE_API;
-  const token = localStorage.getItem("token")
-  
+  const token = localStorage.getItem("token");
+
   const fetchAuthorities = async () => {
     setLoading(true);
     try {
@@ -26,18 +28,38 @@ const AdminPanel = () => {
     }
     setLoading(false);
   };
-  
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(`${API}Auth`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      let emps = []
+      console.log(response.data);
+      response.data.forEach(emp => {
+        emps.push(emp.username);
+      });
+      
+      setEmployees(emps);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      toast.error('Failed to fetch employees!');
+    }
+  };
+
   useEffect(() => {
     fetchAuthorities();
+    fetchEmployees();
   }, []);
-
 
   const createRole = async () => {
     if (!newRole.trim()) {
       toast.warning('Role name cannot be empty!');
       return;
     }
-  
+
     try {
       const response = await axios.post(
         `${API}Authority/create`,
@@ -58,6 +80,35 @@ const AdminPanel = () => {
       toast.error('Failed to create role!');
     }
   };
+
+  const assignRoleToEmployee = async () => {
+    if (!selectedEmpId || !selectedRoleId) {
+      toast.warning('Please select an employee and a role!');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API}Authority/authorize`,
+        { empId: selectedEmpId, roleId: selectedRoleId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success('Role assigned to employee successfully!');
+        setSelectedEmpId('');
+        setSelectedRoleId('');
+      }
+    } catch (error) {
+      console.error('Error assigning role:', error);
+      toast.error('Failed to assign role!');
+    }
+  };
+
   const deleteRole = async (id) => {
     try {
       await axios.delete(`${API}Authority/delete/${id}`, {
@@ -72,24 +123,22 @@ const AdminPanel = () => {
       toast.error('Failed to delete role!');
     }
   };
-  
 
-  const updatePermissions = async () => {
-    try {
-      const response = await axios.get(`${API}Authority/update-perms`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.status === 200) {
-        toast.success('Permissions updated successfully!');
-      }
-    } catch (error) {
-      console.error('Error updating permissions:', error);
-      toast.error('Failed to update permissions!');
-    }
-  };
-  
+  // const updatePermissions = async () => {
+  //   try {
+  //     const response = await axios.get(`${API}Authority/update-perms`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.status === 200) {
+  //       toast.success('Permissions updated successfully!');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating permissions:', error);
+  //     toast.error('Failed to update permissions!');
+  //   }
+  // };
 
   return (
     <div className="p-8 bg-gray-900 min-h-screen">
@@ -141,23 +190,56 @@ const AdminPanel = () => {
             Add Role
           </button>
         </div>
-        <div className="mt-6 flex justify-center">
+
+        {/* Assign Role to Employee */}
+        <div className="mt-8">
+          <h3 className="text-xl text-white mb-4">Assign Role to Employee</h3>
+          <div className="flex gap-4">
+            <select
+              className="flex-1 p-2 border rounded-md"
+              value={selectedEmpId}
+              onChange={(e) => setSelectedEmpId(e.target.value)}
+            >
+              <option value="">Select Employee</option>
+              {
+              employees.map((emp) => (
+                <option key={emp} value={emp}>
+                  {emp}
+                </option>
+              ))}
+            </select>
+            <select
+              className="flex-1 p-2 border rounded-md"
+              value={selectedRoleId}
+              onChange={(e) => setSelectedRoleId(e.target.value)}
+            >
+              <option value="">Select Role</option>
+              {authorities.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
+            <button
+              className="bg-blue-600 px-4 py-2 rounded-md text-white hover:bg-blue-500 transition"
+              onClick={assignRoleToEmployee}
+            >
+              Assign Role
+            </button>
+          </div>
+        </div>
+
+        {/* <div className="mt-6 flex justify-center">
           <button
             className="bg-blue-600 px-4 py-2 rounded-md text-white hover:bg-blue-500 transition"
             onClick={updatePermissions}
           >
             Update Permissions
           </button>
-        </div>
+        </div> */}
       </motion.div>
     </div>
   );
 };
 
 export default AdminPanel;
-
-
-
-
-
-
