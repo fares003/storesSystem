@@ -16,6 +16,7 @@ import Storage from '@/pages/Storage';
 import Dashboard from '@/pages/Dashboard';
 import PrepareToShipment from '@/pages/PrepareToShipment';
 import Admin from '@/pages/Admin';
+import Permission from '@/pages/permission';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -64,6 +65,8 @@ const LogedInHome = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/prepareToShipment" element={<PrepareToShipment />} />
                 <Route path="/adminpanel" element={<Admin/>} />
+                <Route path="/permission" element={<Permission/>} />
+                
               </Routes>
             </div>
           </div>

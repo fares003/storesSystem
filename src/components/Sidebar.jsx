@@ -128,6 +128,14 @@ export default function Sidebar() {
                 <span className="capitalize">mange Authority</span>
               </NavLink>
 
+              <NavLink
+                to={`/permission`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">permissions</span>
+              </NavLink>
+
             </div>
 
           </div>
