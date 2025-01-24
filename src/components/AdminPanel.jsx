@@ -191,7 +191,6 @@ const AdminPanel = () => {
           </button>
         </div>
 
-        {/* Assign Role to Employee */}
         <div className="mt-8">
           <h3 className="text-xl text-white mb-4">Assign Role to Employee</h3>
           <div className="flex gap-4">
@@ -203,7 +202,7 @@ const AdminPanel = () => {
               <option value="">Select Employee</option>
               {
               employees.map((emp) => (
-                <option key={emp} value={emp}>
+                <option key={emp} value={emp.id}>
                   {emp}
                 </option>
               ))}
