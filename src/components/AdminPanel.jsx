@@ -36,13 +36,13 @@ const AdminPanel = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      let emps = []
+      // let emps = []
       console.log(response.data);
-      response.data.forEach(emp => {
-        emps.push(emp.username);
-      });
+      // response.data.forEach(emp => {
+      //   emps.push(emp.username);
+      // });
       
-      setEmployees(emps);
+      setEmployees(response.data);
     } catch (error) {
       console.error('Error fetching employees:', error);
       toast.error('Failed to fetch employees!');
@@ -59,7 +59,7 @@ const AdminPanel = () => {
       toast.warning('Role name cannot be empty!');
       return;
     }
-
+    
     try {
       const response = await axios.post(
         `${API}Authority/create`,
@@ -202,8 +202,8 @@ const AdminPanel = () => {
               <option value="">Select Employee</option>
               {
               employees.map((emp) => (
-                <option key={emp} value={emp.id}>
-                  {emp}
+                <option key={emp.id} value={emp.id}>
+                  {emp.username}
                 </option>
               ))}
             </select>

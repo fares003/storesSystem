@@ -1,4 +1,4 @@
-import { BoxesIcon, DollarSign } from 'lucide-react';
+import { BoxesIcon, DollarSign, ShoppingBasketIcon } from 'lucide-react';
 import React, { useEffect, useRef, useState} from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -106,19 +106,156 @@ const DashboardFinance = () => {
             },
         },
     };
+    const performanceData = [
+        {
+            title: 'New Leads',
+            value: '1248',
+            icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
+            color: 'from-blue-500 to-indigo-500'
+        },
+        {
+            title: 'Booked Revenue',
+            value: '$76,450',
+            icon: <MdMoney className="w-12 h-12 text-green-200" />,
+            color: 'from-green-500 to-teal-500'
+        },
+        {
+            title: 'Deals',
+            value: '325',
+            icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
+            color: 'from-yellow-500 to-orange-500'
+        },
+        {
+            title: 'Total Orders',
+            value: '22,487',
+            icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
+            color: 'from-purple-500 to-pink-500'
+        }
+    ];
 
+    const initialOrders = [
+        {
+            id: 101,
+            customer: "Ahmed Mohamed",
+            total: 150.75,
+            status: "Completed",
+            date: "2025-01-15",
+        },
+        {
+            id: 102,
+            customer: "Sara Ali",
+            total: 89.99,
+            status: "Pending",
+            date: "2025-01-20",
+        },
+        {
+            id: 103,
+            customer: "John Doe",
+            total: 230.5,
+            status: "Canceled",
+            date: "2025-01-18",
+        },
+        {
+            id: 104,
+            customer: "Fatma Hassan",
+            total: 320.9,
+            status: "Completed",
+            date: "2025-01-22",
+        },
+        {
+            id: 105,
+            customer: "Ali Omar",
+            total: 120.0,
+            status: "Pending",
+            date: "2025-01-23",
+        },
+    ];
+    
     const earningSectionRef = useRef(null);
     const barChartRef = useRef(null);
     const lowStockRef = useRef(null);
+    const sectionRef = useRef(null);
 
     const isEarningVisible = useInView(earningSectionRef, { threshold: 0.2 });
-    const isBarChartVisible = useInView(barChartRef, { threshold: 0.3 });
+    const isBarChartVisible = useInView(barChartRef, { threshold: 0.28 });
     const isLowStockVisible = useInView(lowStockRef, { threshold: 0.2 });
-
+    const isVisible = useInView(sectionRef, { threshold: 0.2 });
+    
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             <div className="container mx-auto space-y-6">
+                {/* Preformance Section */}
+                <motion.div
+                    ref={sectionRef}
+                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={isVisible ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ duration: 0.8 }}
+                >
+                    {performanceData.map((item, index) => (
+                        <motion.div
+                            key={index}
+                            className={`p-6 rounded-xl shadow-lg text-white bg-gradient-to-r ${item.color} flex items-center gap-4`}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={isVisible ? { opacity: 1, y: 0 } : {}}
+                            transition={{ duration: 0.6, delay: index * 0.2 }}
+                        >
+                            <div className="bg-white bg-opacity-20 p-4 rounded-lg">
+                                {item.icon}
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-lg font-semibold">{item.title}</span>
+                                <span className="text-2xl font-bold">{item.value}</span>
+                            </div>
+                        </motion.div>
+                    ))}
+                </motion.div>
+                {/* Recent Orders */}
+                {/* Orders Section */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                    <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
+                    {initialOrders.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="table-auto w-full text-left border-collapse rounded-lg overflow-hidden shadow-lg">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="px-4 py-2 text-gray-600 font-semibold">Order ID</th>
+                                        <th className="px-4 py-2 text-gray-600 font-semibold">Customer</th>
+                                        <th className="px-4 py-2 text-gray-600 font-semibold">Total</th>
+                                        <th className="px-4 py-2 text-gray-600 font-semibold">Status</th>
+                                        <th className="px-4 py-2 text-gray-600 font-semibold">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {initialOrders.map((order, index) => (
+                                        <tr
+                                            key={index}
+                                            className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                        >
+                                            <td className="px-4 py-2">{order.id}</td>
+                                            <td className="px-4 py-2">{order.customer}</td>
+                                            <td className="px-4 py-2 font-semibold text-green-600">${order.total}</td>
+                                            <td className={`px-4 py-2 font-medium ${
+                                                order.status === 'Completed'
+                                                    ? 'text-green-500'
+                                                    : order.status === 'Pending'
+                                                    ? 'text-yellow-500'
+                                                    : 'text-red-500'
+                                            }`}>
+                                                {order.status}
+                                            </td>
+                                            <td className="px-4 py-2">{new Date(order.date).toLocaleDateString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <p className="text-gray-500">No orders found.</p>
+                    )}
+                </div>
+
                 {/* Earnings Section */}
                 <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
                     <motion.div
