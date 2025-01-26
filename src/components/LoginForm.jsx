@@ -7,12 +7,11 @@ const LoginForm = () => {
 
 
     const {signin} = useLogin() ;
-    const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [ Email ,setEmail] = useState("")
 
     const evokeSignin = () => {
-        if (!username || !password || !Email) {
+        if (!password || !Email) {
             toast.error("plese enter your username & password",{
                 autoClose:3000
             })
@@ -20,7 +19,7 @@ const LoginForm = () => {
         }
     
         const creds = {
-            username: username,
+            username: Email,
             password: password,
             email: Email,
         };
@@ -43,10 +42,6 @@ const LoginForm = () => {
     <Center >
         <h1 className="textGradient text-5xl md:text-6xl md:h-20 text-white">sign in</h1>
         <div className="flex flex-col gap-8 mt-4 items-center w-[90%] md:w-[50%] py-8 border border-white text-white rounded-lg shadow-lg shadow-slate-500 bg-slate-950 opacity-90 z-10">
-            <div className="flex flex-col items-start gap-2 w-[80%]">
-                <label>Username: </label>
-                <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="Username..." onChange={e => setUsername(e.target.value)} type='text' />
-            </div>
             
             <div className="flex flex-col items-start gap-2 w-[80%]">
                 <label>Email: </label>

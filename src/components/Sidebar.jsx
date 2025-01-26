@@ -2,7 +2,8 @@ import React from 'react';
 import { Link, NavLink } from "react-router-dom";
 import { MdOutlineCancel } from "react-icons/md";
 import { useStateContext } from '../contexts/ContextProvider';
-
+import { useLogin } from '@/contexts/LoginContext';
+import "../App.css"
 export default function Sidebar() {
   const { activeMenu, setActiveMenu, screenSize } = useStateContext();
   const activeLink = "flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2";
@@ -13,10 +14,10 @@ export default function Sidebar() {
       setActiveMenu(false);
     }
   };
-
+  const {logout} = useLogin() ;
   return (
     <div
-      className={`z-[1000] ml-3 h-screen md:overflow-auto overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300 
+      className={`relative z-[1000] ml-3 h-screen md:overflow-auto overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-custom 
         ${activeMenu ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
     >
       {activeMenu && (
@@ -37,7 +38,7 @@ export default function Sidebar() {
           <div className="mt-10 overflow-y-auto">
             {/* Dashboard Section */}
             <div>
-              <p className="text-slate-900 m-3 mt-4 uppercase">
+              <p className="text-gray-50 m-3 mt-4 uppercase">
                 Dashboard
               </p>
               <NavLink
@@ -51,7 +52,7 @@ export default function Sidebar() {
 
             {/* Orders Section */}
             <div>
-              <p className="text-slate-900 m-3 mt-4 uppercase">
+              <p className="text-gray-50 m-3 mt-4 uppercase">
                 Orders
               </p>
               <NavLink
@@ -73,7 +74,7 @@ export default function Sidebar() {
 
             {/* Items Section */}
             <div>
-              <p className="text-slate-900 m-3 mt-4 uppercase">
+              <p className="text-gray-50 m-3 mt-4 uppercase">
                 Items
               </p>
               <NavLink
@@ -95,7 +96,7 @@ export default function Sidebar() {
 
             {/* Storage Section */}
             <div>
-              <p className="text-slate-900 m-3 mt-4 uppercase">
+              <p className="text-gray-50 m-3 mt-4 uppercase">
                 Storage
               </p>
               <NavLink
@@ -117,7 +118,7 @@ export default function Sidebar() {
             </div>
             <div>
 
-              <p className="text-slate-900 m-3 mt-4 uppercase">
+              <p className="text-gray-50 m-3 mt-4 uppercase">
                 admin panel
               </p>
               <NavLink
@@ -141,6 +142,9 @@ export default function Sidebar() {
           </div>
         </>
       )}
+      <div className='w-24 h-8 flex items-center justify-center cursor-pointer rounded-2xl bg-red-600 sticky bottom-0 float-right mx-2 hover:bg-red-800 text-white' onClick={()=>{logout()}}>
+        logout
+      </div>
     </div>
   );
 }

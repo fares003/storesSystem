@@ -64,9 +64,12 @@ export const LoginProvider = ({ children }) => {
         setLogedin(false);
         return data;
     }
-
+    function logout(){
+        localStorage.removeItem("token") ;
+        window.location.href = "/" ; 
+    }
     return (
-        <loginContext.Provider value={{ logedin, setLogedin, signup, signin }}>
+        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout}}>
             {children}
         </loginContext.Provider>
     );
