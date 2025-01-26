@@ -149,6 +149,13 @@ const DashboardFinance = () => {
             date: "2025-01-20",
         },
         {
+            id: 102,
+            customer: "Sara Ali",
+            total: 89.99,
+            status: "Pending",
+            date: "2025-01-20",
+        },
+        {
             id: 103,
             customer: "John Doe",
             total: 230.5,
@@ -161,6 +168,20 @@ const DashboardFinance = () => {
             total: 320.9,
             status: "Completed",
             date: "2025-01-22",
+        },
+        {
+            id: 105,
+            customer: "Ali Omar",
+            total: 120.0,
+            status: "Pending",
+            date: "2025-01-23",
+        },
+        {
+            id: 105,
+            customer: "Ali Omar",
+            total: 120.0,
+            status: "Pending",
+            date: "2025-01-23",
         },
         {
             id: 105,
@@ -216,7 +237,7 @@ const DashboardFinance = () => {
                 <div className="bg-white rounded-xl shadow-md p-6">
                     <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
                     {initialOrders.length > 0 ? (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto h-64 overflow-y-auto">
                             <table className="table-auto w-full text-left border-collapse rounded-lg overflow-hidden shadow-lg">
                                 <thead>
                                     <tr className="bg-gray-100">
