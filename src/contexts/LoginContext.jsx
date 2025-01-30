@@ -18,7 +18,7 @@ export const LoginProvider = ({ children }) => {
     async function signin(credentials) {
         const target = api + "auth/sign-in";
         console.log(credentials);
-
+        localStorage.setItem("username", credentials.username);
         try {
             const response = await fetch(target, {
                 method: 'POST',
@@ -69,7 +69,7 @@ export const LoginProvider = ({ children }) => {
         window.location.href = "/" ; 
     }
     return (
-        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout}}>
+        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout }}>
             {children}
         </loginContext.Provider>
     );

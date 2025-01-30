@@ -83,6 +83,9 @@ function AllItems() {
 
     return (
         <Center className={"px-5"}>
+            <h2 className="textGradient text-4xl font-bold text-white mb-4">
+                Itmes List
+            </h2>
             <div className="w-full overflow-x-auto text-white text-lg shadow-md rounded-lg bg-gray-900">
                 <table className="min-w-full table-auto text-sm text-left">
                     <thead className="bg-gray-800 text-gray-200">

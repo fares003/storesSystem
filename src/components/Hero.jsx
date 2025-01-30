@@ -31,15 +31,15 @@ const Hero = () => {
           visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
         }}
       >
-        <motion.div className="w-[50%] flex flex-col gap-6" variants={textVariants}>
-          <h2 className="text-slate-200 text-6xl">Stores System</h2>
-          <p className="text-gray-400 font-semibold">
+        <motion.div className="w-full md:w-[50%] flex flex-col gap-6" variants={textVariants}>
+          <h2 className="text-slate-200 text-5xl md:text-6xl text-nowrap md:text-wrap">Stores System</h2>
+          <p className="text-gray-400 font-semibold text-xl">
             A management store system helps organize inventory, track orders, manage customers, and
             improve daily operations efficiency.
           </p>
         </motion.div>
         <motion.div
-          className="w-[40%]"
+          className="md:w-[40%] w-full mt-10 md:mt-0"
           variants={floatingImageVariants}
           animate="animate"
         >

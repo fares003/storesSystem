@@ -12,11 +12,14 @@ import AddOrder from '@/pages/AddOrder';
 import Items from '@/pages/Items';
 import AddItem from '@/pages/AddItem';
 import AddShipment from '@/pages/AddShipment';
-import Storage from '@/pages/Storage';
 import Dashboard from '@/pages/Dashboard';
 import PrepareToShipment from '@/pages/PrepareToShipment';
 import Admin from '@/pages/Admin';
 import Permission from '@/pages/permission';
+import OrderPreview from '@/pages/OrderPreview';
+import ShipmentPreview from '@/pages/ShipmentPreview';
+import InboundOrders from '@/pages/InboundOrders';
+import OutboundOrders from '@/pages/OutboundOrders';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -46,7 +49,7 @@ const LogedInHome = () => {
             }`}
           >
             {/* Navbar */}
-            <div className="z-30 fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+            <div className="z-30 md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
               <Navbar />
             </div>
 
@@ -61,12 +64,14 @@ const LogedInHome = () => {
                 <Route path="/items" element={<Items />} />
                 <Route path="/additem" element={<AddItem />} />
                 <Route path="/addShipment" element={<AddShipment />} />
-                <Route path="/Storage" element={<Storage />} />
+                <Route path="/Inbound" element={<InboundOrders />} />
+                <Route path="/Outbound" element={<OutboundOrders />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/prepareToShipment" element={<PrepareToShipment />} />
                 <Route path="/adminpanel" element={<Admin/>} />
                 <Route path="/permission" element={<Permission/>} />
-                
+                <Route path="/OrderPreview" element={<OrderPreview/>} />
+                <Route path="/Shipment" element={<ShipmentPreview/>} />
               </Routes>
             </div>
           </div>

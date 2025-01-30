@@ -6,15 +6,38 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import useInView from "@/Hooks/useInView";
+import { useLogin } from "@/contexts/LoginContext";
 
 function AllOrders() {
   const navigate = useNavigate();
-
   const API = import.meta.env.VITE_API;
   const [orders, setOrders] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
   const [popupData, setPopupData] = useState(null);
   const [completePopupData, setCompletePopupData] = useState(null);
+  const [isAdmin , setIsAdmin] = useState(false) ;
+
+
+  const Authority = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const target = `${API}Authority/roles`;
+
+        const response = await axios.get(target, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = response.data
+        setIsAdmin( !!data.find( (element)=> element === "admin") )
+        console.log(isAdmin);
+    } 
+    catch(error){
+      console.log(error);
+    }
+  }
+
 
   const fetchOrders = async () => {
     try {
@@ -38,10 +61,14 @@ function AllOrders() {
       console.error("Error fetching status options:", error);
     }
   };
+  const fetching = async ()=>{
+      await fetchOrders();
+      await fetchStatusOptions();
+      await Authority() ;
+  }
 
-  useEffect(() => {
-    fetchOrders();
-    fetchStatusOptions();
+  useEffect(()=>{
+    fetching() ;
   }, []);
 
   const deleteOrder = async (id) => {
@@ -130,6 +157,7 @@ function AllOrders() {
       );
       const DataToBeSent = {
         id: popupData.id,
+        // nead omar send me admin id 
         adminId: 0,
         statusId: popupData.status,
         total: popupData.total,
@@ -196,7 +224,7 @@ const handleSaveCode = async () => {
 
     // Pagination logic
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 12;
+    const itemsPerPage = 9;
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -208,7 +236,7 @@ const handleSaveCode = async () => {
     };
     
   return (
-    <Center>
+    <Center className={"mt-2"}>
       <div className="flex flex-col items-center gap-6 w-full md:w-[100%] px-2 overflow-y-auto scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300 ">
         <h2 className="textGradient text-4xl font-bold text-white">
           Orders List
@@ -272,14 +300,14 @@ const handleSaveCode = async () => {
                         </button>
                       )}
 
-                      {item.status === "In preparation" && (
+                      {/* {item.status === "In preparation" && (
                         <button
                           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => navigate("/prepareToShipment", { state: { orderId: item.id} })}
                         >
                           Prepare
                         </button>
-                      )}
+                      )} */}
 
                       {item.status === "Delivered" && (
                         <button
@@ -291,13 +319,22 @@ const handleSaveCode = async () => {
                           Complete
                         </button>
                       )}
-
                       <button
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition"
-                        onClick={() => deleteOrder(item.id)}
-                      >
-                        Delete
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition"
+                        onClick={()=>{navigate("/OrderPreview", { state: { orderId: item.id} })}}
+                        >
+                          previrew
                       </button>
+                      {
+                        isAdmin && (
+                          <button
+                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition"
+                            onClick={() => deleteOrder(item.id)}
+                          >
+                            Delete
+                          </button>
+                        )
+                      }
                     </div>
                   </motion.div>
                 )

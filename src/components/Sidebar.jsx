@@ -17,7 +17,7 @@ export default function Sidebar() {
   const {logout} = useLogin() ;
   return (
     <div
-      className={`relative z-[1000] ml-3 h-screen md:overflow-auto overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-custom 
+      className={`relative z-[1000] ml-3 h-screen overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-custom 
         ${activeMenu ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
     >
       {activeMenu && (
@@ -100,11 +100,19 @@ export default function Sidebar() {
                 Storage
               </p>
               <NavLink
-                to={`/Storage`}
+                to={`/Inbound`}
                 onClick={HandelColseSidebar}
                 className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
               >
-                <span className="capitalize">Storage</span>
+                <span className="capitalize">Inbound</span>
+              </NavLink>
+
+              <NavLink
+                to={`/Outbound`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">Outbound</span>
               </NavLink>
 
               <NavLink
@@ -142,7 +150,7 @@ export default function Sidebar() {
           </div>
         </>
       )}
-      <div className='w-24 h-8 flex items-center justify-center cursor-pointer rounded-2xl bg-red-600 sticky bottom-0 float-right mx-2 hover:bg-red-800 text-white' onClick={()=>{logout()}}>
+      <div className='w-24 h-8 flex items-center justify-center cursor-pointer rounded-2xl bg-red-600 sticky bottom-[-30px] float-right mx-2 hover:bg-red-800 text-white' onClick={()=>{logout()}}>
         logout
       </div>
     </div>

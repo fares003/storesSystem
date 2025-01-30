@@ -41,7 +41,7 @@ const Notifications = () => {
     const interval = setInterval(() => {
       fetchNotifications();
       
-    }, 600000);
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);

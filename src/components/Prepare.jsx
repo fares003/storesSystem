@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 
 const API = import.meta.env.VITE_API;
 
+
 const itemSchema = z.object({
   id: z.number().min(1, "Username is required"),
   items: z
@@ -73,7 +74,7 @@ const Prepare = () => {
         items : products
       }
       const token = localStorage.getItem("token");
-      const target = `${API}storage/prepare`;
+      const target = `${API}OutboundOrders`;
 
       const response = await axios.post(target, dataToBeSent, {
         headers: {

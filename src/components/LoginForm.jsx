@@ -8,20 +8,19 @@ const LoginForm = () => {
 
     const {signin} = useLogin() ;
     const [password, setPassword] = useState("")
-    const [ Email ,setEmail] = useState("")
+    const [ userName ,setuserName] = useState("")
 
     const evokeSignin = () => {
-        if (!password || !Email) {
+        if (!password || !userName) {
             toast.error("plese enter your username & password",{
                 autoClose:3000
             })
             return;
         }
-    
         const creds = {
-            username: Email,
+            username: userName,
             password: password,
-            email: Email,
+            email: userName+"@gmail.com",
         };
         signin(creds).then(data => {
             if (!data) {
@@ -44,8 +43,8 @@ const LoginForm = () => {
         <div className="flex flex-col gap-8 mt-4 items-center w-[90%] md:w-[50%] py-8 border border-white text-white rounded-lg shadow-lg shadow-slate-500 bg-slate-950 opacity-90 z-10">
             
             <div className="flex flex-col items-start gap-2 w-[80%]">
-                <label>Email: </label>
-                <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="example@gmail.com" onChange={e => setEmail(e.target.value)} type='email' />
+                <label>user name: </label>
+                <input className="w-full bg-transparent border border-white rounded-lg p-2" placeholder="example123" onChange={e => setuserName(e.target.value)} type='text' />
             </div>
             
             <div className="flex flex-col items-start gap-2 w-[80%]">

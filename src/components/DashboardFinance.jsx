@@ -204,7 +204,7 @@ const DashboardFinance = () => {
     
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-gray-100 p-6 mt-14 md:mt-0">
             <div className="container mx-auto space-y-6">
                 {/* Preformance Section */}
                 <motion.div
@@ -286,16 +286,16 @@ const DashboardFinance = () => {
                     animate={isEarningVisible ? { opacity: 1, y: 0 } : {} }
                     transition={{ duration: 0.5 }}
                     >
-                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg p-6 shadow-md">
+                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg px-4 py-2 md:p-6 shadow-md">
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <h2 className="text-2xl font-bold">Earnings</h2>
-                                    <p className="text-4xl font-extrabold mt-2">{total}$</p>
+                                    <h2 className="text-xl md:text-2xl font-bold">Earnings</h2>
+                                    <p className="text-2xl md:text-4xl font-extrabold mt-2">{total}$</p>
                                 </div>
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
-                                    className="bg-white text-indigo-500 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200"
+                                    className="bg-white text-indigo-500 px-4 md:px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200"
                                 >
                                     Download
                                 </motion.button>
