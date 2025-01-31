@@ -47,6 +47,26 @@ const Prepare = () => {
     });
   };
 
+
+  const nameFromBarcode = async (barcode)=>{
+    const target = `${API}OutboundOrders/barcode/${barcode}`;
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(target, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+  
+        if (response.status === 200) {
+          return response.data
+        } else {
+            console.error("Failed to fetch items.");
+        }
+    } catch (error) {
+        console.error("Error fetching items:", error);
+    }
+  }
   const addToProducts = (barcode) => {
     setProducts((prevProducts) => {
       const existingProduct = prevProducts.find(
@@ -60,7 +80,8 @@ const Prepare = () => {
             : product
         );
       } else {
-        return [...prevProducts, { barcode, quantity: 1 }];
+        const ProductnameFromBarcode = nameFromBarcode(barcode) ;
+        return [...prevProducts, { barcode, quantity: 1 , name : ProductnameFromBarcode }];
       }
     });
   };
@@ -70,8 +91,8 @@ const Prepare = () => {
     e.preventDefault();
     try {
       const dataToBeSent = {
-        id : orderId , 
-        items : products
+        orderId : orderId , 
+        barcodes : products
       }
       const token = localStorage.getItem("token");
       const target = `${API}OutboundOrders`;
@@ -194,6 +215,10 @@ const Prepare = () => {
             <table className="min-w-full table-auto text-sm text-left">
               <thead className="bg-gray-800 text-gray-200">
                 <tr>
+                  
+                  <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">
+                    Product Name
+                  </th>
                   <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">
                     Barcode
                   </th>
@@ -211,6 +236,9 @@ const Prepare = () => {
                     key={item.barcode}
                     className={`text-center ${i % 2 === 0 ? "bg-gray-800" : "bg-gray-700"} hover:bg-gray-600 transition-colors duration-200`}
                   >
+                    <td className="px-6 py-3 border-b border-gray-700">
+                      {item.name}
+                    </td>
                     <td className="px-6 py-3 border-b border-gray-700">
                       {item.barcode}
                     </td>

@@ -25,6 +25,28 @@ const SingleShipment = () => {
     }
   };
 
+  const handlePDF = async (id) => {
+    const target = `${API}inboundOrders/barcodes/${id}`;
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(target, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            responseType: 'blob' // receving files
+        });
+
+        if (response.status === 200) {
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, "_blank"); 
+        } else {
+            console.error("Failed to fetch PDF.");
+        }
+    } catch (error) {
+        console.error("Error fetching PDF:", error);
+    }
+  };
 
   const handleSaveChanges = async () => {
     try {
@@ -34,13 +56,11 @@ const SingleShipment = () => {
         itemsArray.push({
           id : shipmentData.products[i].productId ,
           deliveredAmount : popupData.deliveredAmount? popupData.deliveredAmount : 0 ,
-          isComplete : "true"
+          isComplete : false
         })
       }
       console.log(itemsArray);
-      console.log("////////////////////");
       
-      console.log(DataToBeSent);
       
 
       const DataToBeSent = {
@@ -51,7 +71,8 @@ const SingleShipment = () => {
 
       const token = localStorage.getItem("token");
       const target = API + "InboundOrders/fulfill";
-
+      
+      console.log(DataToBeSent);
       const response = await axios.post(target, DataToBeSent, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,7 +81,7 @@ const SingleShipment = () => {
       });
 
       if (response.status === 200) {
-        setShipmentData(updatedShipmentData);
+        setShipmentData(DataToBeSent);
         toast.success("Updated successfully");
       }
 
@@ -145,6 +166,9 @@ const SingleShipment = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
                     fulfill
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
+                    barcodes PDF
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-indigo-100">
@@ -175,6 +199,14 @@ const SingleShipment = () => {
                       onClick={()=>{setPopupData(product)}}
                       >
                         fulfill
+                      </button>
+                    </td>
+                    {/* PDF */}
+                    <td>
+                      <button className="bg-orange-500 hover:bg-orange-700 px-6 py-2 rounded-md"
+                      onClick={()=>{ handlePDF(product.id) }}
+                      >
+                        PDF
                       </button>
                     </td>
                   </tr>
