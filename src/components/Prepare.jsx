@@ -78,14 +78,20 @@ const Prepare = () => {
     }
     setProducts((prevProducts) => {
       const existingProduct = prevProducts.find(
-        (product) => product.barcode === barcode
+        (product) => product.name === ProductnameFromBarcode.name 
       );
   
       if (existingProduct) {
-        return prevProducts.map((product) =>
-          product.barcode === barcode
+        return prevProducts.map((product) =>{
+          console.log(product.name);
+          console.log(ProductnameFromBarcode);
+          
+          return(
+            product.name === ProductnameFromBarcode.name
             ? { ...product, quantity: product.quantity + 1 }
             : product
+          )
+        }
         );
       } else {
         return [...prevProducts, { barcode, quantity: 1 , name : ProductnameFromBarcode.name }];
@@ -227,9 +233,6 @@ const Prepare = () => {
                     Product Name
                   </th>
                   <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">
-                    Barcode
-                  </th>
-                  <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">
                     Quantity
                   </th>
                   <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">
@@ -245,9 +248,6 @@ const Prepare = () => {
                   >
                     <td className="px-6 py-3 border-b border-gray-700">
                       {item.name}
-                    </td>
-                    <td className="px-6 py-3 border-b border-gray-700">
-                      {item.barcode}
                     </td>
                     <td className="px-6 py-3 border-b border-gray-700">
                       {item.quantity}
