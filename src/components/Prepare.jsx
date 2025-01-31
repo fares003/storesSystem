@@ -67,7 +67,8 @@ const Prepare = () => {
         console.error("Error fetching items:", error);
     }
   }
-  const addToProducts = (barcode) => {
+  const addToProducts = async (barcode) => {
+    const ProductnameFromBarcode = await nameFromBarcode(barcode) ;
     setProducts((prevProducts) => {
       const existingProduct = prevProducts.find(
         (product) => product.barcode === barcode
@@ -80,7 +81,6 @@ const Prepare = () => {
             : product
         );
       } else {
-        const ProductnameFromBarcode = nameFromBarcode(barcode) ;
         return [...prevProducts, { barcode, quantity: 1 , name : ProductnameFromBarcode }];
       }
     });
