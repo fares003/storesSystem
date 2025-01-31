@@ -68,7 +68,14 @@ const Prepare = () => {
     }
   }
   const addToProducts = async (barcode) => {
-    const ProductnameFromBarcode = await nameFromBarcode(barcode) ;
+
+    let ProductnameFromBarcode = await nameFromBarcode(barcode) ;
+    
+    if(!ProductnameFromBarcode.name){
+      ProductnameFromBarcode = {
+        name : "UnKownen"
+      }
+    }
     setProducts((prevProducts) => {
       const existingProduct = prevProducts.find(
         (product) => product.barcode === barcode
@@ -81,7 +88,7 @@ const Prepare = () => {
             : product
         );
       } else {
-        return [...prevProducts, { barcode, quantity: 1 , name : ProductnameFromBarcode }];
+        return [...prevProducts, { barcode, quantity: 1 , name : ProductnameFromBarcode.name }];
       }
     });
   };
@@ -230,7 +237,7 @@ const Prepare = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-white">
                 {products.map((item, i) => (
                   <tr
                     key={item.barcode}
