@@ -69,7 +69,7 @@ const AllOutbound = () => {
                     <div className="flex flex-col gap-2">
                       <div>
                         <span className="font-semibold text-gray-400">Total:</span>{" "}
-                        <span className="text-green-400 font-bold">${item.total}</span>
+                        <span className="text-green-400 font-bold">EGP {item.total}</span>
                       </div>
                     </div>
                     <div>
@@ -77,7 +77,7 @@ const AllOutbound = () => {
                       <ul className="list-disc pl-6 text-sm text-gray-300">
                         {item.cart.map((product, j) => (
                           <li key={j}>
-                            {product.name} (x{product.quantity}) - ${product.price}
+                            {product.name} (x{product.quantity}) - EGP {product.price}
                           </li>
                         ))}
                       </ul>

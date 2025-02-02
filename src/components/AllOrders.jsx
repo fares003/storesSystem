@@ -230,10 +230,29 @@ const handleSaveCode = async () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(orders.length / itemsPerPage);
-  
+    
+    // Number of pagination buttons to display at a time
+    const maxPaginationButtons = 5;
+
+    // Calculate the range of pagination buttons to display
+    const getPaginationRange = () => {
+      const halfRange = Math.floor(maxPaginationButtons / 2);
+      let start = Math.max(currentPage - halfRange, 1);
+      let end = Math.min(start + maxPaginationButtons - 1, totalPages);
+
+      if (end - start + 1 < maxPaginationButtons) {
+        start = Math.max(end - maxPaginationButtons + 1, 1);
+      }
+
+      return { start, end };
+    };
+
     const handlePageChange = (pageNumber) => {
       setCurrentPage(pageNumber);
     };
+
+    const { start, end } = getPaginationRange();
+
     
   return (
     <Center className={"mt-2"}>
@@ -255,7 +274,11 @@ const handleSaveCode = async () => {
                     <div className="flex flex-col gap-2">
                       <div>
                         <span className="font-semibold text-gray-400">Username:</span>{" "}
-                        {item.customer.username}
+                        {item.customer.name}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-400">Phone:</span>{" "}
+                        {item.customer.phoneNumber}
                       </div>
                       <div>
                         <span className="font-semibold text-gray-400">Status:</span>{" "}
@@ -263,7 +286,7 @@ const handleSaveCode = async () => {
                       </div>
                       <div>
                         <span className="font-semibold text-gray-400">Total:</span>{" "}
-                        <span className="text-green-400 font-bold">${item.total}</span>
+                        <span className="text-green-400 font-bold">EGP {item.total}</span>
                       </div>
                     </div>
                     <div>
@@ -271,7 +294,7 @@ const handleSaveCode = async () => {
                       <ul className="list-disc pl-6 text-sm text-gray-300">
                         {item.cart.map((product, j) => (
                           <li key={j}>
-                            {product.name} (x{product.quantity}) - ${product.price}
+                            {product.name} (x{product.quantity}) - EGP {product.price}
                           </li>
                         ))}
                       </ul>
@@ -440,20 +463,49 @@ const handleSaveCode = async () => {
     </div>
   </Popup>
 )}
-        <div className="flex justify-center items-center gap-4 mt-6">
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+
+    {/* totalPages */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+          {/* Previous Button */}
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-500"
+            }`}
+          >
+            Previous
+          </button>
+
+          {/* Pagination Buttons */}
+          {Array.from({ length: end - start + 1 }, (_, index) => start + index).map((page) => (
             <button
               key={page}
+              onClick={() => handlePageChange(page)}
               className={`px-4 py-2 rounded-md ${
                 page === currentPage
                   ? "bg-blue-600 text-white"
                   : "bg-gray-300 text-black hover:bg-gray-400"
               }`}
-              onClick={() => handlePageChange(page)}
             >
               {page}
             </button>
           ))}
+
+          {/* Next Button */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-500"
+            }`}
+          >
+            Next
+          </button>
         </div>
       </div>
     </Center>

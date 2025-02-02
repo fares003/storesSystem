@@ -118,7 +118,7 @@ const SingleShipment = () => {
             </div>
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <p className="text-sm text-blue-500">Total Cost</p>
-              <p className="text-lg font-medium text-blue-800">${shipmentData.cost}</p>
+              <p className="text-lg font-medium text-blue-800">EGP {shipmentData.cost}</p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <p className="text-sm text-blue-500">Status</p>
@@ -130,7 +130,7 @@ const SingleShipment = () => {
             </div>
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <p className="text-sm text-blue-500">Shipping Cost</p>
-              <p className="text-lg font-medium text-blue-800">${shipmentData.shippingCost}</p>
+              <p className="text-lg font-medium text-blue-800">EGP {shipmentData.shippingCost}</p>
             </div>
           </div>
         </div>
@@ -175,9 +175,9 @@ const SingleShipment = () => {
                 {shipmentData.products?.map((product, index) => (
                   <tr key={index} className="hover:bg-indigo-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-indigo-800">{product.productName}</td>
-                    <td className="px-6 py-4 text-sm text-indigo-800">${product.costPerPiece}</td>
+                    <td className="px-6 py-4 text-sm text-indigo-800">EGP {product.costPerPiece}</td>
                     <td className="px-6 py-4 text-sm text-indigo-800">{product.amount}</td>
-                    <td className="px-6 py-4 text-sm text-indigo-800">${product.totalCost}</td>
+                    <td className="px-6 py-4 text-sm text-indigo-800">EGP {product.totalCost}</td>
                     <td className="px-6 py-4 text-sm text-indigo-800">{product.received}</td>
                     <td className="px-6 py-4 text-sm text-indigo-800">{product.waiting}</td>
                     <td className="px-6 py-4">

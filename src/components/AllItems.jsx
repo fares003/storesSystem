@@ -10,7 +10,7 @@ function AllItems() {
     const [items, setItems] = useState([]);
     const [paginationItems, setPaginationItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20; // عدد العناصر لكل صفحة
+    const itemsPerPage = 20;
 
     useEffect(() => {
         fetchItems();
@@ -105,14 +105,14 @@ function AllItems() {
                                 key={item.sku}
                                 initial={{ opacity: 0, y: 50 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8, delay: i * 0.2 }}
+                                transition={{ duration: 0.3, delay: i * 0.05 }}
                                 className={`text-center ${
                                     i % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
                                 } hover:bg-gray-600 transition-colors duration-200`}
                             >
                                 <td className="px-6 py-3 border-b border-gray-700">{item.sku}</td>
                                 <td className="px-6 py-3 border-b border-gray-700">{item.name}</td>
-                                <td className="px-6 py-3 border-b border-gray-700">${item.price}</td>
+                                <td className="px-6 py-3 border-b border-gray-700">EGP {item.price}</td>
                                 <td className="px-6 py-3 border-b border-gray-700 truncate max-w-[200px]">
                                     {item.description}
                                 </td>

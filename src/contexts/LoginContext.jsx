@@ -6,7 +6,6 @@ const api = import.meta.env.VITE_API;
 
 export const LoginProvider = ({ children }) => {
     const [logedin, setLogedin] = useState(false);
-
     useEffect(() => {
 
         const isUserLoggedIn = localStorage.getItem('token');
@@ -69,7 +68,7 @@ export const LoginProvider = ({ children }) => {
         window.location.href = "/" ; 
     }
     return (
-        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout }}>
+        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout  }}>
             {children}
         </loginContext.Provider>
     );

@@ -18,8 +18,8 @@ export default function Navbar() {
     setNewNotification, 
   } = useStateContext();
 
-  const { logedin } = useLogin();
-
+  const { logedin} = useLogin();
+  const username = localStorage.getItem("username")
   useEffect(() => {
     const handleResize = () => {
       setScreenSize(window.innerWidth);
@@ -71,10 +71,9 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center gap-2">
-            <img src={avatar} alt="User Avatar" className="w-8 h-8 rounded-full" />
             <p className="text-sm">
               <span className="text-gray-400">Hi,</span>{' '}
-              <span className="font-bold">Admin</span>
+              <span className="font-bold">{username}</span>
             </p>
           </div>
         </div>

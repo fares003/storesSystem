@@ -190,7 +190,7 @@ const AddNewShipment = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="textGradient text-5xl md:text-6xl font-semibold text-white"
         >
-          Add Shipment
+          Add inbound orders
         </motion.h2>
         <motion.form
           initial={{ opacity: 0, scale: 0.9 }}

@@ -1,9 +1,8 @@
-import { BoxesIcon, DollarSign, ShoppingBasketIcon } from 'lucide-react';
+import { DollarSign, ShoppingBasketIcon } from 'lucide-react';
 import React, { useEffect, useRef, useState} from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { motion } from "framer-motion";
-import { GoDotFill } from "react-icons/go";
 import { MdMoney } from 'react-icons/md';
 import { FaUserFriends } from 'react-icons/fa';
 import useInView from "@/Hooks/useInView"; 
@@ -148,48 +147,6 @@ const DashboardFinance = () => {
             status: "Pending",
             date: "2025-01-20",
         },
-        {
-            id: 102,
-            customer: "Sara Ali",
-            total: 89.99,
-            status: "Pending",
-            date: "2025-01-20",
-        },
-        {
-            id: 103,
-            customer: "John Doe",
-            total: 230.5,
-            status: "Canceled",
-            date: "2025-01-18",
-        },
-        {
-            id: 104,
-            customer: "Fatma Hassan",
-            total: 320.9,
-            status: "Completed",
-            date: "2025-01-22",
-        },
-        {
-            id: 105,
-            customer: "Ali Omar",
-            total: 120.0,
-            status: "Pending",
-            date: "2025-01-23",
-        },
-        {
-            id: 105,
-            customer: "Ali Omar",
-            total: 120.0,
-            status: "Pending",
-            date: "2025-01-23",
-        },
-        {
-            id: 105,
-            customer: "Ali Omar",
-            total: 120.0,
-            status: "Pending",
-            date: "2025-01-23",
-        },
     ];
     
     const earningSectionRef = useRef(null);
@@ -198,8 +155,8 @@ const DashboardFinance = () => {
     const sectionRef = useRef(null);
 
     const isEarningVisible = useInView(earningSectionRef, { threshold: 0.2 });
-    const isBarChartVisible = useInView(barChartRef, { threshold: 0.28 });
-    const isLowStockVisible = useInView(lowStockRef, { threshold: 0.2 });
+    const isBarChartVisible = useInView(barChartRef, { threshold: 0.2 });
+    const isLowStockVisible = useInView(lowStockRef, { threshold: 0.15 });
     const isVisible = useInView(sectionRef, { threshold: 0.2 });
     
 
@@ -256,7 +213,7 @@ const DashboardFinance = () => {
                                         >
                                             <td className="px-4 py-2">{order.id}</td>
                                             <td className="px-4 py-2">{order.customer}</td>
-                                            <td className="px-4 py-2 font-semibold text-green-600">${order.total}</td>
+                                            <td className="px-4 py-2 font-semibold text-green-600">EGP {order.total}</td>
                                             <td className={`px-4 py-2 font-medium ${
                                                 order.status === 'Completed'
                                                     ? 'text-green-500'
@@ -290,7 +247,7 @@ const DashboardFinance = () => {
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h2 className="text-xl md:text-2xl font-bold">Earnings</h2>
-                                    <p className="text-2xl md:text-4xl font-extrabold mt-2">{total}$</p>
+                                    <p className="text-2xl md:text-4xl font-extrabold mt-2">{total}EGP </p>
                                 </div>
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
@@ -325,7 +282,7 @@ const DashboardFinance = () => {
                                             >
                                                 <td className="px-4 py-2">{item.id}</td>
                                                 <td className="px-4 py-2">{item.name}</td>
-                                                <td className="px-4 py-2 text-green-600 font-semibold">${item.value}</td>
+                                                <td className="px-4 py-2 text-green-600 font-semibold">EGP {item.value}</td>
                                                 <td className="px-4 py-2">{new Date(item.date).toLocaleDateString()}</td>
                                             </tr>
                                         ))}
@@ -367,7 +324,7 @@ const DashboardFinance = () => {
                                 />
                                 <h4 className="text-lg font-semibold">{product.name}</h4>
                                 <p className="text-sm text-gray-500">Available: {product.available}</p>
-                                <p className="text-lg font-bold text-indigo-600">${product.price}</p>
+                                <p className="text-lg font-bold text-indigo-600">EGP {product.price}</p>
                             </div>
                         ))}
                     </div>
@@ -377,7 +334,7 @@ const DashboardFinance = () => {
                 <motion.div
                 ref={lowStockRef}
                 className="bg-white rounded-xl shadow-md p-6"
-                initial={{ x: -50, opacity: 0 }}
+                initial={{ x: -20, opacity: 0 }}
                 animate={isLowStockVisible ? { x: 0, opacity: 1 } :{}}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 >
@@ -401,7 +358,7 @@ const DashboardFinance = () => {
                 {/* Orders Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
                     <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
-                    <p className="text-3xl font-bold">Total Revenue: ${orders.reduce((acc, item) => acc + item.revenue, 0)}</p>
+                    <p className="text-3xl font-bold">Total Revenue: EGP {orders.reduce((acc, item) => acc + item.revenue, 0)}</p>
                         {/* Pie Chart for Orders Overview */}
                         <div className="bg-white rounded-xl shadow-md p-6">
                             <h3 className="text-xl font-semibold mb-4">Orders Overview by Store</h3>

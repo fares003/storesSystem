@@ -120,7 +120,7 @@ export default function Sidebar() {
                 onClick={HandelColseSidebar}
                 className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
               >
-                <span className="capitalize">Add Shipment</span>
+                <span className="capitalize">Add inbound order</span>
               </NavLink>
 
             </div>

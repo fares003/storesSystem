@@ -36,10 +36,29 @@ const AllInbound = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentStorage = storage.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(storage.length / itemsPerPage);
-  
+    
+    // Number of pagination buttons to display at a time
+    const maxPaginationButtons = 5;
+
+    // Calculate the range of pagination buttons to display
+    const getPaginationRange = () => {
+      const halfRange = Math.floor(maxPaginationButtons / 2);
+      let start = Math.max(currentPage - halfRange, 1);
+      let end = Math.min(start + maxPaginationButtons - 1, totalPages);
+
+      if (end - start + 1 < maxPaginationButtons) {
+        start = Math.max(end - maxPaginationButtons + 1, 1);
+      }
+
+      return { start, end };
+    };
+
     const handlePageChange = (pageNumber) => {
       setCurrentPage(pageNumber);
     };
+
+    const { start, end } = getPaginationRange();
+
     
   return (
     <Center className={"mt-2"}>
@@ -62,13 +81,13 @@ const AllInbound = () => {
                   <span className="font-semibold text-gray-400">Date:</span> {item.date}
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-400">Total Cost:</span> ${item.cost}
+                  <span className="font-semibold text-gray-400">Total Cost:</span> {item.cost}
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-400">supplier:</span> ${item.supplier}
+                  <span className="font-semibold text-gray-400">supplier:</span> EGP{item.supplier}
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-400">status:</span> ${item.status}
+                  <span className="font-semibold text-gray-400">status:</span> EGP{item.status}
                 </div>
               </div>
 
@@ -105,20 +124,48 @@ const AllInbound = () => {
           ))}
         </div>
         
-      <div className="flex justify-center items-center gap-4 mt-6">
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+          {/* totalPages */}
+          <div className="flex justify-center items-center gap-2 mt-6">
+          {/* Previous Button */}
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-500"
+            }`}
+          >
+            Previous
+          </button>
+
+          {/* Pagination Buttons */}
+          {Array.from({ length: end - start + 1 }, (_, index) => start + index).map((page) => (
             <button
               key={page}
+              onClick={() => handlePageChange(page)}
               className={`px-4 py-2 rounded-md ${
                 page === currentPage
                   ? "bg-blue-600 text-white"
                   : "bg-gray-300 text-black hover:bg-gray-400"
               }`}
-              onClick={() => handlePageChange(page)}
             >
               {page}
             </button>
           ))}
+
+          {/* Next Button */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-500"
+            }`}
+          >
+            Next
+          </button>
         </div>
       </div>
     </Center>

@@ -105,9 +105,6 @@ const OrderDetailes = () => {
                     Product Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
                     Quantity
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
@@ -122,13 +119,10 @@ const OrderDetailes = () => {
                 {orderData.cart.map((item, index) => (
                   <tr key={index} className="hover:bg-indigo-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-indigo-800">{item.name}</td>
-                    <td className="px-6 py-4 text-sm text-indigo-800">
-                      {item.description || "N/A"}
-                    </td>
                     <td className="px-6 py-4 text-sm text-indigo-800">{item.quantity}</td>
-                    <td className="px-6 py-4 text-sm text-indigo-800">${item.price}</td>
+                    <td className="px-6 py-4 text-sm text-indigo-800">{item.price} EGP</td>
                     <td className="px-6 py-4 text-sm text-indigo-800">
-                      ${item.quantity * item.price}
+                      {item.quantity * item.price} EGP 
                     </td>
                   </tr>
                 ))}
