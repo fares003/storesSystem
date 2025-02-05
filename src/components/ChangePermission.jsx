@@ -6,6 +6,8 @@ import axios from 'axios';
 const ChangePermission = () => {
   const [roles, setRoles] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [selectedRole, setSelectedRole] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const API = import.meta.env.VITE_API;
   const token = localStorage.getItem("token");
@@ -72,69 +74,80 @@ const ChangePermission = () => {
   };
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen">
-      <h1 className="text-4xl text-center text-white font-bold mb-8">
-        Manage Permissions
-      </h1>
+    <div className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-500 min-h-screen p-4 md:p-8">
       <motion.div
-        className="bg-gray-800 p-6 rounded-lg shadow-lg"
+        className="container mx-auto max-w-4xl bg-white p-8 rounded-xl shadow-2xl"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <h2 className="text-2xl text-white mb-4">Update Permissions for Roles</h2>
+        <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-6">Manage Permissions</h1>
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-8">Update Permissions</h2>
+
         {loading ? (
-          <div className="text-center text-white">Loading...</div>
+          <div className="text-center text-gray-600">Loading...</div>
         ) : (
-          <ul className="space-y-8">
-            {roles.map((role) => (
-              <motion.li
-                key={role.id}
-                className="bg-gray-700 p-4 rounded-md text-white"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <h3 className="text-xl font-semibold mb-4">{role.name}</h3>
-                <div className="space-y-4">
-                  {statuses.map((status) => (
-                    <div
-                      key={status.id}
-                      className="flex justify-between items-center bg-gray-600 p-3 rounded-md"
-                    >
-                      <span>{status.name}</span>
-                      <div className="flex gap-2">
-                        <button
-                          className="bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-500 transition"
-                          onClick={() => updatePermission(role.id, status.id, 'edit', 1)}
-                        >
-                          Enable Edit
-                        </button>
-                        <button
-                          className="bg-blue-600 px-3 py-1 rounded-md hover:bg-blue-500 transition"
-                          onClick={() => updatePermission(role.id, status.id, 'edit', 0)}
-                        >
-                          Disable Edit
-                        </button>
-                        <button
-                          className="bg-green-600 px-3 py-1 rounded-md hover:bg-green-500 transition"
-                          onClick={() => updatePermission(role.id, status.id, 'view', 1)}
-                        >
-                          Enable View
-                        </button>
-                        <button
-                          className="bg-green-600 px-3 py-1 rounded-md hover:bg-green-500 transition"
-                          onClick={() => updatePermission(role.id, status.id, 'view', 0)}
-                        >
-                          Disable View
-                        </button>
-                      </div>
-                    </div>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:space-x-4">
+                <select
+                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg shadow-md w-full mb-4 md:mb-0"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                >
+                  <option value="">Select Role</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
                   ))}
-                </div>
-              </motion.li>
-            ))}
-          </ul>
+                </select>
+
+                <select
+                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg shadow-md w-full"
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  {statuses.map((status) => (
+                    <option key={status.id} value={status.id}>
+                      {status.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Display buttons only if both role and status are selected */}
+            {selectedRole && selectedStatus && (
+              <div className="flex flex-wrap gap-4 justify-center mt-6">
+                <button
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-500 transition w-full sm:w-auto"
+                  onClick={() => updatePermission(selectedRole, selectedStatus, 'edit', 1)}
+                >
+                  Enable Edit
+                </button>
+                <button
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-500 transition w-full sm:w-auto"
+                  onClick={() => updatePermission(selectedRole, selectedStatus, 'edit', 0)}
+                >
+                  Disable Edit
+                </button>
+                <button
+                  className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-500 transition w-full sm:w-auto"
+                  onClick={() => updatePermission(selectedRole, selectedStatus, 'view', 1)}
+                >
+                  Enable View
+                </button>
+                <button
+                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition w-full sm:w-auto"
+                  onClick={() => updatePermission(selectedRole, selectedStatus, 'view', 0)}
+                >
+                  Disable View
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </motion.div>
     </div>

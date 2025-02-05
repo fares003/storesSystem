@@ -6,21 +6,26 @@ import { motion } from "framer-motion";
 import { MdMoney } from 'react-icons/md';
 import { FaUserFriends } from 'react-icons/fa';
 import useInView from "@/Hooks/useInView"; 
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const API = import.meta.env.VITE_API;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const DashboardFinance = () => {
+    const [timeInterval, setTimeInterval] = useState('year');
     const [earningData, setEarningData] = useState([]);
     const [total, setTotal] = useState(0);
+    const [TopOrders , setTopOrders] = useState([]);
+
     const [barChartData, setBarChartData] = useState([
-        { month: 'Jan', value: 15000 },
-        { month: 'Feb', value: 12000 },
-        { month: 'Mar', value: 18000 },
-        { month: 'Apr', value: 20000 },
-        { month: 'May', value: 17000 },
-        { month: 'Jun', value: 19000 },
-        { month: 'Jul', value: 22000 },
+        { month: 'Jan', sales: 15000, netProfit: 5000 },
+        { month: 'Feb', sales: 12000, netProfit: 4000 },
+        { month: 'Mar', sales: 18000, netProfit: 7000 },
+        { month: 'Apr', sales: 20000, netProfit: 8000 },
+        { month: 'May', sales: 17000, netProfit: 6000 },
+        { month: 'Jun', sales: 19000, netProfit: 7500 },
+        { month: 'Jul', sales: 22000, netProfit: 9000 },
     ]);
 
     const [products, setProducts] = useState([]);
@@ -28,11 +33,25 @@ const DashboardFinance = () => {
     const [orders, setOrders] = useState([]);
     const [stores, setStores] = useState([]);
 
+    const [newCustomers, setNewCustomers] = useState("1900");
+    const [customers, setCustomers] = useState({});
+    const [ordersCard, setOrdersCard] = useState("1900");
+    const [sales, setSales] = useState("1900");
+    const [product, setProduct] = useState([]);
+    const [shipping, setShipping] = useState({});    
+    const [deliveredOrders, setDeliveredOrders] = useState({});
+    const [netProfit, setNetProfit] = useState({});
+
+
+
     const fetchData = async (endpoint, setter) => {
         try {
             const target = `${API}${endpoint}`;
             const resp = await fetch(target);
             const data = await resp.json();
+            console.log(data);
+            console.log(endpoint);
+            
             setter(data);
         } catch (error) {
             console.error(`Error fetching data from ${endpoint}:`, error);
@@ -45,7 +64,18 @@ const DashboardFinance = () => {
         fetchData('Data/low-stock', setLowStock);
         fetchData('Data/orders', setOrders);
         fetchData('Data/stores', setStores);
-    }, []);
+        fetchData('Orders/top-5', setTopOrders);
+        fetchData(`reports/new-customers?groupBy=${timeInterval}`, setNewCustomers);
+        fetchData(`reports/customers?groupBy=${timeInterval}`,setCustomers);
+        fetchData(`reports/orders?groupBy=${timeInterval}`, setOrdersCard);
+        fetchData(`reports/total-sales?groupBy=${timeInterval}`, setSales);
+        fetchData(`reports/products?groupBy=${timeInterval}`, setProduct);
+        fetchData(`reports/shipping-items`, setShipping);
+        fetchData(`reports/delivered-orders?groupBy=${timeInterval}`, setDeliveredOrders);
+        
+        // fetchData(`reports/net-profit?groupBy=${timeInterval}`, setNetProfit);
+        
+    }, [timeInterval]);
 
     useEffect(() => {
         const tempTotal = earningData.reduce((acc, item) => acc + item.value, 0);
@@ -53,36 +83,64 @@ const DashboardFinance = () => {
     }, [earningData]);
 
     // Pie chart data
+    const storesNames = [] ;
+    const storesRevenue = [] ;
+    stores.forEach((ele)=>{
+        storesNames.push(ele.store);
+        storesRevenue.push(ele.revenue);
+    })
     const pieData = {
-        labels: ['Store A', 'Store B', 'Store C'], // Static store names
+        labels: storesNames,
         datasets: [
             {
                 label: 'Order Revenue by Store',
-                data: [3000, 4500, 2300], // Static revenue data for each store
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',  // Red
-                    'rgba(54, 162, 235, 0.7)',  // Blue
-                    'rgba(255, 206, 86, 0.7)'   // Yellow
-                ], // Static colors for each store
+                data: storesRevenue,
                 borderWidth: 1,
             },
         ],
     };
     const barData = {
-        labels: barChartData.map((item) => item.month),
-        datasets: [
-            {
-                label: 'Monthly Earnings',
-                data: barChartData.map((item) => item.value),
-                backgroundColor: 'rgba(79, 209, 197, 0.8)',
-                borderColor: 'rgba(47, 128, 237, 1)',
-                borderWidth: 2,
+    labels: barChartData.map((item) => item.month),
+    datasets: [
+        {
+            label: 'Sales',
+            data: barChartData.map((item) => item.sales),
+            backgroundColor: (context) => {
+                const { ctx, chartArea } = context.chart;
+                if (!chartArea) return null;
+                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                gradient.addColorStop(0, 'rgba(128, 0, 128, 0.7)'); // Dark purple
+                gradient.addColorStop(1, 'rgba(147, 112, 219, 0.7)'); // Light purple
+                return gradient;
             },
-        ],
-    };
+            borderColor: 'rgba(128, 0, 128, 1)',
+            borderWidth: 1,
+            borderRadius: 5,
+            barThickness: 30,
+        },
+        {
+            label: 'Net Profit',
+            data: barChartData.map((item) => item.netProfit),
+            backgroundColor: (context) => {
+                const { ctx, chartArea } = context.chart;
+                if (!chartArea) return null;
+                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                gradient.addColorStop(0, 'rgba(0, 128, 128, 0.7)'); // Dark teal
+                gradient.addColorStop(1, 'rgba(32, 178, 170, 0.7)'); // Light teal
+                return gradient;
+            },
+            borderColor: 'rgba(0, 128, 128, 1)',
+            borderWidth: 1,
+            borderRadius: 5,
+            barThickness: 30,
+        },
+    ],
+};
 
+    
     const barOptions = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'top',
@@ -104,50 +162,85 @@ const DashboardFinance = () => {
                 },
             },
         },
+        scales: {
+            x: {
+                grid: {
+                    display: false, // Hide x-axis grid lines
+                },
+                ticks: {
+                    color: '#4B5563', // Dark gray color for x-axis labels
+                    font: {
+                        size: 12,
+                        family: 'Poppins, sans-serif',
+                    },
+                },
+            },
+            y: {
+                grid: {
+                    color: '#E5E7EB', // Light gray color for y-axis grid lines
+                },
+                ticks: {
+                    color: '#4B5563', // Dark gray color for y-axis labels
+                    font: {
+                        size: 12,
+                        family: 'Poppins, sans-serif',
+                    },
+                },
+            },
+        },
     };
     const performanceData = [
         {
-            title: 'New Leads',
-            value: '1248',
+            title: 'new customers',
+            value: newCustomers.total,
             icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
             color: 'from-blue-500 to-indigo-500'
         },
         {
-            title: 'Booked Revenue',
-            value: '$76,450',
-            icon: <MdMoney className="w-12 h-12 text-green-200" />,
-            color: 'from-green-500 to-teal-500'
-        },
-        {
-            title: 'Deals',
-            value: '325',
+            title: 'customers',
+            value: customers.total ,
             icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
             color: 'from-yellow-500 to-orange-500'
         },
         {
-            title: 'Total Orders',
-            value: '22,487',
+            title: 'orders',
+            value: ordersCard.total ,
+            icon: <MdMoney className="w-12 h-12 text-green-200" />,
+            color: 'from-green-500 to-teal-500'
+        },
+        {
+            title: 'Products',
+            value: product.total,
+            icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
+            color: 'from-purple-500 to-pink-500'
+        }
+        ,{
+            title: 'shipping',
+            value: shipping.value,
+            icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
+            color: 'from-blue-500 to-indigo-500'
+        },
+        {
+            title: 'deleverd orders',
+            value: deliveredOrders.total,
+            icon: <MdMoney className="w-12 h-12 text-green-200" />,
+            color: 'from-green-500 to-teal-500'
+        },
+        {
+            title: 'revenu',
+            value: sales.total,
+            icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
+            color: 'from-yellow-500 to-orange-500'
+        },
+        {
+            title: 'net profit',
+            value : "0000",
+            // value: netProfit.total,
             icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
             color: 'from-purple-500 to-pink-500'
         }
     ];
 
-    const initialOrders = [
-        {
-            id: 101,
-            customer: "Ahmed Mohamed",
-            total: 150.75,
-            status: "Completed",
-            date: "2025-01-15",
-        },
-        {
-            id: 102,
-            customer: "Sara Ali",
-            total: 89.99,
-            status: "Pending",
-            date: "2025-01-20",
-        },
-    ];
     
     const earningSectionRef = useRef(null);
     const barChartRef = useRef(null);
@@ -155,30 +248,87 @@ const DashboardFinance = () => {
     const sectionRef = useRef(null);
 
     const isEarningVisible = useInView(earningSectionRef, { threshold: 0.2 });
-    const isBarChartVisible = useInView(barChartRef, { threshold: 0.2 });
-    const isLowStockVisible = useInView(lowStockRef, { threshold: 0.15 });
+    const isBarChartVisible = useInView(barChartRef, { threshold: 0.28 });
+    const isLowStockVisible = useInView(lowStockRef, { threshold: 0.2 });
     const isVisible = useInView(sectionRef, { threshold: 0.2 });
     
+    const [isCapturing, setIsCapturing] = useState(false);
+    
+    const downloadData = async () => {
+        setIsCapturing(true);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+        const dashboard = document.getElementById("dashboard-content");
+        if (!dashboard) return;
+    
+        try {
+            const canvas = await html2canvas(dashboard, { scale: 2 });
+            const imgData = canvas.toDataURL("image/png");
+    
+            const pdf = new jsPDF("p", "mm", "a4");
+            const imgWidth = 210;
+            const pageHeight = 297; 
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
 
+            pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+              }
+
+            pdf.save("dashboard_report.pdf");
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+        }
+        finally{
+            setIsCapturing(false);
+        }
+    };
+    
+    
     return (
-        <div className="min-h-screen bg-gray-100 p-6 mt-14 md:mt-0">
+        <div id="dashboard-content" className={`min-h-screen bg-gray-100 p-6 mt-14 md:mt-0 ${isCapturing && 'animate-pulse'} `}>
             <div className="container mx-auto space-y-6">
+                {/* Time Interval Selector */}
+                <div className="flex justify-end mb-6">
+                    <div className="bg-white rounded-lg shadow-md p-2 flex space-x-2">
+                        {['day', 'week', 'month', 'year'].map((interval) => (
+                            <button
+                                key={interval}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    timeInterval === interval
+                                        ? 'bg-indigo-500 text-white'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                                onClick={() => setTimeInterval(interval)}
+                            >
+                                {interval.charAt(0).toUpperCase() + interval.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Preformance Section */}
                 <motion.div
                     ref={sectionRef}
                     className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={isVisible ? { opacity: 1, scale: 1 } : {}}
-                    transition={{ duration: 0.8 }}
+                    initial={isCapturing ? false : { opacity: 0, scale: 0.95 }}
+                    animate={ isCapturing ? { opacity: 1, scale: 1} : isVisible ? { opacity: 1, scale: 1 } : {}}
+                    transition={isCapturing ? { duration: 0 } : { duration: 0.8 }}
                 >
                     {performanceData.map((item, index) => (
                         <motion.div
                             key={index}
                             className={`p-6 rounded-xl shadow-lg text-white bg-gradient-to-r ${item.color} flex items-center gap-4`}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={isVisible ? { opacity: 1, y: 0 } : {}}
-                            transition={{ duration: 0.6, delay: index * 0.2 }}
-                        >
+                            initial={isCapturing ? false : { opacity: 0, y: 20 }}
+                            animate={isCapturing ? { opacity: 1, y: 0 } : isVisible ? { opacity: 1, y: 0 } : {}}
+                            transition={isCapturing ? { duration: 0 ,delay: 0} : { duration: 0.6, delay: index * 0.2 }}
+                            >
                             <div className="bg-white bg-opacity-20 p-4 rounded-lg">
                                 {item.icon}
                             </div>
@@ -192,8 +342,8 @@ const DashboardFinance = () => {
                 {/* Recent Orders */}
                 {/* Orders Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
-                    <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
-                    {initialOrders.length > 0 ? (
+                    <h3 className="text-xl font-semibold mb-4">Top 5 Orders</h3>
+                    {TopOrders.length > 0 ? (
                         <div className="overflow-x-auto h-64 overflow-y-auto">
                             <table className="table-auto w-full text-left border-collapse rounded-lg overflow-hidden shadow-lg">
                                 <thead>
@@ -206,7 +356,7 @@ const DashboardFinance = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {initialOrders.map((order, index) => (
+                                    {TopOrders.map((order, index) => (
                                         <tr
                                             key={index}
                                             className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
@@ -214,16 +364,8 @@ const DashboardFinance = () => {
                                             <td className="px-4 py-2">{order.id}</td>
                                             <td className="px-4 py-2">{order.customer}</td>
                                             <td className="px-4 py-2 font-semibold text-green-600">EGP {order.total}</td>
-                                            <td className={`px-4 py-2 font-medium ${
-                                                order.status === 'Completed'
-                                                    ? 'text-green-500'
-                                                    : order.status === 'Pending'
-                                                    ? 'text-yellow-500'
-                                                    : 'text-red-500'
-                                            }`}>
-                                                {order.status}
-                                            </td>
-                                            <td className="px-4 py-2">{new Date(order.date).toLocaleDateString()}</td>
+                                            <td className={`px-4 py-2 font-medium text-indigo-700`}> {order.status} </td>
+                                            <td className="px-4 py-2">{new Date(order.orderTime).toLocaleDateString()}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -239,9 +381,9 @@ const DashboardFinance = () => {
                     <motion.div
                     ref={earningSectionRef}
                     className="bg-white rounded-xl shadow-md p-6 space-y-6"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isEarningVisible ? { opacity: 1, y: 0 } : {} }
-                    transition={{ duration: 0.5 }}
+                    initial={isCapturing ? false :{ opacity: 0, y: 20 }}
+                    animate={isCapturing ? { opacity: 1, y: 0} : isEarningVisible ? { opacity: 1, y: 0 } : {} }
+                    transition={isCapturing ? { duration: 0 } : { duration: 0.5 }}
                     >
                         <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg px-4 py-2 md:p-6 shadow-md">
                             <div className="flex justify-between items-center">
@@ -252,6 +394,7 @@ const DashboardFinance = () => {
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
+                                    onClick={downloadData}
                                     className="bg-white text-indigo-500 px-4 md:px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200"
                                 >
                                     Download
@@ -298,18 +441,17 @@ const DashboardFinance = () => {
 
                 {/* barchart */}
                 <motion.div
-                ref={barChartRef}
-                className="bg-white rounded-xl shadow-md p-6"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={ isBarChartVisible ? { opacity: 1, scale: 1 } : {}}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                    ref={barChartRef}
+                    className="bg-white rounded-xl shadow-md p-6"
+                    initial={isCapturing ? false :{ opacity: 0, scale: 0.9 }}
+                    animate={isCapturing ? {opacity:1 , scale:1} : isBarChartVisible ? { opacity: 1, scale: 1 } : {}}
+                    transition={isCapturing ? {duration:0,delay: 0} : { duration: 0.6, delay: 0.3 }}
                 >
-                        <h3 className="text-xl font-semibold mb-4">Monthly Earnings Overview</h3>
-                        <div className="h-72">
-                            <Bar data={barData} options={barOptions} />
-                        </div>
+                    <h3 className="text-xl font-semibold mb-4">Monthly Earnings Overview</h3>
+                    <div className="h-72">
+                        <Bar data={barData} options={barOptions} />
+                    </div>
                 </motion.div>
-
 
                 {/* Products Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
@@ -323,7 +465,7 @@ const DashboardFinance = () => {
                                     className="w-full h-40 object-cover rounded-lg mb-4"
                                 />
                                 <h4 className="text-lg font-semibold">{product.name}</h4>
-                                <p className="text-sm text-gray-500">Available: {product.available}</p>
+                                <p className="text-sm text-gray-500">revenue: {product.revenue}</p>
                                 <p className="text-lg font-bold text-indigo-600">EGP {product.price}</p>
                             </div>
                         ))}
@@ -334,9 +476,9 @@ const DashboardFinance = () => {
                 <motion.div
                 ref={lowStockRef}
                 className="bg-white rounded-xl shadow-md p-6"
-                initial={{ x: -20, opacity: 0 }}
-                animate={isLowStockVisible ? { x: 0, opacity: 1 } :{}}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                initial={isCapturing ? false :{ x: -50, opacity: 0 }}
+                animate={isCapturing ? { x: 0, opacity: 1 } :isLowStockVisible ? { x: 0, opacity: 1 } :{}}
+                transition={isCapturing ? { duration: 0 , delay: 0} : { duration: 0.5, delay: 0.6 }}
                 >
                     <h3 className="text-xl font-semibold mb-4">Low Stock Products</h3>
                     <ul className="space-y-4">
@@ -344,9 +486,9 @@ const DashboardFinance = () => {
                             <motion.li
                                 key={index}
                                 className="flex justify-between items-center bg-red-100 p-4 rounded-lg"
-                                initial={{ opacity: 0 }}
+                                initial={isCapturing ? false :{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ delay: index * 0.1 }}
+                                transition={isCapturing?{ delay: index * 0 } : { delay: index * 0.1 }}
                             >
                                 <span className="font-medium text-red-600">{item.name}</span>
                                 <span className="text-sm">Available: {item.available}</span>
@@ -357,8 +499,8 @@ const DashboardFinance = () => {
 
                 {/* Orders Section */}
                 <div className="bg-white rounded-xl shadow-md p-6">
-                    <h3 className="text-xl font-semibold mb-4">Orders Overview</h3>
-                    <p className="text-3xl font-bold">Total Revenue: EGP {orders.reduce((acc, item) => acc + item.revenue, 0)}</p>
+                    <h3 className="text-xl font-semibold mb-4">Stores Overview</h3>
+                    <p className="text-3xl font-bold mb-4">Total Revenue: EGP {orders.reduce((acc, item) => acc + item.revenue, 0)}</p>
                         {/* Pie Chart for Orders Overview */}
                         <div className="bg-white rounded-xl shadow-md p-6">
                             <h3 className="text-xl font-semibold mb-4">Orders Overview by Store</h3>
