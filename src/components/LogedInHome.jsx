@@ -20,6 +20,7 @@ import OrderPreview from '@/pages/OrderPreview';
 import ShipmentPreview from '@/pages/ShipmentPreview';
 import InboundOrders from '@/pages/InboundOrders';
 import OutboundOrders from '@/pages/OutboundOrders';
+import ViewInventory from '@/pages/ViewInventory';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -72,6 +73,7 @@ const LogedInHome = () => {
                 <Route path="/permission" element={<Permission/>} />
                 <Route path="/OrderPreview" element={<OrderPreview/>} />
                 <Route path="/Shipment" element={<ShipmentPreview/>} />
+                <Route path="/viewInventory" element={<ViewInventory/>} />
               </Routes>
             </div>
           </div>

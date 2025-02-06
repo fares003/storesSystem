@@ -147,6 +147,21 @@ export default function Sidebar() {
 
             </div>
 
+            <div>
+
+              <p className="text-gray-50 m-3 mt-4 uppercase">
+                inventory 
+              </p>
+              <NavLink
+                to={`/viewInventory`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">View & Create</span>
+              </NavLink>
+
+            </div>
+
           </div>
         </>
       )}
