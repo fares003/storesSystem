@@ -11,10 +11,10 @@ const itemSchema = z.object({
   cost: z.number().min(1, "Cost is required"),
   date: z.string().min(1, "Date is required"),
   supplierid: z.string().min(1, "Supplier ID is required"),
+  inventoryId : z.number().min(1 , "manager is required"), 
   products: z
     .array(
       z.object({
-        sku: z.string().min(1, "SKU is required"),
         amount: z.number().min(1, "Quantity is required"),
         cost: z.number().min(1, "Cost is required"),
         productId: z.number().min(1, "Product ID is required"),
@@ -28,10 +28,12 @@ const AddNewShipment = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [formData, setFormData] = useState({
     cost: null,
-    date: "",
+    date: "", 
+    inventoryId:"",
     supplierid: "",
     products: [{ sku: "", amount: null, cost: null, productId: null }],
   });
+  const [managersData , setManagersData] = useState([]); 
 
   const fetchItems = async () => {
     const target = `${API}item`;
@@ -80,17 +82,44 @@ const AddNewShipment = () => {
       });
     }
   };
+  const fetchManagersData = async()=>{
+    const target = `${API}inventory`;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(target, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      if (response.status === 200) {
+        setManagersData(response.data);
+      } else {
+        console.error("Failed to fetch ManagersData.");
+      }
+    } catch (error) {
+      console.error("Error fetching ManagersData:", error);
+      toast.error("Failed to fetch ManagersData. Please try again later.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  }
   useEffect(() => {
     fetchItems();
     fetchSuppliers();
+    fetchManagersData() ;
   }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(name);
+    
+    console.log(value);
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "cost" ? parseFloat(value) || null : value, // Only parse "cost" as a number
+      [name]: name === "cost" || name === "inventoryId" ? parseInt(value) || null : value, 
     }));
   };
 
@@ -109,7 +138,6 @@ const AddNewShipment = () => {
   const addNewItem = () => {
     const lastItem = formData.products[formData.products.length - 1];
     if (
-      lastItem.sku &&
       lastItem.amount &&
       lastItem.cost &&
       lastItem.productId
@@ -151,7 +179,8 @@ const AddNewShipment = () => {
         setFormData({
           cost: null,
           date: "",
-          supplierid: "", // Reset to an empty string
+          inventoryId:"" , 
+          supplierid: "",
           products: [{ sku: "", amount: null, cost: null, productId: null }],
         });
       } else {
@@ -235,7 +264,7 @@ const AddNewShipment = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="col-span-12 flex flex-col gap-2"
+            className="col-span-6 flex flex-col gap-2"
           >
             <label className="text-white text-lg">Supplier</label>
             <select
@@ -255,22 +284,33 @@ const AddNewShipment = () => {
             </select>
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="col-span-6 flex flex-col gap-2"
+          >
+            <label className="text-white text-lg">inventory</label>
+            <select
+              name="inventoryId"
+              className="p-2 rounded-md bg-transparent border text-white"
+              value={formData.inventoryId}
+              onChange={handleInputChange}
+            >
+              <option className="bg-slate-600" value="" disabled>
+                Select a manager
+              </option>
+              {managersData.map((ele) => (
+                <option className="bg-slate-600" key={ele.id} value={ele.id}>
+                  {ele.manager}
+                </option>
+              ))}
+            </select>
+          </motion.div>
+
+
           {formData.products.map((item, i) => (
             <React.Fragment key={i}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
-                className="col-span-6 flex flex-col gap-2"
-              >
-                <label className="text-white text-lg">SKU</label>
-                <input
-                  name="sku"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.sku}
-                  onChange={(e) => handleItemChange(i, e)}
-                />
-              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -308,7 +348,7 @@ const AddNewShipment = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
-                className="col-span-6 flex flex-col gap-2"
+                className="col-span-12 flex flex-col gap-2"
               >
                 <label className="text-white text-lg">Product ID</label>
                 <select

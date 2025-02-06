@@ -21,6 +21,8 @@ import ShipmentPreview from '@/pages/ShipmentPreview';
 import InboundOrders from '@/pages/InboundOrders';
 import OutboundOrders from '@/pages/OutboundOrders';
 import ViewInventory from '@/pages/ViewInventory';
+import Financial from '@/pages/Financial';
+import Delever from '@/pages/Delever';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -74,6 +76,9 @@ const LogedInHome = () => {
                 <Route path="/OrderPreview" element={<OrderPreview/>} />
                 <Route path="/Shipment" element={<ShipmentPreview/>} />
                 <Route path="/viewInventory" element={<ViewInventory/>} />
+                <Route path="/financial" element={<Financial/>} />
+                <Route path="/DeleverInbound" element={<Delever/>} />
+
               </Routes>
             </div>
           </div>

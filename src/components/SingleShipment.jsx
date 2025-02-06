@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Barcode from "react-barcode";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import Popup from "./Popup";
 import axios from "axios";
 const API = import.meta.env.VITE_API;
 
@@ -11,7 +10,6 @@ const SingleShipment = () => {
   const { shipmentId } = location.state || {};
 
   const [shipmentData, setShipmentData] = useState({});
-  const [popupData, setPopupData] = useState(null);
 
   const fetchStorage = async () => {
     try {
@@ -48,50 +46,6 @@ const SingleShipment = () => {
     }
   };
 
-  const handleSaveChanges = async () => {
-    try {
-      
-      const itemsArray = []
-      for(let i =0 ; i < shipmentData.products.length ; i++){
-        itemsArray.push({
-          id : shipmentData.products[i].productId ,
-          deliveredAmount : popupData.deliveredAmount? popupData.deliveredAmount : 0 ,
-          isComplete : false
-        })
-      }
-      console.log(itemsArray);
-      
-      
-
-      const DataToBeSent = {
-        id: popupData.id,
-        pay : popupData.pay,
-        items: itemsArray,
-      };
-
-      const token = localStorage.getItem("token");
-      const target = API + "InboundOrders/fulfill";
-      
-      console.log(DataToBeSent);
-      const response = await axios.post(target, DataToBeSent, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200) {
-        setShipmentData(DataToBeSent);
-        toast.success("Updated successfully");
-      }
-
-      setPopupData(null);
-    } catch (error) {
-      toast.error("Update Error!");
-      console.error("Error updating order:", error);
-    }
-  };
-  
   useEffect(() => {
     fetchStorage();
   }, []);
@@ -164,9 +118,6 @@ const SingleShipment = () => {
                     Barcode
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
-                    fulfill
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-500 uppercase tracking-wider">
                     barcodes PDF
                   </th>
                 </tr>
@@ -194,13 +145,6 @@ const SingleShipment = () => {
                         />
                       </div>
                     </td>
-                    <td>
-                      <button className="bg-green-500 hover:bg-green-700 px-6 py-2 rounded-md"
-                      onClick={()=>{setPopupData(product)}}
-                      >
-                        fulfill
-                      </button>
-                    </td>
                     {/* PDF */}
                     <td>
                       <button className="bg-orange-500 hover:bg-orange-700 px-6 py-2 rounded-md"
@@ -216,63 +160,6 @@ const SingleShipment = () => {
           </div>
         </div>
       </div>
-      {popupData && (
-      <Popup
-        title="fulfill Order"
-        onClose={() => setPopupData(null)}
-        actions={[
-          {
-            label: "Cancel",
-            onClick: () => setPopupData(null),
-            type: "secondary",
-          },
-          {
-            label: "Save",
-            onClick: handleSaveChanges,
-            type: "primary",
-          },
-        ]}
-      >
-        <div className="flex flex-col gap-4">
-          <div>
-            <label>Pay:</label>
-            <input
-              type="text"
-              value={popupData.pay}
-              onChange={(e) =>
-                setPopupData({
-                  ...popupData,
-                  pay:e.target.value ,
-                })
-              }
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
-          <div>
-            <label>product:</label>
-            <input
-              type="text"
-              value={popupData.productName}
-              onChange={(e) =>
-                e.preventDefault()
-              }
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
-          <div>
-            <label>delivered Amount:</label>
-            <input
-              type="number"
-              value={popupData.deliveredAmount}
-              onChange={(e) =>
-                setPopupData({ ...popupData, deliveredAmount: e.target.value })
-              }
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
-        </div>
-      </Popup>
-    )}
     </div>
   );
 };

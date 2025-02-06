@@ -7,7 +7,9 @@ const OrderDetailes = () => {
   const location = useLocation();
   const { orderId } = location.state || {};
   const [orderData, setOrderData] = useState();
-
+  const [orderHestory, setOrderHestory] = useState([]);
+  console.log(orderHestory);
+  
   const fetchOrder = async () => {
     const target = `${API}orders/${orderId}`;
     try {
@@ -27,9 +29,28 @@ const OrderDetailes = () => {
       console.error("Error fetching order:", error);
     }
   };
+  const fetchHestory = async ()=>{
+    const target = `${API}orders/summary/${orderId}`;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(target, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      if (response.status === 200) {
+        setOrderHestory(response.data);
+      } else {
+        console.error("Failed to fetch order.");
+      }
+    } catch (error) {
+      console.error("Error fetching order:", error);
+    }
+  }
   useEffect(() => {
     fetchOrder();
+    fetchHestory() ; 
   }, []);
 
   if (!orderData) {
@@ -64,6 +85,25 @@ const OrderDetailes = () => {
               <p className="text-sm text-blue-500">Total</p>
               <p className="text-lg font-medium text-blue-800">${orderData.total}</p>
             </div>
+          </div>
+          <div className="bg-blue-50 p-4 mt-4 rounded-lg border border-blue-100">
+            <p className="text-sm text-blue-500">Order Hestory</p>
+            {
+              <ul className="text-lg font-medium text-blue-800 mt-4">
+                {orderHestory.map((element, index) => {
+                  const match = element.event.match(/Order became (\w+) at (.+)/);
+                  const eventType = match ? match[1] : element.event;
+                  const eventDate = match ? match[2] : '';
+
+                  return (
+                    <li key={index}>
+                      Order became <span className="text-orange-500 font-bold">{eventType}</span> at 
+                      <span className="text-blue-700 font-bold"> {eventDate}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            }
           </div>
         </div>
 

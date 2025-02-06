@@ -15,8 +15,9 @@ const AllInventory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedManager, setSelectedManager] = useState("select manger");
   const [filteredInventory , setFilteredInventory] = useState([]) ;
-  const [createInventory,setCreateInventory] = useState("");
-
+  const [Authusers , setAuthusers] = useState([]);
+  const [selectedAuthusers , setSelectedAuthusers] = useState([]);
+  
   useEffect(()=>{
     paginationInventory.forEach((ele)=>{
       ele.manager == selectedManager && setFilteredInventory(ele.items)
@@ -27,6 +28,7 @@ const AllInventory = () => {
 
   useEffect(() => {
       fetchInventory();
+      fetchAuthusers() ; 
   }, []);
 
   const fetchInventory = async () => {
@@ -50,6 +52,25 @@ const AllInventory = () => {
       }
   };
 
+  const fetchAuthusers = async () => {
+    const target = `${API}auth`;
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(target, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (response.status === 200) {
+            setAuthusers(response.data);
+        } else {
+            console.error("Failed to fetch Inventory.");
+        }
+    } catch (error) {
+        console.error("Error fetching Inventory:", error);
+    }
+};
 
   const handleCreateInventory = async () => {
     const target = `${API}Inventory/create`;
@@ -57,7 +78,7 @@ const AllInventory = () => {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         target,
-        { managerId: createInventory },
+        { managerId: selectedAuthusers },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,7 +88,6 @@ const AllInventory = () => {
 
       if (response.status === 200) {
         toast.success('Inventory created successfully!');
-        setCreateInventory(''); // Clear the input field
         fetchInventory(); // Refresh the inventory list
       } else {
         toast.error('Failed to create inventory.');
@@ -109,7 +129,17 @@ const AllInventory = () => {
         </div>
 
         <div className='flex items-center justify-around gap-4 mb-4 mt-4'>
-          <Input type='text' placeholder='enter id' value={createInventory} onChange={(e)=>{setCreateInventory(e.target.value)}}/>
+        <Select
+            className='w-40 text-black'
+            id='selectManager'
+            color='[#000]'
+            value={selectedAuthusers}
+            onChange={(e)=>{setSelectedAuthusers(e.target.value)}}
+          >
+            {
+              Authusers.map((ele , i )=>(<MenuItem  key={i} value={ele.id}>{ele.username}</MenuItem>))
+            }
+          </Select>
           <Button
            variant='contained'
            onClick={handleCreateInventory}
