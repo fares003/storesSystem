@@ -23,6 +23,8 @@ import OutboundOrders from '@/pages/OutboundOrders';
 import ViewInventory from '@/pages/ViewInventory';
 import Financial from '@/pages/Financial';
 import Delever from '@/pages/Delever';
+import GovPrices from '@/pages/GovPrices';
+import ShippingServices from '@/pages/ShippingServices';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -78,6 +80,8 @@ const LogedInHome = () => {
                 <Route path="/viewInventory" element={<ViewInventory/>} />
                 <Route path="/financial" element={<Financial/>} />
                 <Route path="/DeleverInbound" element={<Delever/>} />
+                <Route path="/GovPrices" element={<GovPrices/>} />
+                <Route path="/Shipping" element={<ShippingServices/>} />
 
               </Routes>
             </div>

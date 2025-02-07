@@ -16,6 +16,8 @@ function AllOrders() {
   const [popupData, setPopupData] = useState(null);
   const [completePopupData, setCompletePopupData] = useState(null);
   const [isAdmin , setIsAdmin] = useState(false) ;
+  const [services , setServices] = useState([]) ;
+  const [selectedservices , setSelectedservices] = useState("") ;
 
 
   const Authority = async () => {
@@ -37,7 +39,17 @@ function AllOrders() {
       console.log(error);
     }
   }
+  const fetchServices = async () => {
+    try {
+      const target = API + "shipping/services";
+      const resp = await fetch(target);
+      const data = await resp.json();
+      setServices(data);
 
+    } catch (error) {
+      console.error("Error shipping/services orders:", error);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -65,6 +77,7 @@ function AllOrders() {
       await fetchOrders();
       await fetchStatusOptions();
       await Authority() ;
+      await fetchServices()
   }
 
   useEffect(()=>{
@@ -122,11 +135,11 @@ function AllOrders() {
   const deliverOrder = async (orderId) => {
     try {
       const token = localStorage.getItem("token");
-      const target = `${API}orders/deliver`;
+      const target = `${API}shipping/deliver`;
 
       const data = {
         orderId: orderId,
-        serviceId: 0
+        service: selectedservices
       };
 
       const response = await axios.post(target, data, {
@@ -150,6 +163,11 @@ function AllOrders() {
     }
   };
 
+  const handleDelever = async (id) =>{
+    await deliverOrder(id);
+    // navigate("/Shipping", { state: { orderId: id} })
+
+  }
   const handleSaveChanges = async () => {
     try {
       const updatedOrders = orders.map((order) =>
@@ -260,7 +278,7 @@ const handleSaveCode = async () => {
         <h2 className="textGradient text-4xl font-bold text-white">
           Orders List
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 s gap-6 w-full">
             {currentOrders.map((item, i) => { 
                 
                 return(
@@ -315,12 +333,35 @@ const handleSaveCode = async () => {
                       </button>
                       )}
                       {item.status === "Ready for Shipping" && (
-                        <button
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => deliverOrder(item.id)}
+                        <div
+                        className="col-span-6 flex flex-row items-center gap-2"
+                      >
+                        {/* Select dropdown */}
+                        <select
+                          name="inventoryId"
+                          className="p-2 rounded-md bg-transparent border text-white"
+                          value={selectedservices}
+                          onChange={(e) => setSelectedservices(e.target.value)}
                         >
-                          Deliver
+                          <option className="bg-slate-600" value="" disabled>
+                            Select a method 
+                          </option>
+                          {services.map((ele , i) => (
+                            <option className="bg-slate-600" key={i} value={ele}>
+                              {ele}
+                            </option>
+                          ))}
+                        </select>
+                      
+                        {/* Button */}
+                        <button
+                          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition"
+                          onClick={() => {handleDelever(item.id)}}
+                          disabled={!selectedservices}
+                        >
+                          Delever
                         </button>
+                      </div>                      
                       )}
 
                       {/* {item.status === "In preparation" && (

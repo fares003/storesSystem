@@ -113,11 +113,11 @@ const OrderDetailes = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
               <p className="text-sm text-indigo-500">Customer Name</p>
-              <p className="text-lg font-medium text-indigo-800">{orderData.customer.username}</p>
+              <p className="text-lg font-medium text-indigo-800">{orderData.customer.name|| "N/A"}</p>
             </div>
             <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
               <p className="text-sm text-indigo-500">Email</p>
-              <p className="text-lg font-medium text-indigo-800">{orderData.customer.email}</p>
+              <p className="text-lg font-medium text-indigo-800">{orderData.customer.email|| "N/A"}</p>
             </div>
             <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
               <p className="text-sm text-indigo-500">Phone Number</p>

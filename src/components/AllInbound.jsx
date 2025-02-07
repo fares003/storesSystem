@@ -78,6 +78,10 @@ const AllInbound = () => {
                   <span className="font-semibold text-gray-400">Storage ID:</span> {item.id}
                 </div>
                 <div>
+                  <span className="font-semibold text-gray-400">inventory ID:</span> {item.inventoryId}
+                </div>
+                
+                <div>
                   <span className="font-semibold text-gray-400">Date:</span> {item.date}
                 </div>
                 <div>

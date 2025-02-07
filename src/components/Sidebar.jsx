@@ -187,6 +187,27 @@ export default function Sidebar() {
 
             </div>
 
+            <div>
+
+              <p className="text-gray-50 m-3 mt-4 uppercase">
+                Shipping 
+              </p>
+              <NavLink
+                to={`/GovPrices`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">shipping prices</span>
+              </NavLink>
+              
+              <NavLink
+                to={`/Shipping`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">shipping</span>
+              </NavLink>
+            </div>
           </div>
         </>
       )}
