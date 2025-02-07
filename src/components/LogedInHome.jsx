@@ -25,6 +25,7 @@ import Financial from '@/pages/Financial';
 import Delever from '@/pages/Delever';
 import GovPrices from '@/pages/GovPrices';
 import ShippingServices from '@/pages/ShippingServices';
+import Myshipments from '@/pages/Myshipments';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -82,6 +83,7 @@ const LogedInHome = () => {
                 <Route path="/DeleverInbound" element={<Delever/>} />
                 <Route path="/GovPrices" element={<GovPrices/>} />
                 <Route path="/Shipping" element={<ShippingServices/>} />
+                <Route path="/Myshipments" element={<Myshipments/>} />
 
               </Routes>
             </div>

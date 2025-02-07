@@ -207,6 +207,14 @@ export default function Sidebar() {
               >
                 <span className="capitalize">shipping</span>
               </NavLink>
+              
+              <NavLink
+                to={`/Myshipments`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">Myshipments</span>
+              </NavLink>
             </div>
           </div>
         </>
