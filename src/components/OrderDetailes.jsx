@@ -59,7 +59,7 @@ const OrderDetailes = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+      <div className="max-w-8xl mx-auto bg-white rounded-lg shadow-lg p-6">
         {/* Header */}
         <h1 className="text-3xl font-bold text-indigo-500 mb-6">Order Details</h1>
 

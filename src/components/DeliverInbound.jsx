@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const API = import.meta.env.VITE_API;
 
-const DeleverInbound = () => {
+const DeliverInbound = () => {
   const [barcode, setBarcode] = useState('');
   const [productData, setProductData] = useState(null);
   const [error, setError] = useState('');
@@ -175,4 +175,4 @@ const DeleverInbound = () => {
   );
 };
 
-export default DeleverInbound;
+export default DeliverInbound;

@@ -1,9 +1,9 @@
 import React from "react";
 
-const Popup = ({ title, children, onClose, actions }) => {
+const Popup = ({ title, children, onClose, actions , width="" }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg shadow-lg w-[95%] md:w-[60%] p-6">
+      <div className={`bg-white rounded-lg shadow-lg ${width ? width : "w-[95%] md:w-[60%]"} p-6`}>
         <div className="flex justify-between items-center border-b pb-3">
           <h2 className="text-xl font-semibold">{title}</h2>
           <button

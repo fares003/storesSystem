@@ -1,76 +1,63 @@
-import React from 'react'
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Center from "@/components/Center";
 import axios from "axios";
-import { motion } from "framer-motion";
-import Select from '@mui/material/Select';
-import { Button, Input, MenuItem } from '@mui/material';
+import { Select, Button, MenuItem, InputLabel, FormControl } from '@mui/material';
 const API = import.meta.env.VITE_API;
 
 const AllInventory = () => {
-
-  const [Inventory, setInventory] = useState([]);
-  const [paginationInventory, setPaginationInventory] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedManager, setSelectedManager] = useState("select manger");
-  const [filteredInventory , setFilteredInventory] = useState([]) ;
-  const [Authusers , setAuthusers] = useState([]);
-  const [selectedAuthusers , setSelectedAuthusers] = useState([]);
-  
-  useEffect(()=>{
-    paginationInventory.forEach((ele)=>{
-      ele.manager == selectedManager && setFilteredInventory(ele.items)
-    })
-  },[selectedManager])
-  
-  const InventoryPerPage = 20;
+  const [selectedManager, setSelectedManager] = useState("");
+  const [Authusers, setAuthusers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [sourceInventory, setSourceInventory] = useState("");
+  const [targetInventory, setTargetInventory] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState("");
+  const [quantity, setQuantity] = useState("");
 
   useEffect(() => {
-      fetchInventory();
-      fetchAuthusers() ; 
+    fetchAuthusers();
+    fetchProducts();
   }, []);
-
-  const fetchInventory = async () => {
-      const target = `${API}Inventory`;
-      try {
-          const token = localStorage.getItem("token");
-          const response = await axios.get(target, {
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              },
-          });
-
-          if (response.status === 200) {
-              setInventory(response.data);
-              paginate(1, response.data);
-          } else {
-              console.error("Failed to fetch Inventory.");
-          }
-      } catch (error) {
-          console.error("Error fetching Inventory:", error);
-      }
-  };
 
   const fetchAuthusers = async () => {
     const target = `${API}auth`;
     try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(target, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+      const token = localStorage.getItem("token");
+      const response = await axios.get(target, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (response.status === 200) {
-            setAuthusers(response.data);
-        } else {
-            console.error("Failed to fetch Inventory.");
-        }
+      if (response.status === 200) {
+        setAuthusers(response.data);
+      } else {
+        console.error("Failed to fetch users.");
+      }
     } catch (error) {
-        console.error("Error fetching Inventory:", error);
+      console.error("Error fetching users:", error);
     }
-};
+  };
+
+  const fetchProducts = async () => {
+    const target = `${API}Item`;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(target, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setProducts(response.data);
+      } else {
+        console.error("Failed to fetch products.");
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
   const handleCreateInventory = async () => {
     const target = `${API}Inventory/create`;
@@ -78,7 +65,7 @@ const AllInventory = () => {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         target,
-        { managerId: selectedAuthusers },
+        { managerId: selectedManager },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -88,7 +75,7 @@ const AllInventory = () => {
 
       if (response.status === 200) {
         toast.success('Inventory created successfully!');
-        fetchInventory(); // Refresh the inventory list
+        fetchAuthusers(); // Refresh the users list
       } else {
         toast.error('Failed to create inventory.');
       }
@@ -97,130 +84,149 @@ const AllInventory = () => {
       toast.error('Error creating inventory. Please try again.');
     }
   };
-  const paginate = (pageNumber, data = Inventory) => {
-      const startIndex = (pageNumber - 1) * InventoryPerPage;
-      const endIndex = startIndex + InventoryPerPage;
-      const tempInventory = data.slice(startIndex, endIndex);
-      setPaginationInventory(tempInventory);
-      setCurrentPage(pageNumber);
-  };
 
-  const totalPages = Math.ceil(Inventory.length / InventoryPerPage);
+  const handleTransferInventory = async () => {
+    const target = `${API}Inventory/transfer`;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        target,
+        {
+          sourceId: sourceInventory,
+          productId: selectedProduct,
+          targetId: targetInventory,
+          quantity: quantity,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success('Inventory transferred successfully!');
+        // Reset form fields
+        setSourceInventory("");
+        setTargetInventory("");
+        setSelectedProduct("");
+        setQuantity("");
+      } else {
+        toast.error('Failed to transfer inventory.');
+      }
+    } catch (error) {
+      console.error('Error transferring inventory:', error);
+      toast.error('Error transferring inventory. Please try again.');
+    }
+  };
 
   return (
     <Center className={"px-5 bg-gray-200"}>
       <h2 className="textGradient text-4xl font-bold text-gray-900 mb-4">
-          Inventory
+        Inventory Management
       </h2>
-      <div className='w-full mb-4 flex flex-col md:flex-row gap-8  items-center justify-around text-gray-800 font-semibold'>
-        <div>
-        <label htmlFor="selectManager">select inventory manger : </label>
-          <Select
-            className='w-40 text-black'
-            id='selectManager'
-            color='[#000]'
-            value={selectedManager}
-            onChange={(e)=>{setSelectedManager(e.target.value)}}
-          >
-            {
-              paginationInventory.map((ele , i )=>(<MenuItem  key={i} value={ele.manager}>{ele.manager}</MenuItem>))
-            }
-          </Select>
-        </div>
 
-        <div className='flex items-center justify-around gap-4 mb-4 mt-4'>
-        <Select
-            className='w-40 text-black'
-            id='selectManager'
-            color='[#000]'
-            value={selectedAuthusers}
-            onChange={(e)=>{setSelectedAuthusers(e.target.value)}}
-          >
-            {
-              Authusers.map((ele , i )=>(<MenuItem  key={i} value={ele.id}>{ele.username}</MenuItem>))
-            }
-          </Select>
+      {/* Create Inventory Section */}
+      <div className="w-full mb-8 p-6 bg-white rounded-lg shadow-md">
+        <h3 className="text-2xl font-semibold mb-4">Create Inventory</h3>
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <FormControl fullWidth>
+            <InputLabel id="select-manager-label">Select Manager</InputLabel>
+            <Select
+              labelId="select-manager-label"
+              value={selectedManager}
+              onChange={(e) => setSelectedManager(e.target.value)}
+              label="Select Manager"
+            >
+              {Authusers.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Button
-           variant='contained'
-           onClick={handleCreateInventory}
+            variant="contained"
+            color="primary"
+            onClick={handleCreateInventory}
+            className="w-full md:w-auto"
           >
-            Create inventory
+            Create Inventory
           </Button>
         </div>
       </div>
-      <div className="w-full overflow-x-auto text-white text-lg shadow-md rounded-lg bg-gray-900">
-          <table className="min-w-full table-auto text-sm text-left">
-              <thead className="bg-gray-800 text-gray-200">
-                  <tr>
-                      <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">product Id</th>
-                      <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">Name</th>
-                      <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">minimum</th>
-                      <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">Available</th>
-                      <th className="px-6 py-3 border-b border-gray-700 font-bold text-center">Reserved</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  {filteredInventory.map((item, i) => (
-                      <motion.tr
-                          key={item.id}
-                          initial={{ opacity: 0, y: 50 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: i * 0.05 }}
-                          className={`text-center ${
-                              i % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
-                          } hover:bg-gray-600 transition-colors duration-200`}
-                      >
-                          <td className="px-6 py-3 border-b border-gray-700">{item.productId}</td>
-                          <td className="px-6 py-3 border-b border-gray-700">{item.product}</td>
-                          <td className="px-6 py-3 border-b border-gray-700">EGP {item.minimum}</td>
-                          <td className="px-6 py-3 border-b border-gray-700">{item.available}</td>
-                          <td className="px-6 py-3 border-b border-gray-700">{item.reserved}</td>
-                          
-                      </motion.tr>
-                  ))}
-              </tbody>
-          </table>
-      </div>
-      {/* Pagination Controls */}
-      <div className="flex justify-center items-center mt-4 space-x-2">
-          <button
-              className={`px-4 py-2 rounded-md font-semibold shadow-md ${
-                  currentPage === 1
-                      ? "bg-gray-600 cursor-not-allowed"
-                      : "bg-gray-800 hover:bg-gray-700"
-              } text-white`}
-              disabled={currentPage === 1}
-              onClick={() => paginate(currentPage - 1)}
-          >
-              Previous
-          </button>
-          {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                  key={index + 1}
-                  className={`px-4 py-2 rounded-md font-semibold shadow-md ${
-                      currentPage === index + 1
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-800 hover:bg-gray-700 text-white"
-                  }`}
-                  onClick={() => paginate(index + 1)}
-              >
-                  {index + 1}
-              </button>
-          ))}
-          <button
-              className={`px-4 py-2 rounded-md font-semibold shadow-md ${
-                  currentPage === totalPages
-                      ? "bg-gray-600 cursor-not-allowed"
-                      : "bg-gray-800 hover:bg-gray-700"
-              } text-white`}
-              disabled={currentPage === totalPages}
-              onClick={() => paginate(currentPage + 1)}
-          >
-              Next
-          </button>
+
+      {/* Transfer Inventory Section */}
+      <div className="w-full p-6 bg-white rounded-lg shadow-md">
+        <h3 className="text-2xl font-semibold mb-4">Transfer Inventory</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormControl fullWidth>
+            <InputLabel id="source-inventory-label">Source Inventory</InputLabel>
+            <Select
+              labelId="source-inventory-label"
+              value={sourceInventory}
+              onChange={(e) => setSourceInventory(e.target.value)}
+              label="Source Inventory"
+            >
+              {Authusers.map((user) => (
+                <MenuItem  key={user.id} value={user.id}>
+                  {user.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel id="target-inventory-label">Target Inventory</InputLabel>
+            <Select
+              labelId="target-inventory-label"
+              value={targetInventory}
+              onChange={(e) => setTargetInventory(e.target.value)}
+              label="Target Inventory"
+            >
+              {Authusers.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel id="product-label">Product</InputLabel>
+            <Select
+              labelId="product-label"
+              value={selectedProduct}
+              onChange={(e) => setSelectedProduct(e.target.value)}
+              label="Product"
+            >
+              {products.map((product) => (
+                <MenuItem key={product.id} value={product.id}>
+                  {product.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel id="quantity-label">Quantity</InputLabel>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              className="w-full p-2 border rounded"
+              placeholder="Quantity"
+            />
+          </FormControl>
+        </div>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleTransferInventory}
+          className="mt-8 w-full"
+        >
+          Transfer Inventory
+        </Button>
       </div>
     </Center>
-  )
-}
+  );
+};
 
-export default AllInventory
+export default AllInventory;

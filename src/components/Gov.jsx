@@ -95,7 +95,7 @@ const Gov = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-8xl">
         <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">Governorate Shipping Data</h1>
 
         {error && (

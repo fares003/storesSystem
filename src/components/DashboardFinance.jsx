@@ -8,6 +8,8 @@ import { FaUserFriends } from 'react-icons/fa';
 import useInView from "@/Hooks/useInView"; 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import Popup from './Popup';
+import { Select } from '@mui/material';
 
 const API = import.meta.env.VITE_API;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -17,6 +19,10 @@ const DashboardFinance = () => {
     const [earningData, setEarningData] = useState([]);
     const [total, setTotal] = useState(0);
     const [TopOrders , setTopOrders] = useState([]);
+    const [preformancePopup , setPreformancePopup ] = useState(false);
+    const [preformancePopupData , setPreformancePopupData ] = useState([]);
+    
+    const [EarningGroupBy , setEarningGroupBy ] = useState("year");
 
     const [barChartData, setBarChartData] = useState([
         { month: 'Jan', sales: 15000, netProfit: 5000 },
@@ -41,6 +47,11 @@ const DashboardFinance = () => {
     const [shipping, setShipping] = useState({});    
     const [deliveredOrders, setDeliveredOrders] = useState({});
     const [netProfit, setNetProfit] = useState({});
+    const [newOrders, setnewOrders] = useState({});
+    const [deliverdOrders, setDeliverdOrders] = useState({});
+    const [recentCustomers, setrecentCustomers] = useState({});
+    const [allNewCustomers, setallNewCustomers] = useState({});
+    const [productSales, setProductSales] = useState({});
 
 
 
@@ -59,7 +70,7 @@ const DashboardFinance = () => {
     };
 
     useEffect(() => {
-        fetchData('Data/finances', setEarningData);
+        fetchData(`Data/finances?groupBy=${EarningGroupBy}`, setEarningData);
         fetchData('Data/products', setProducts);
         fetchData('Data/low-stock', setLowStock);
         fetchData('Data/orders', setOrders);
@@ -74,8 +85,15 @@ const DashboardFinance = () => {
         fetchData(`reports/delivered-orders?groupBy=${timeInterval}`, setDeliveredOrders);
         
         // fetchData(`reports/net-profit?groupBy=${timeInterval}`, setNetProfit);
+
         
-    }, [timeInterval]);
+        fetchData(`reports/new-orders?groupBy=${timeInterval}`, setnewOrders);
+        fetchData(`reports/recent-customers?groupBy=${timeInterval}`, setrecentCustomers);
+        fetchData(`reports/all-new-customers?groupBy=${timeInterval}`, setallNewCustomers);
+        fetchData(`reports/all-delivered-orders?groupBy=${timeInterval}`, setDeliverdOrders);
+        fetchData(`reports/product-sales?groupBy=${timeInterval}`, setProductSales);
+        
+    }, [timeInterval , EarningGroupBy]);
 
     useEffect(() => {
         const tempTotal = earningData.reduce((acc, item) => acc + item.value, 0);
@@ -191,56 +209,66 @@ const DashboardFinance = () => {
     };
     const performanceData = [
         {
-            title: 'new customers',
-            value: newCustomers.total,
+            title: 'New Customers',
+            value: newCustomers,
             icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
-            color: 'from-blue-500 to-indigo-500'
+            color: 'from-blue-500 to-indigo-500' , 
+            popupValues :allNewCustomers ,
+            tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
         },
         {
-            title: 'customers',
-            value: customers.total ,
+            title: 'Customers',
+            value: customers,
             icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
-            color: 'from-yellow-500 to-orange-500'
+            color: 'from-yellow-500 to-orange-500' ,
+            popupValues : recentCustomers,
+            tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
         },
         {
-            title: 'orders',
-            value: ordersCard.total ,
+            title: 'Orders',
+            value: ordersCard,
             icon: <MdMoney className="w-12 h-12 text-green-200" />,
-            color: 'from-green-500 to-teal-500'
+            color: 'from-green-500 to-teal-500',
+            popupValues : newOrders , 
+            tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
         },
         {
             title: 'Products',
-            value: product.total,
+            value: product,
             icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
-            color: 'from-purple-500 to-pink-500'
-        }
-        ,{
-            title: 'shipping',
-            value: shipping.value,
+            color: 'from-purple-500 to-pink-500',
+            popupValues : productSales.items ,
+            tableHeader : ["SKU" , "product" , "sold"] ,
+        },
+        {
+            title: 'In Shipping',
+            value: shipping,
             icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
             color: 'from-blue-500 to-indigo-500'
         },
         {
-            title: 'deleverd orders',
-            value: deliveredOrders.total,
+            title: 'Delivered Orders',
+            value: deliveredOrders,
             icon: <MdMoney className="w-12 h-12 text-green-200" />,
-            color: 'from-green-500 to-teal-500'
+            color: 'from-green-500 to-teal-500',
+            popupValues : deliverdOrders , 
+            tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
         },
         {
-            title: 'revenu',
-            value: sales.total,
+            title: 'Revenue',
+            value: sales,
             icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
             color: 'from-yellow-500 to-orange-500'
         },
         {
-            title: 'net profit',
-            value : "0000",
-            // value: netProfit.total,
+            title: 'Net Profit',
+            value: "0000",
+            // value: netProfit,
             icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
             color: 'from-purple-500 to-pink-500'
         }
     ];
-
+    
     
     const earningSectionRef = useRef(null);
     const barChartRef = useRef(null);
@@ -323,6 +351,10 @@ const DashboardFinance = () => {
                 >
                     {performanceData.map((item, index) => (
                         <motion.div
+                            onClick={()=>{
+                                setPreformancePopup(true)
+                                setPreformancePopupData(index)
+                            }}
                             key={index}
                             className={`p-6 rounded-xl shadow-lg text-white bg-gradient-to-r ${item.color} flex items-center gap-4`}
                             initial={isCapturing ? false : { opacity: 0, y: 20 }}
@@ -334,7 +366,7 @@ const DashboardFinance = () => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-lg font-semibold">{item.title}</span>
-                                <span className="text-2xl font-bold">{item.value}</span>
+                                <span className="text-2xl font-bold">{item.value.total}</span>
                             </div>
                         </motion.div>
                     ))}
@@ -391,14 +423,27 @@ const DashboardFinance = () => {
                                     <h2 className="text-xl md:text-2xl font-bold">Earnings</h2>
                                     <p className="text-2xl md:text-4xl font-extrabold mt-2">{total}EGP </p>
                                 </div>
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={downloadData}
-                                    className="bg-white text-indigo-500 px-4 md:px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200"
-                                >
-                                    Download
-                                </motion.button>
+                                <div className='flex items-center gap-4'>
+                                    <select
+                                        className="p-2 rounded-md bg-transparent border text-white"
+                                        value={EarningGroupBy}
+                                        onChange={(e)=>{setEarningGroupBy(e.target.value)}}
+                                    >
+                                    {['day', 'week', 'month', 'year'].map((ele) => (
+                                        <option className="bg-black" key={ele} value={ele}>
+                                            {ele}
+                                        </option>
+                                    ))}
+                                    </select>
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={downloadData}
+                                        className="bg-white text-indigo-500 px-4 md:px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-200"
+                                    >
+                                        Download
+                                    </motion.button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -510,6 +555,125 @@ const DashboardFinance = () => {
                         </div>
                 </div>
             </div>
+            {
+                preformancePopup && (
+                    <Popup
+                    width='w-[80vw]'
+                        title={""}
+                        onClose={()=>{setPreformancePopup(false)}}
+                    >
+                        {
+                            preformancePopupData < 2 && (
+                                <div className='max-h-[80vh] overflow-y-auto'>
+                                    {
+                                        <table className="min-w-full table-auto text-sm text-left overflow-y-auto border border-gray-700">
+                                        <thead className="bg-gray-800 text-gray-200">
+                                            <tr>
+                                                {performanceData[preformancePopupData].tableHeader.map((ele, i) => (
+                                                    <th key={i} className="px-6 py-3 border-b border-gray-700 font-bold text-center uppercase tracking-wide">
+                                                        {ele}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {performanceData[preformancePopupData].popupValues.map((ele, i) => (
+                                                <tr key={i} className="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-all">
+                                                    {performanceData[preformancePopupData].tableHeader.map((header, index) => (
+                                                        <td key={index} className="px-6 py-3 text-center text-gray-300">
+                                                            {ele[header]}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    
+                                    }
+                                </div>
+                            ) 
+                        }
+                        {
+                            (preformancePopupData == 2 || preformancePopupData == 5 )&& (
+                                
+                                <div className="p-4 bg-gray-900 text-gray-200 rounded-lg shadow-lg">
+                                <h2 className="text-lg font-bold mb-4">Orders</h2>
+                                
+                                {/* Orders Table */}
+                                <table className="min-w-full table-auto text-sm text-left border border-gray-700 overflow-y-auto">
+                                    <thead className="bg-gray-800 text-gray-200">
+                                        <tr>
+                                            {
+                                                console.log(performanceData[preformancePopupData].tableHeader)
+                                            }
+                                            {performanceData[preformancePopupData].tableHeader.map((header, i) => (
+                                                <th key={i} className="px-6 py-3 border-b border-gray-700 font-bold text-center uppercase">
+                                                    {header}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                                console.log(performanceData[preformancePopupData].popupValues)
+                                        }
+                                        {performanceData[preformancePopupData].popupValues.map((order, i) => (
+                                            <tr key={i} className="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-all">
+                                                <td className="px-6 py-3 text-center">{order.customer.name || "N/A"}</td>
+                                                <td className="px-6 py-3 text-center">{order.customer.email || "N/A"}</td>
+                                                <td className="px-6 py-3 text-center">{order.customer.phoneNumber || "N/A"}</td>
+                                                <td className="px-6 py-3 text-center">{order.status || "N/A"}</td>
+                                                <td className="px-6 py-3 text-center">{order.total || "N/A"}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                
+                            </div>
+
+                            )
+                        }
+                        {
+                             preformancePopupData == 3 && (
+                                <div className="p-4 bg-gray-900 text-gray-200 rounded-lg shadow-lg">
+                                <h2 className="text-lg font-bold mb-4">Products</h2>
+                                
+                                {/* Orders Table */}
+                                <table className="min-w-full table-auto text-sm text-left border border-gray-700 overflow-y-auto">
+                                    <thead className="bg-gray-800 text-gray-200">
+                                        <tr>
+                                            {
+                                                console.log(performanceData[preformancePopupData].tableHeader)
+                                            }
+                                            {performanceData[preformancePopupData].tableHeader.map((header, i) => (
+                                                <th key={i} className="px-6 py-3 border-b border-gray-700 font-bold text-center uppercase">
+                                                    {header}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                                console.log(performanceData[preformancePopupData].popupValues)
+                                        }
+                                        {performanceData[preformancePopupData].popupValues.map((p, i) => (
+                                            <tr key={i} className="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-all">
+                                                <td className="px-6 py-3 text-center">{p.sku || "N/A"}</td>
+                                                <td className="px-6 py-3 text-center">{p.product || "N/A"}</td>
+                                                <td className="px-6 py-3 text-center">{p.sold || "N/A"}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                
+                            </div>
+                             )
+                        }
+                    </Popup>
+                )
+            }
         </div>
     );
 };

@@ -77,7 +77,7 @@ const Shipping = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-8xl">
         <h1 className="text-2xl font-bold text-purple-800 mb-6 text-center">Local Orders</h1>
 
         {error && (

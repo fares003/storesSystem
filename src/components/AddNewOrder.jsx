@@ -60,6 +60,18 @@ const AddNewOrder = () => {
       }));
     }
   };
+  const removeItem = (i)=>{
+    if(formData.items.length > 1){
+      const FilteredItems = [] ;
+      formData.items.forEach((element , index) =>{
+        index != i && FilteredItems.push(element)
+      })
+      setFormData((prev)=>({
+        ...prev , 
+        items :  FilteredItems 
+      }))
+    }
+  }
 
   const addOrder = async (e) => {
     e.preventDefault();
@@ -133,7 +145,7 @@ const AddNewOrder = () => {
     </motion.h2>
     <motion.form
       onSubmit={addOrder}
-      className="grid grid-cols-12 w-[90%] md:w-[50%] gap-y-8 gap-x-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6 max-h-[50vh] overflow-y-auto"
+      className="grid grid-cols-12 w-[90%] md:w-[50%] gap-y-8 gap-x-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6 max-h-[80vh] overflow-y-auto"
       initial={{ scale: 0.9 }}
       animate={{ scale: 1 }}
       transition={{ duration: 0.5 }}
@@ -154,7 +166,7 @@ const AddNewOrder = () => {
       {formData.items.map((item, i) => (
         <React.Fragment key={i}>
           <motion.div
-            className={`col-span-5 flex flex-col gap-2 ${formData.items.length - 1 > i ? "col-span-6" : ""}`}
+            className={`col-span-5 flex flex-col gap-2 `}
             whileHover={{ scale: 1.05 }}
           >
             <label className="text-white text-lg">SKU</label>
@@ -167,7 +179,7 @@ const AddNewOrder = () => {
           </motion.div>
 
           <motion.div
-            className={`col-span-5 flex flex-col gap-2 ${formData.items.length - 1 > i ? "col-span-6" : ""}`}
+            className={`col-span-5 flex flex-col gap-2 `}
             whileHover={{ scale: 1.05 }}
           >
             <label className="text-white text-lg">Quantity</label>
@@ -181,17 +193,26 @@ const AddNewOrder = () => {
           </motion.div>
 
           <motion.div
-            className={`col-span-2 flex flex-col gap-2 justify-center ${formData.items.length - 1 > i ? "hidden" : ""}`}
-            whileHover={{ scale: 1.1 }}
+            className={`col-span-2 flex flex-col gap-2 justify-center `}
+            whileHover={{ scale: 1.05 }}
           >
-            <span className="text-white text-lg">Add</span>
-            <button
-              type="button"
-              className="bg-green-600 py-1 rounded-md text-white text-2xl font-bold"
-              onClick={addNewItem}
-            >
-              +
-            </button>
+            <span className="text-white text-lg">actions</span>
+            <div className='flex items-center gap-1 md:gap-4'>
+              <button
+                type="button"
+                className="w-full bg-green-600 py-1 rounded-md text-white text-2xl font-bold"
+                onClick={addNewItem}
+              >
+                +
+              </button>
+              <button
+                type="button"
+                className="w-full bg-red-600 py-1 rounded-md text-white text-2xl font-bold"
+                onClick={()=>{removeItem(i)}}
+              >
+                -
+              </button>
+            </div>
           </motion.div>
         </React.Fragment>
       ))}

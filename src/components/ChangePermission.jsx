@@ -74,9 +74,9 @@ const ChangePermission = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-500 min-h-screen p-4 md:p-8">
+    <div className="bg-gradient-to-r  from-blue-400 to-purple-400 min-h-screen p-4 md:p-8">
       <motion.div
-        className="container mx-auto max-w-4xl bg-white p-8 rounded-xl shadow-2xl"
+        className="container mx-auto max-w-8xl bg-white p-8 rounded-xl shadow-2xl"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}

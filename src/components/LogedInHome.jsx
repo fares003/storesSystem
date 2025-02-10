@@ -22,7 +22,7 @@ import InboundOrders from '@/pages/InboundOrders';
 import OutboundOrders from '@/pages/OutboundOrders';
 import ViewInventory from '@/pages/ViewInventory';
 import Financial from '@/pages/Financial';
-import Delever from '@/pages/Delever';
+import Deliver from '@/pages/Deliver';
 import GovPrices from '@/pages/GovPrices';
 import ShippingServices from '@/pages/ShippingServices';
 import Myshipments from '@/pages/Myshipments';
@@ -80,7 +80,7 @@ const LogedInHome = () => {
                 <Route path="/Shipment" element={<ShipmentPreview/>} />
                 <Route path="/viewInventory" element={<ViewInventory/>} />
                 <Route path="/financial" element={<Financial/>} />
-                <Route path="/DeleverInbound" element={<Delever/>} />
+                <Route path="/deliverInbound" element={<Deliver/>} />
                 <Route path="/GovPrices" element={<GovPrices/>} />
                 <Route path="/Shipping" element={<ShippingServices/>} />
                 <Route path="/Myshipments" element={<Myshipments/>} />

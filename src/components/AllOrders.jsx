@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import useInView from "@/Hooks/useInView";
 import { useLogin } from "@/contexts/LoginContext";
+import Loader from "./Loader";
 
 function AllOrders() {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ function AllOrders() {
   const [orders, setOrders] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
   const [popupData, setPopupData] = useState(null);
+  console.log(popupData);
+  
   const [completePopupData, setCompletePopupData] = useState(null);
   const [isAdmin , setIsAdmin] = useState(false) ;
   const [services , setServices] = useState([]) ;
@@ -163,7 +166,7 @@ function AllOrders() {
     }
   };
 
-  const handleDelever = async (id) =>{
+  const handledeliver = async (id) =>{
     await deliverOrder(id);
     // navigate("/Shipping", { state: { orderId: id} })
 
@@ -175,10 +178,13 @@ function AllOrders() {
       );
       const DataToBeSent = {
         id: popupData.id,
-        // nead omar send me admin id 
-        adminId: 0,
-        statusId: popupData.status,
+        adminId: null ,
+        statusId: null,
         total: popupData.total,
+        customer: popupData.customer.name,
+        address: popupData.address,
+        phone: popupData.phone,
+        email: popupData.email
       };
 
       const token = localStorage.getItem("token");
@@ -272,252 +278,311 @@ const handleSaveCode = async () => {
     
   return (
 <Center className="mt-4">
-  <div className="flex flex-col items-center gap-6 w-full md:w-[90%] lg:w-[96%] px-2 overflow-y-auto scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300">
-    <h2 className="textGradient text-4xl font-bold text-white">Orders List</h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-      {currentOrders.map((item, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: i * 0.2 }}
-          className="bg-gray-800 text-white rounded-lg shadow-lg p-6 flex flex-col gap-4"
-        >
-          <div className="flex flex-col gap-2">
-            <div>
-              <span className="font-semibold text-gray-400">Username:</span>{" "}
-              {item.customer.name}
-            </div>
-            <div>
-              <span className="font-semibold text-gray-400">Phone:</span>{" "}
-              {item.customer.phoneNumber}
-            </div>
-            <div>
-              <span className="font-semibold text-gray-400">Status:</span>{" "}
-              {item.status}
-            </div>
-            <div>
-              <span className="font-semibold text-gray-400">Total:</span>{" "}
-              <span className="text-green-400 font-bold">EGP {item.total}</span>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">Cart Items:</h3>
-            <ul className="list-disc pl-6 text-sm text-gray-300">
-              {item.cart.map((product, j) => (
-                <li key={j}>
-                  {product.name} (x{product.quantity}) - EGP {product.price}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-4">
-            <button
-              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-500 transition flex-1"
-              onClick={() => handleUpdateOrder(item)}
+  {
+    orders.length == 0 ? <Loader/> : (
+      
+      <div className="flex flex-col items-center gap-6 w-full md:w-[90%] lg:w-[96%] px-2 overflow-y-auto scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300">
+        <h2 className="textGradient text-4xl font-bold text-white">Orders List</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {currentOrders.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: i * 0.2 }}
+              className="bg-gray-800 text-white rounded-lg shadow-lg p-6 flex flex-col gap-4"
             >
-              Update
-            </button>
-            {item.status === "New" && (
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => confirmOrder(item.id)}
-              >
-                Confirm
-              </button>
-            )}
-            {item.status === "Ready for Shipping" && (
-              <div className="flex flex-col md:flex-row gap-2 w-full">
-                <select
-                  name="inventoryId"
-                  className="p-2 rounded-md bg-transparent border text-white flex-1"
-                  value={selectedservices}
-                  onChange={(e) => setSelectedservices(e.target.value)}
-                >
-                  <option className="bg-slate-600" value="" disabled>
-                    Select a method
-                  </option>
-                  {services.map((ele, i) => (
-                    <option className="bg-slate-600" key={i} value={ele}>
-                      {ele}
-                    </option>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-400">order id : <span className="text-white">{item.id}</span></span>
+                  <span className="font-semibold text-gray-400">customer id : <span className="text-white">{item.customer.id}</span></span>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-400">Username:</span>{" "}
+                  {item.customer.name}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-400">Phone:</span>{" "}
+                  {item.customer.phoneNumber}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-400">Status:</span>{" "}
+                  {item.status}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-400">Total:</span>{" "}
+                  <span className="text-green-400 font-bold">EGP {item.total}</span>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Cart Items:</h3>
+                <ul className="list-disc pl-6 text-sm text-gray-300">
+                  {item.cart.map((product, j) => (
+                    <li key={j}>
+                      {product.name} (x{product.quantity}) - EGP {product.price}
+                    </li>
                   ))}
-                </select>
+                </ul>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                <button
+                  className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-500 transition flex-1"
+                  onClick={() => handleUpdateOrder(item)}
+                >
+                  Update
+                </button>
+                {item.status === "New" && (
+                  <button
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => confirmOrder(item.id)}
+                  >
+                    Confirm
+                  </button>
+                )}
+                {item.status === "Ready for Shipping" && (
+                  <div className="flex flex-col md:flex-row gap-2 w-full">
+                    <select
+                      name="inventoryId"
+                      className="p-2 rounded-md bg-transparent border text-white flex-1"
+                      value={selectedservices}
+                      onChange={(e) => setSelectedservices(e.target.value)}
+                    >
+                      <option className="bg-slate-600" value="" disabled>
+                        Select a method
+                      </option>
+                      {services.map((ele, i) => (
+                        <option className="bg-slate-600" key={i} value={ele}>
+                          {ele}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition flex-1"
+                      onClick={() => handledeliver(item.id)}
+                      disabled={!selectedservices}
+                    >
+                      Deliver
+                    </button>
+                  </div>
+                )}
+                {item.status === "Delivered" && (
+                  <button
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handleCompleteClick(item)}
+                  >
+                    Complete
+                  </button>
+                )}
                 <button
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition flex-1"
-                  onClick={() => handleDelever(item.id)}
-                  disabled={!selectedservices}
+                  onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
                 >
-                  Deliver
+                  Preview
                 </button>
+                {isAdmin && (
+                  <button
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition flex-1"
+                    onClick={() => deleteOrder(item.id)}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
-            )}
-            {item.status === "Delivered" && (
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => handleCompleteClick(item)}
-              >
-                Complete
-              </button>
-            )}
+            </motion.div>
+          ))}
+        </div>
+
+        {popupData && (
+          <Popup
+            title="Update Order"
+            onClose={() => setPopupData(null)}
+            actions={[
+              {
+                label: "Cancel",
+                onClick: () => setPopupData(null),
+                type: "secondary",
+              },
+              {
+                label: "Save",
+                onClick: handleSaveChanges,
+                type: "primary",
+              },
+            ]}
+          >
+            <div className="flex flex-col gap-4">
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label>Id:</label>
+                  <input
+                    type="text"
+                    value={popupData.id}
+                    onChange={(e) =>
+                      setPopupData({
+                        ...popupData,
+                        id:  e.target.value ,
+                      })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    value={popupData.customer.name}
+                    onChange={(e) =>
+                      setPopupData({
+                        ...popupData,
+                        customer:  e.target.value ,
+                      })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label>address:</label>
+                  <input
+                    type="text"
+                    value={popupData.customer.address}
+                    onChange={(e) =>
+                      setPopupData({
+                        ...popupData,
+                        address:  e.target.value ,
+                      })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                
+                <div>
+                  <label>Total:</label>
+                  <input
+                    type="number"
+                    value={popupData.total}
+                    onChange={(e) =>
+                      setPopupData({ ...popupData, total: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label>phone:</label>
+                  <input
+                    type="number"
+                    value={popupData.customer.phoneNumber}
+                    onChange={(e) =>
+                      setPopupData({
+                        ...popupData,
+                        phone:  e.target.value ,
+                      })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                
+                <div>
+                  <label>email:</label>
+                  <input
+                    type="email"
+                    value={popupData.customer.email}
+                    onChange={(e) =>
+                      setPopupData({
+                        ...popupData,
+                        email:  e.target.value ,
+                      })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+              </div>
+            </div>
+          </Popup>
+        )}
+
+        {completePopupData && (
+          <Popup
+            title="Complete Order"
+            onClose={() => setCompletePopupData(null)}
+            actions={[
+              {
+                label: "Cancel",
+                onClick: () => setCompletePopupData(null),
+                type: "secondary",
+              },
+              {
+                label: "Save Code",
+                onClick: handleSaveCode,
+                type: "primary",
+              },
+            ]}
+          >
+            <div className="flex flex-col gap-4">
+              <div>
+                <label>Order Code:</label>
+                <input
+                  type="text"
+                  value={completePopupData.code}
+                  onChange={(e) =>
+                    setCompletePopupData({
+                      ...completePopupData,
+                      code: e.target.value,
+                    })
+                  }
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+            </div>
+          </Popup>
+        )}
+
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-500"
+            }`}
+          >
+            Previous
+          </button>
+
+          {Array.from({ length: end - start + 1 }, (_, index) => start + index).map((page) => (
             <button
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition flex-1"
-              onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-4 py-2 rounded-md ${
+                page === currentPage
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-300 text-black hover:bg-gray-400"
+              }`}
             >
-              Preview
+              {page}
             </button>
-            {isAdmin && (
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition flex-1"
-                onClick={() => deleteOrder(item.id)}
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        </motion.div>
-      ))}
-    </div>
+          ))}
 
-    {popupData && (
-      <Popup
-        title="Update Order"
-        onClose={() => setPopupData(null)}
-        actions={[
-          {
-            label: "Cancel",
-            onClick: () => setPopupData(null),
-            type: "secondary",
-          },
-          {
-            label: "Save",
-            onClick: handleSaveChanges,
-            type: "primary",
-          },
-        ]}
-      >
-        <div className="flex flex-col gap-4">
-          <div>
-            <label>Username:</label>
-            <input
-              type="text"
-              value={popupData.customer.username}
-              onChange={(e) =>
-                setPopupData({
-                  ...popupData,
-                  customer: { username: e.target.value },
-                })
-              }
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
-          <div>
-            <label>Status:</label>
-            <select
-              value={popupData.status}
-              onChange={(e) =>
-                setPopupData({ ...popupData, status: Number(e.target.value) })
-              }
-              className="w-full p-2 border rounded-md"
-            >
-              {statusOptions.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Total:</label>
-            <input
-              type="number"
-              value={popupData.total}
-              onChange={(e) =>
-                setPopupData({ ...popupData, total: e.target.value })
-              }
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-500"
+            }`}
+          >
+            Next
+          </button>
         </div>
-      </Popup>
-    )}
-
-    {completePopupData && (
-      <Popup
-        title="Complete Order"
-        onClose={() => setCompletePopupData(null)}
-        actions={[
-          {
-            label: "Cancel",
-            onClick: () => setCompletePopupData(null),
-            type: "secondary",
-          },
-          {
-            label: "Save Code",
-            onClick: handleSaveCode,
-            type: "primary",
-          },
-        ]}
-      >
-        <div className="flex flex-col gap-4">
-          <div>
-            <label>Order Code:</label>
-            <input
-              type="text"
-              value={completePopupData.code}
-              onChange={(e) =>
-                setCompletePopupData({
-                  ...completePopupData,
-                  code: e.target.value,
-                })
-              }
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
-        </div>
-      </Popup>
-    )}
-
-    <div className="flex justify-center items-center gap-2 mt-6">
-      <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`px-4 py-2 rounded-md ${
-          currentPage === 1
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-500"
-        }`}
-      >
-        Previous
-      </button>
-
-      {Array.from({ length: end - start + 1 }, (_, index) => start + index).map((page) => (
-        <button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          className={`px-4 py-2 rounded-md ${
-            page === currentPage
-              ? "bg-blue-600 text-white"
-              : "bg-gray-300 text-black hover:bg-gray-400"
-          }`}
-        >
-          {page}
-        </button>
-      ))}
-
-      <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`px-4 py-2 rounded-md ${
-          currentPage === totalPages
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-500"
-        }`}
-      >
-        Next
-      </button>
-    </div>
-  </div>
+      </div>
+    )
+  }
 </Center>
   );
 }

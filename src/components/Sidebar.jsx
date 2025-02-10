@@ -82,7 +82,7 @@ export default function Sidebar() {
                 onClick={HandelColseSidebar}
                 className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
               >
-                <span className="capitalize">Items</span>
+                <span className="capitalize">Items report</span>
               </NavLink>
 
               <NavLink
@@ -101,11 +101,11 @@ export default function Sidebar() {
               </p>
               
               <NavLink
-                to={`/DeleverInbound`}
+                to={`/deliverInbound`}
                 onClick={HandelColseSidebar}
                 className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
               >
-                <span className="capitalize">Delever</span>
+                <span className="capitalize">deliver</span>
               </NavLink>
 
               <NavLink

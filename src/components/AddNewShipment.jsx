@@ -156,7 +156,15 @@ const AddNewShipment = () => {
       });
     }
   };
-
+  const RemoveItem = ()=>{
+    if(formData.products.length > 1){
+      const ProductsArrayAfterRemove = formData.products.slice(0 , formData.products.length - 1) ;
+      setFormData((prev)=>({
+        ... prev , 
+        products : ProductsArrayAfterRemove
+      }))
+    }
+  }
   const addShipment = async (e) => {
     e.preventDefault();
     try {
@@ -390,6 +398,15 @@ const AddNewShipment = () => {
               onClick={addNewItem}
             >
               +
+            </button>
+            
+            <button
+              type="button"
+              aria-label="Add new product"
+              className="text-white text-2xl font-semibold px-6 py-1 rounded-lg bg-red-600 hover:bg-red-800 gradient-btn duration-300"
+              onClick={RemoveItem}
+            >
+              -
             </button>
           </motion.div>
         </motion.form>
