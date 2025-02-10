@@ -11,13 +11,37 @@ const AllInventory = () => {
   const [products, setProducts] = useState([]);
   const [sourceInventory, setSourceInventory] = useState("");
   const [targetInventory, setTargetInventory] = useState("");
+  const [Inventory, setInventory] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState("");
+
   const [quantity, setQuantity] = useState("");
 
   useEffect(() => {
     fetchAuthusers();
     fetchProducts();
+    fetchInventory() ;
   }, []);
+
+  const fetchInventory = async () => {
+    const target = `${API}Inventory`;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(target, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setInventory(response.data);
+      } else {
+        console.error("Failed to fetch users.");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
 
   const fetchAuthusers = async () => {
     const target = `${API}auth`;
@@ -140,7 +164,7 @@ const AllInventory = () => {
             >
               {Authusers.map((user) => (
                 <MenuItem key={user.id} value={user.id}>
-                  {user.name}
+                  {user.username}
                 </MenuItem>
               ))}
             </Select>
@@ -159,7 +183,7 @@ const AllInventory = () => {
       {/* Transfer Inventory Section */}
       <div className="w-full p-6 bg-white rounded-lg shadow-md">
         <h3 className="text-2xl font-semibold mb-4">Transfer Inventory</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <FormControl fullWidth>
             <InputLabel id="source-inventory-label">Source Inventory</InputLabel>
             <Select
@@ -168,9 +192,9 @@ const AllInventory = () => {
               onChange={(e) => setSourceInventory(e.target.value)}
               label="Source Inventory"
             >
-              {Authusers.map((user) => (
-                <MenuItem  key={user.id} value={user.id}>
-                  {user.name}
+              {Inventory.map((user) => (
+                <MenuItem  key={user.managerId} value={user.managerId}>
+                  {user.manager}
                 </MenuItem>
               ))}
             </Select>
@@ -183,9 +207,9 @@ const AllInventory = () => {
               onChange={(e) => setTargetInventory(e.target.value)}
               label="Target Inventory"
             >
-              {Authusers.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.name}
+              {Inventory.map((user) => (
+                <MenuItem key={user.managerId} value={user.managerId}>
+                  {user.manager}
                 </MenuItem>
               ))}
             </Select>
@@ -206,7 +230,6 @@ const AllInventory = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth>
-            <InputLabel id="quantity-label">Quantity</InputLabel>
             <input
               type="number"
               value={quantity}
@@ -220,7 +243,7 @@ const AllInventory = () => {
           variant="contained"
           color="primary"
           onClick={handleTransferInventory}
-          className="mt-8 w-full"
+          className="mt-16 w-full"
         >
           Transfer Inventory
         </Button>

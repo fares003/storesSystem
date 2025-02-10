@@ -15,7 +15,7 @@ import AddShipment from '@/pages/AddShipment';
 import Dashboard from '@/pages/Dashboard';
 import PrepareToShipment from '@/pages/PrepareToShipment';
 import Admin from '@/pages/Admin';
-import Permission from '@/pages/permission';
+import Permission from '@/pages/Permission';
 import OrderPreview from '@/pages/OrderPreview';
 import ShipmentPreview from '@/pages/ShipmentPreview';
 import InboundOrders from '@/pages/InboundOrders';
