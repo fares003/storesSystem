@@ -217,6 +217,23 @@ export default function Sidebar() {
               </NavLink>
             </div>
           </div>
+
+
+          
+          <div>
+            <p className="text-gray-50 m-3 mt-4 uppercase">
+              Shipping 
+            </p>
+            
+            <NavLink
+                to={`/supplierData`}
+                onClick={HandelColseSidebar}
+                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+              >
+                <span className="capitalize">supplier Data</span>
+            </NavLink>
+          </div>
+
         </>
       )}
       <div className='w-24 h-8 flex items-center justify-center cursor-pointer rounded-2xl bg-red-600 sticky bottom-[-30px] float-right mx-2 hover:bg-red-800 text-white' onClick={()=>{logout()}}>

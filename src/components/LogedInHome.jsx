@@ -26,6 +26,8 @@ import Deliver from '@/pages/Deliver';
 import GovPrices from '@/pages/GovPrices';
 import ShippingServices from '@/pages/ShippingServices';
 import Myshipments from '@/pages/Myshipments';
+import PerformancePage from '@/pages/PerformancePage';
+import SupplierData from '@/pages/SupplierData';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -84,8 +86,9 @@ const LogedInHome = () => {
                 <Route path="/GovPrices" element={<GovPrices/>} />
                 <Route path="/Shipping" element={<ShippingServices/>} />
                 <Route path="/Myshipments" element={<Myshipments/>} />
-
-              </Routes>
+                <Route path="/performance-details/:index" element={<PerformancePage/>}/>
+                <Route path="/supplierData" element={<SupplierData />} />
+                </Routes>
             </div>
           </div>
         </div>

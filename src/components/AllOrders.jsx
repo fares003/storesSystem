@@ -171,43 +171,46 @@ function AllOrders() {
     // navigate("/Shipping", { state: { orderId: id} })
 
   }
+  
   const handleSaveChanges = async () => {
     try {
       const updatedOrders = orders.map((order) =>
         order.id === popupData.id ? popupData : order
       );
+  
       const DataToBeSent = {
         id: popupData.id,
-        adminId: null ,
+        adminId: null, 
         statusId: null,
         total: popupData.total,
-        customer: popupData.customer.name,
-        address: popupData.address,
-        phone: popupData.phone,
-        email: popupData.email
+        customer: popupData.customer.name, 
+        address: popupData.customer.address,
+        phone: popupData.customer.phoneNumber,
+        email: popupData.customer.email,
       };
-
+  
       const token = localStorage.getItem("token");
       const target = API + "orders/update";
-
+  
       const response = await axios.put(target, DataToBeSent, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.status === 200) {
         setOrders(updatedOrders);
         toast.success("Updated successfully");
       }
-
+  
       setPopupData(null);
     } catch (error) {
       toast.error("Update Error!");
       console.error("Error updating order:", error);
     }
   };
+
   const handleUpdateOrder = (order) => {
     setPopupData(order);
   };
@@ -393,117 +396,128 @@ const handleSaveCode = async () => {
         </div>
 
         {popupData && (
-          <Popup
-            title="Update Order"
-            onClose={() => setPopupData(null)}
-            actions={[
-              {
-                label: "Cancel",
-                onClick: () => setPopupData(null),
-                type: "secondary",
-              },
-              {
-                label: "Save",
-                onClick: handleSaveChanges,
-                type: "primary",
-              },
-            ]}
-          >
-            <div className="flex flex-col gap-4">
-              
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label>Id:</label>
-                  <input
-                    type="text"
-                    value={popupData.id}
-                    onChange={(e) =>
-                      setPopupData({
-                        ...popupData,
-                        id:  e.target.value ,
-                      })
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label>Username:</label>
-                  <input
-                    type="text"
-                    value={popupData.customer.name}
-                    onChange={(e) =>
-                      setPopupData({
-                        ...popupData,
-                        customer:  e.target.value ,
-                      })
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label>address:</label>
-                  <input
-                    type="text"
-                    value={popupData.customer.address}
-                    onChange={(e) =>
-                      setPopupData({
-                        ...popupData,
-                        address:  e.target.value ,
-                      })
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-                
-                <div>
-                  <label>Total:</label>
-                  <input
-                    type="number"
-                    value={popupData.total}
-                    onChange={(e) =>
-                      setPopupData({ ...popupData, total: e.target.value })
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label>phone:</label>
-                  <input
-                    type="number"
-                    value={popupData.customer.phoneNumber}
-                    onChange={(e) =>
-                      setPopupData({
-                        ...popupData,
-                        phone:  e.target.value ,
-                      })
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-                
-                <div>
-                  <label>email:</label>
-                  <input
-                    type="email"
-                    value={popupData.customer.email}
-                    onChange={(e) =>
-                      setPopupData({
-                        ...popupData,
-                        email:  e.target.value ,
-                      })
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-              </div>
-            </div>
-          </Popup>
-        )}
+  <Popup
+    title="Update Order"
+    onClose={() => setPopupData(null)}
+    actions={[
+      {
+        label: "Cancel",
+        onClick: () => setPopupData(null),
+        type: "secondary",
+      },
+      {
+        label: "Save",
+        onClick: handleSaveChanges,
+        type: "primary",
+      },
+    ]}
+  >
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label>Id:</label>
+          <input
+            type="text"
+            value={popupData.id}
+            onChange={(e) =>
+              setPopupData({
+                ...popupData,
+                id: e.target.value,
+              })
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
+        <div>
+          <label>Username:</label>
+          <input
+            type="text"
+            value={popupData.customer.name}
+            onChange={(e) =>
+              setPopupData({
+                ...popupData,
+                customer: {
+                  ...popupData.customer,
+                  name: e.target.value,
+                },
+              })
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label>Address:</label>
+          <input
+            type="text"
+            value={popupData.customer.address}
+            onChange={(e) =>
+              setPopupData({
+                ...popupData,
+                customer: {
+                  ...popupData.customer,
+                  address: e.target.value,
+                },
+              })
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
+        <div>
+          <label>Total:</label>
+          <input
+            type="number"
+            value={popupData.total}
+            onChange={(e) =>
+              setPopupData({
+                ...popupData,
+                total: e.target.value,
+              })
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label>Phone:</label>
+          <input
+            type="number"
+            value={popupData.customer.phoneNumber}
+            onChange={(e) =>
+              setPopupData({
+                ...popupData,
+                customer: {
+                  ...popupData.customer,
+                  phoneNumber: e.target.value,
+                },
+              })
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
+        <div>
+          <label>Email:</label>
+          <input
+            type="email"
+            value={popupData.customer.email}
+            onChange={(e) =>
+              setPopupData({
+                ...popupData,
+                customer: {
+                  ...popupData.customer,
+                  email: e.target.value,
+                },
+              })
+            }
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
+      </div>
+    </div>
+  </Popup>
+)}
 
         {completePopupData && (
           <Popup
