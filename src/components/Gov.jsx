@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 const API = import.meta.env.VITE_API;
 
 const Gov = () => {
-    const deliveredID = 8 ;
-    const cancelledAfterDeliveryID = 0 ;
-    const cancelledBeforeDeliveryID = 0 ;
-    
+  const [deliveredID, setDeliveredID] = useState(0);
+  const [cancelledAfterDeliveryID, setCancelledAfterDeliveryID] = useState(0);
+  const [cancelledBeforeDeliveryID, setCancelledBeforeDeliveryID] = useState(0);
+
   const [shippingData, setShippingData] = useState([]);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -17,24 +17,30 @@ const Gov = () => {
     price: 0,
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${API}Gov/shipping`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const data = await response.json();
-        setShippingData(data);
-      } catch (err) {
-        setError(err.message);
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${API}Gov/shipping`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
       }
-    };
+      const data = await response.json();
+      setShippingData(data);
 
+      // Set the IDs based on the first item in the response (assuming they are consistent across all rows)
+      if (data.length > 0) {
+        setDeliveredID(data[0].deliveredId);
+        setCancelledAfterDeliveryID(data[0].cancelledAfterDeliveryId);
+        setCancelledBeforeDeliveryID(data[0].cancelledBeforeDeliveryId);
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
-  
   const handleEdit = (row) => {
     setEditingRow(row.governorateId);
     setFormData({

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const API = import.meta.env.VITE_API;
@@ -8,10 +8,24 @@ const SupplierDetailes = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [supplierId, setSupplierId] = useState('');
+  const [allSuppliers, setAllSuppliers] = useState([]);
+
+  const fetchAllsuppliers = async () => {
+    try {
+      const response = await axios.get(`${API}InboundOrders/suppliers`);
+      setAllSuppliers(response.data);
+    } catch (err) {
+      setError(err.message || 'Failed to fetch data. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    fetchAllsuppliers();
+  }, []);
 
   const fetchData = async () => {
     if (!supplierId) {
-      setError('Please enter a valid supplier ID.');
+      setError('Please select a valid supplier.');
       return;
     }
 
@@ -41,17 +55,22 @@ const SupplierDetailes = () => {
 
         <form onSubmit={handleSubmit} className="mb-8">
           <label htmlFor="supplierId" className="block text-sm font-medium text-gray-700 mb-2">
-            Enter Supplier ID:
+            Select Supplier:
           </label>
           <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
+            <select
               id="supplierId"
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
               className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 123"
-            />
+            >
+              <option value="">Select a supplier</option>
+              {allSuppliers.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </option>
+              ))}
+            </select>
             <button
               type="submit"
               disabled={loading}
