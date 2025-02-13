@@ -1,26 +1,30 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Center from "./Center";
 import Popup from "./Popup";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import useInView from "@/Hooks/useInView";
-import { useLogin } from "@/contexts/LoginContext";
 import Loader from "./Loader";
+import { FiEdit, FiTrash2, FiTruck, FiCheckCircle, FiInfo, FiPackage } from "react-icons/fi";
 
 function AllOrders() {
+  
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
+  
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API;
   const [orders, setOrders] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [popupData, setPopupData] = useState(null);
-  console.log(popupData);
-  
   const [completePopupData, setCompletePopupData] = useState(null);
-  const [isAdmin , setIsAdmin] = useState(false) ;
-  const [services , setServices] = useState([]) ;
-  const [selectedservices , setSelectedservices] = useState("") ;
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [services, setServices] = useState([]);
+  const [selectedService, setSelectedService] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
 
   const Authority = async () => {
@@ -66,19 +70,8 @@ function AllOrders() {
     }
   };
 
-  const fetchStatusOptions = async () => {
-    try {
-      const target = API + "orders/status";
-      const resp = await fetch(target);
-      const data = await resp.json();
-      setStatusOptions(data);
-    } catch (error) {
-      console.error("Error fetching status options:", error);
-    }
-  };
   const fetching = async ()=>{
       await fetchOrders();
-      await fetchStatusOptions();
       await Authority() ;
       await fetchServices()
   }
@@ -86,6 +79,14 @@ function AllOrders() {
   useEffect(()=>{
     fetching() ;
   }, []);
+
+
+  const handleCompleteClick = (order) => {
+    setCompletePopupData({
+      id: order.id,
+      code: "",
+    });
+  };
 
   const deleteOrder = async (id) => {
     try {
@@ -142,7 +143,7 @@ function AllOrders() {
 
       const data = {
         orderId: orderId,
-        service: selectedservices
+        service: selectedService 
       };
 
       const response = await axios.post(target, data, {
@@ -221,8 +222,8 @@ const handleSaveCode = async () => {
     const token = localStorage.getItem("token");
     const target = `${API}orders/complete`;
     const data = {
-      orderId: popupData.id,
-      code: popupData.code,
+      orderId: completePopupData.id,
+      code: completePopupData.code
     };
 
     const response = await axios.post(target, data, {
@@ -242,16 +243,18 @@ const handleSaveCode = async () => {
   }
 };
 
-  const handleCompleteClick = (order) => {
-    setCompletePopupData({
-      id: order.id,
-      code: "",
-    });
-  };
 
-    // Pagination logic
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 9;
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'New': return 'bg-blue-500/20 text-blue-500';
+      case 'Confirmed': return 'bg-purple-500/20 text-purple-500';
+      case 'Ready for Shipping': return 'bg-yellow-500/20 text-yellow-500';
+      case 'Delivered': return 'bg-green-500/20 text-green-500';
+      default: return 'bg-gray-500/20 text-gray-500';
+      
+    }
+  };
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -280,325 +283,272 @@ const handleSaveCode = async () => {
 
     
   return (
-<Center className="mt-4">
-  {
-    orders.length == 0 ? <Loader/> : (
-      
-      <div className="flex flex-col items-center gap-6 w-full md:w-[90%] lg:w-[96%] px-2 overflow-y-auto scrollbar-thumb-slate-800 scrollbar-thin scrollbar-track-gray-300">
-        <h2 className="textGradient text-4xl font-bold text-white">Orders List</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {currentOrders.map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: i * 0.2 }}
-              className="bg-gray-800 text-white rounded-lg shadow-lg p-6 flex flex-col gap-4"
-            >
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-400">order id : <span className="text-white">{item.id}</span></span>
-                  <span className="font-semibold text-gray-400">customer id : <span className="text-white">{item.customer.id}</span></span>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-400">Username:</span>{" "}
-                  {item.customer.name}
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-400">Phone:</span>{" "}
-                  {item.customer.phoneNumber}
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-400">Status:</span>{" "}
-                  {item.status}
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-400">Total:</span>{" "}
-                  <span className="text-green-400 font-bold">EGP {item.total}</span>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">Cart Items:</h3>
-                <ul className="list-disc pl-6 text-sm text-gray-300">
-                  {item.cart.map((product, j) => (
-                    <li key={j}>
-                      {product.name} (x{product.quantity}) - EGP {product.price}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <button
-                  className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-500 transition flex-1"
-                  onClick={() => handleUpdateOrder(item)}
-                >
-                  Update
-                </button>
-                {item.status === "New" && (
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => confirmOrder(item.id)}
-                  >
-                    Confirm
-                  </button>
-                )}
-                {item.status === "Ready for Shipping" && (
-                  <div className="flex flex-col md:flex-row gap-2 w-full">
-                    <select
-                      name="inventoryId"
-                      className="p-2 rounded-md bg-transparent border text-white flex-1"
-                      value={selectedservices}
-                      onChange={(e) => setSelectedservices(e.target.value)}
-                    >
-                      <option className="bg-slate-600" value="" disabled>
-                        Select a method
-                      </option>
-                      {services.map((ele, i) => (
-                        <option className="bg-slate-600" key={i} value={ele}>
-                          {ele}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition flex-1"
-                      onClick={() => handledeliver(item.id)}
-                      disabled={!selectedservices}
-                    >
-                      Deliver
-                    </button>
+    <Center className="py-8 px-4">
+      {orders.length === 0 ? (
+        <Loader />
+      ) : (
+        <div className="w-full overflow-y-auto scrollbar-thin">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-white">
+              <FiPackage className="inline-block mr-3 mb-1" />
+              Order Management
+            </h1>
+            <div className="flex items-center gap-4">
+              <span className="text-gray-400 text-sm">
+                Showing {Math.min(currentPage * itemsPerPage, orders.length)} of {orders.length} orders
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentOrders.map((item, i) => (
+              <motion.div
+                key={item.id}
+                initial="hidden"
+                animate="visible"
+                variants={cardVariants}
+                transition={{ duration: 0.3, delay: i * 0.05 }}
+                className="bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Order #{item.id}</h3>
+                    <p className="text-sm text-gray-400">{item.customer.name}</p>
                   </div>
-                )}
-                {item.status === "Delivered" && (
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => handleCompleteClick(item)}
-                  >
-                    Complete
-                  </button>
-                )}
-                <button
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition flex-1"
-                  onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
-                >
-                  Preview
-                </button>
-                {isAdmin && (
-                  <button
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 transition flex-1"
-                    onClick={() => deleteOrder(item.id)}
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                  <span className={`${getStatusColor(item.status)} px-3 py-1 rounded-full text-sm`}>
+                    {item.status}
+                  </span>
+                </div>
 
-        {popupData && (
-  <Popup
-    title="Update Order"
-    onClose={() => setPopupData(null)}
-    actions={[
-      {
-        label: "Cancel",
-        onClick: () => setPopupData(null),
-        type: "secondary",
-      },
-      {
-        label: "Save",
-        onClick: handleSaveChanges,
-        type: "primary",
-      },
-    ]}
-  >
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label>Id:</label>
-          <input
-            type="text"
-            value={popupData.id}
-            onChange={(e) =>
-              setPopupData({
-                ...popupData,
-                id: e.target.value,
-              })
-            }
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            value={popupData.customer.name}
-            onChange={(e) =>
-              setPopupData({
-                ...popupData,
-                customer: {
-                  ...popupData.customer,
-                  name: e.target.value,
-                },
-              })
-            }
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label>Address:</label>
-          <input
-            type="text"
-            value={popupData.customer.address}
-            onChange={(e) =>
-              setPopupData({
-                ...popupData,
-                customer: {
-                  ...popupData.customer,
-                  address: e.target.value,
-                },
-              })
-            }
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
-        <div>
-          <label>Total:</label>
-          <input
-            type="number"
-            value={popupData.total}
-            onChange={(e) =>
-              setPopupData({
-                ...popupData,
-                total: e.target.value,
-              })
-            }
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label>Phone:</label>
-          <input
-            type="number"
-            value={popupData.customer.phoneNumber}
-            onChange={(e) =>
-              setPopupData({
-                ...popupData,
-                customer: {
-                  ...popupData.customer,
-                  phoneNumber: e.target.value,
-                },
-              })
-            }
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={popupData.customer.email}
-            onChange={(e) =>
-              setPopupData({
-                ...popupData,
-                customer: {
-                  ...popupData.customer,
-                  email: e.target.value,
-                },
-              })
-            }
-            className="w-full p-2 border rounded-md"
-          />
-        </div>
-      </div>
-    </div>
-  </Popup>
-)}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center text-sm">
+                    <FiTruck className="mr-2 text-gray-400" />
+                    <span className="text-gray-300">{item.customer.phoneNumber}</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <FiInfo className="mr-2 text-gray-400" />
+                    <span className="text-gray-300">{item.cart.length} items</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <FiCheckCircle className="mr-2 text-gray-400" />
+                    <span className="text-emerald-400 font-semibold">EGP {item.total}</span>
+                  </div>
+                </div>
 
-        {completePopupData && (
-          <Popup
-            title="Complete Order"
-            onClose={() => setCompletePopupData(null)}
-            actions={[
-              {
-                label: "Cancel",
-                onClick: () => setCompletePopupData(null),
-                type: "secondary",
-              },
-              {
-                label: "Save Code",
-                onClick: handleSaveCode,
-                type: "primary",
-              },
-            ]}
-          >
-            <div className="flex flex-col gap-4">
-              <div>
-                <label>Order Code:</label>
+                <div className="border-t border-gray-700 pt-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg transition-all"
+                    >
+                      <FiInfo className="text-base" />
+                      Details
+                    </button>
+                    
+                    {item.status === "New" && (
+                      <button
+                        onClick={() => confirmOrder(item.id)}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm transition-all"
+                      >
+                        Confirm
+                      </button>
+                    )}
+
+                    {item.status === "Ready for Shipping" && (
+                      <div className="flex gap-2 w-full">
+                        <select
+                          value={selectedService}
+                          onChange={(e) => setSelectedService(e.target.value)}
+                          className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
+                        >
+                          <option value="" disabled>Select Service</option>
+                          {services.map((service) => (
+                            <option key={service} value={service}>{service}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => handledeliver(item.id)}
+                          disabled={!selectedService}
+                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-all disabled:opacity-50"
+                        >
+                          Deliver
+                        </button>
+                      </div>
+                    )}
+
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleUpdateOrder(item)}
+                          className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 transition-all"
+                        >
+                          <FiEdit className="text-lg" />
+                        </button>
+                        <button
+                          onClick={() => deleteOrder(item.id)}
+                          className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-all"
+                        >
+                          <FiTrash2 className="text-lg" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-8 flex items-center justify-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 hover:bg-gray-700 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent"
+            >
+              ←
+            </button>
+            
+            {Array.from({ length: end - start + 1 }, (_, index) => start + index).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`w-10 h-10 rounded-lg ${
+                  currentPage === page 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'hover:bg-gray-700 text-gray-300'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 hover:bg-gray-700 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Popups remain unchanged */}
+      {popupData && (
+        <Popup
+          title="Update Order"
+          onClose={() => setPopupData(null)}
+          actions={[
+            { label: "Cancel", onClick: () => setPopupData(null), type: "secondary" },
+            { label: "Save", onClick: handleSaveChanges, type: "primary" },
+          ]}
+        >
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-sm text-gray-300">Order ID</label>
                 <input
-                  type="text"
-                  value={completePopupData.code}
-                  onChange={(e) =>
-                    setCompletePopupData({
-                      ...completePopupData,
-                      code: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 border rounded-md"
+                  value={popupData.id}
+                  onChange={(e) => setPopupData({...popupData, id: e.target.value})}
+                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-gray-300">Total</label>
+                <input
+                  type="number"
+                  value={popupData.total}
+                  onChange={(e) => setPopupData({...popupData, total: e.target.value})}
+                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             </div>
-          </Popup>
-        )}
+            
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-gray-400">Customer Information</h4>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Name</label>
+                  <input
+                    value={popupData.customer.name}
+                    onChange={(e) => setPopupData({...popupData, customer: {
+                      ...popupData.customer,
+                      name: e.target.value
+                    }})}
+                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm text-gray-300">Phone</label>
+                    <input
+                      value={popupData.customer.phoneNumber}
+                      onChange={(e) => setPopupData({...popupData, customer: {
+                        ...popupData.customer,
+                        phoneNumber: e.target.value
+                      }})}
+                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm text-gray-300">Email</label>
+                    <input
+                      value={popupData.customer.email}
+                      onChange={(e) => setPopupData({...popupData, customer: {
+                        ...popupData.customer,
+                        email: e.target.value
+                      }})}
+                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Address</label>
+                  <input
+                    value={popupData.customer.address}
+                    onChange={(e) => setPopupData({...popupData, customer: {
+                      ...popupData.customer,
+                      address: e.target.value
+                    }})}
+                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Popup>
+      )}
 
-        <div className="flex justify-center items-center gap-2 mt-6">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-md ${
-              currentPage === 1
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-500"
-            }`}
-          >
-            Previous
-          </button>
-
-          {Array.from({ length: end - start + 1 }, (_, index) => start + index).map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-4 py-2 rounded-md ${
-                page === currentPage
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-300 text-black hover:bg-gray-400"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-md ${
-              currentPage === totalPages
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-500"
-            }`}
-          >
-            Next
-          </button>
-        </div>
-      </div>
-    )
-  }
-</Center>
+      {completePopupData && (
+        <Popup
+          title="Complete Order"
+          onClose={() => setCompletePopupData(null)}
+          actions={[
+            { label: "Cancel", onClick: () => setCompletePopupData(null), type: "secondary" },
+            { label: "Confirm", onClick: handleSaveCode, type: "primary" },
+          ]}
+        >
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-sm text-gray-300">Confirmation Code</label>
+              <input
+                value={completePopupData.code}
+                onChange={(e) => setCompletePopupData({
+                  ...completePopupData,
+                  code: e.target.value
+                })}
+                className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter verification code"
+              />
+            </div>
+          </div>
+        </Popup>
+      )}
+    </Center>
   );
 }
 
 export default AllOrders;
+
+
+

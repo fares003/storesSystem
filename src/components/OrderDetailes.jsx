@@ -97,7 +97,15 @@ const OrderDetailes = () => {
 
                   return (
                     <li key={index}>
-                      Order became <span className="text-orange-500 font-bold">{eventType}</span> at 
+                      Order became
+                      <span className={`${eventType.toLowerCase() == "Delivered".toLowerCase() ? "text-orange-500" :
+                        eventType.toLowerCase() == "Cancelled".toLowerCase() ? "text-red-500" : 
+                        (eventType.toLowerCase() == "Complete".toLowerCase() || eventType.toLowerCase() == "Confirmed".toLowerCase() )? "text-green-500" :
+                        eventType.toLowerCase() == "in transit (quickconnect)".toLowerCase() ? "text-blue-500" : "text-black" 
+                       }
+                          font-bold`}>
+                            {eventType}
+                          </span> at 
                       <span className="text-blue-700 font-bold"> {eventDate}</span>
                     </li>
                   );

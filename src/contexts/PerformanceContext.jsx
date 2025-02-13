@@ -17,8 +17,6 @@ export const PerformanceProvider = ({children}) => {
             const target = `${API}${endpoint}`;
             const resp = await fetch(target);
             const data = await resp.json();
-            console.log(data);
-            console.log(endpoint);
             
             setter(data);
         } catch (error) {
@@ -40,6 +38,7 @@ export const PerformanceProvider = ({children}) => {
     const [recentCustomers, setrecentCustomers] = useState({});
     const [allNewCustomers, setallNewCustomers] = useState({});
     const [productSales, setProductSales] = useState({});
+    const [performanceData , setPerformanceData] = useState() ;
 
     useEffect(()=>{
         fetchData(`reports/new-customers?groupBy=${timeInterval}`, setNewCustomers);
@@ -55,70 +54,70 @@ export const PerformanceProvider = ({children}) => {
         fetchData(`reports/all-delivered-orders?groupBy=${timeInterval}`, setDeliverdOrders);
         fetchData(`reports/product-sales?groupBy=${timeInterval}`, setProductSales);
         // fetchData(`reports/net-profit?groupBy=${timeInterval}`, setNetProfit);
-
+        setPerformanceData(
+            [
+                {
+                    title: 'New Customers',
+                    value: newCustomers,
+                    icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
+                    color: 'from-blue-500 to-indigo-500' , 
+                    popupValues :allNewCustomers ,
+                    tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
+                },
+                {
+                    title: 'Customers',
+                    value: customers,
+                    icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
+                    color: 'from-yellow-500 to-orange-500' ,
+                    popupValues : recentCustomers,
+                    tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
+                },
+                {
+                    title: 'Orders',
+                    value: ordersCard,
+                    icon: <MdMoney className="w-12 h-12 text-green-200" />,
+                    color: 'from-green-500 to-teal-500',
+                    popupValues : newOrders , 
+                    tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
+                },
+                {
+                    title: 'Products',
+                    value: product,
+                    icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
+                    color: 'from-purple-500 to-pink-500',
+                    popupValues : productSales.items ,
+                    tableHeader : ["SKU" , "product" , "sold"] ,
+                },
+                {
+                    title: 'In Shipping',
+                    value: shipping,
+                    icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
+                    color: 'from-blue-500 to-indigo-500'
+                },
+                {
+                    title: 'Delivered Orders',
+                    value: deliveredOrders,
+                    icon: <MdMoney className="w-12 h-12 text-green-200" />,
+                    color: 'from-green-500 to-teal-500',
+                    popupValues : deliverdOrders , 
+                    tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
+                },
+                {
+                    title: 'Revenue',
+                    value: sales,
+                    icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
+                    color: 'from-yellow-500 to-orange-500'
+                },
+                {
+                    title: 'Net Profit',
+                    value: "0000",
+                    // value: netProfit,
+                    icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
+                    color: 'from-purple-500 to-pink-500'
+                }
+            ]
+        )
     } , [timeInterval])
-
-    const performanceData = [
-        {
-            title: 'New Customers',
-            value: newCustomers,
-            icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
-            color: 'from-blue-500 to-indigo-500' , 
-            popupValues :allNewCustomers ,
-            tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
-        },
-        {
-            title: 'Customers',
-            value: customers,
-            icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
-            color: 'from-yellow-500 to-orange-500' ,
-            popupValues : recentCustomers,
-            tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
-        },
-        {
-            title: 'Orders',
-            value: ordersCard,
-            icon: <MdMoney className="w-12 h-12 text-green-200" />,
-            color: 'from-green-500 to-teal-500',
-            popupValues : newOrders , 
-            tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
-        },
-        {
-            title: 'Products',
-            value: product,
-            icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
-            color: 'from-purple-500 to-pink-500',
-            popupValues : productSales.items ,
-            tableHeader : ["SKU" , "product" , "sold"] ,
-        },
-        {
-            title: 'In Shipping',
-            value: shipping,
-            icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
-            color: 'from-blue-500 to-indigo-500'
-        },
-        {
-            title: 'Delivered Orders',
-            value: deliveredOrders,
-            icon: <MdMoney className="w-12 h-12 text-green-200" />,
-            color: 'from-green-500 to-teal-500',
-            popupValues : deliverdOrders , 
-            tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
-        },
-        {
-            title: 'Revenue',
-            value: sales,
-            icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
-            color: 'from-yellow-500 to-orange-500'
-        },
-        {
-            title: 'Net Profit',
-            value: "0000",
-            // value: netProfit,
-            icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
-            color: 'from-purple-500 to-pink-500'
-        }
-    ];
     return (
         <PerformanceContext.Provider value={{performanceData , timeInterval, setTimeInterval}}>
             {children}
