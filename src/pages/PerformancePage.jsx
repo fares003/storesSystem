@@ -1,14 +1,14 @@
 import PerformanceDetails from '@/components/PerformanceDetails'
-import { usePerformanceContext } from '@/contexts/PerformanceContext';
 import React from 'react'
 
 const PerformancePage = () => {
 
-    const { performanceData } = usePerformanceContext() ;
+    const PerformanceFromLocal = JSON.parse(localStorage.getItem("performanceData"));
+    console.log(PerformanceFromLocal );
     
   return (
     <div>
-      <PerformanceDetails performanceData={performanceData}/>
+      <PerformanceDetails performanceData={PerformanceFromLocal}/>
     </div>
   )
 }

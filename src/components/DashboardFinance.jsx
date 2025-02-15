@@ -1,26 +1,26 @@
+import { DollarSign, ShoppingBasketIcon } from 'lucide-react';
 import React, { useEffect, useRef, useState} from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { motion } from "framer-motion";
+import { MdMoney } from 'react-icons/md';
+import { FaUserFriends } from 'react-icons/fa';
 import useInView from "@/Hooks/useInView"; 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { usePerformanceContext } from '@/contexts/PerformanceContext';
+import Popup from './Popup';
+import { Select } from '@mui/material';
 
 const API = import.meta.env.VITE_API;
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const DashboardFinance = () => {
+    const [timeInterval, setTimeInterval] = useState('year');
     const [earningData, setEarningData] = useState([]);
     const [total, setTotal] = useState(0);
     const [TopOrders , setTopOrders] = useState([]);
-    // const [preformancePopup , setPreformancePopup ] = useState(false);
-    // const [preformancePopupData , setPreformancePopupData ] = useState([]);
-    
+
     const [EarningGroupBy , setEarningGroupBy ] = useState("year");
-
-
-    const {performanceData , timeInterval , setTimeInterval} = usePerformanceContext() ;
 
     const [barChartData, setBarChartData] = useState([
         { month: 'Jan', sales: 15000, netProfit: 5000 },
@@ -37,6 +37,20 @@ const DashboardFinance = () => {
     const [orders, setOrders] = useState([]);
     const [stores, setStores] = useState([]);
 
+    const [newCustomers, setNewCustomers] = useState("1900");
+    const [customers, setCustomers] = useState({});
+    const [ordersCard, setOrdersCard] = useState("1900");
+    const [sales, setSales] = useState("1900");
+    const [product, setProduct] = useState([]);
+    const [shipping, setShipping] = useState({});    
+    const [deliveredOrders, setDeliveredOrders] = useState({});
+    const [netProfit, setNetProfit] = useState({});
+    const [newOrders, setnewOrders] = useState({});
+    const [deliverdOrders, setDeliverdOrders] = useState({});
+    const [recentCustomers, setrecentCustomers] = useState({});
+    const [allNewCustomers, setallNewCustomers] = useState({});
+    const [productSales, setProductSales] = useState({});
+
 
 
     const fetchData = async (endpoint, setter) => {
@@ -44,6 +58,8 @@ const DashboardFinance = () => {
             const target = `${API}${endpoint}`;
             const resp = await fetch(target);
             const data = await resp.json();
+            console.log(data);
+            console.log(endpoint);
             
             setter(data);
         } catch (error) {
@@ -58,8 +74,24 @@ const DashboardFinance = () => {
         fetchData('Data/orders', setOrders);
         fetchData('Data/stores', setStores);
         fetchData('Orders/top-5', setTopOrders);
+        fetchData(`reports/new-customers?groupBy=${timeInterval}`, setNewCustomers);
+        fetchData(`reports/customers?groupBy=${timeInterval}`,setCustomers);
+        fetchData(`reports/orders?groupBy=${timeInterval}`, setOrdersCard);
+        fetchData(`reports/total-sales?groupBy=${timeInterval}`, setSales);
+        fetchData(`reports/products?groupBy=${timeInterval}`, setProduct);
+        fetchData(`reports/shipping-items`, setShipping);
+        fetchData(`reports/delivered-orders?groupBy=${timeInterval}`, setDeliveredOrders);
         
-    }, [EarningGroupBy]);
+        // fetchData(`reports/net-profit?groupBy=${timeInterval}`, setNetProfit);
+
+        
+        fetchData(`reports/new-orders?groupBy=${timeInterval}`, setnewOrders);
+        fetchData(`reports/recent-customers?groupBy=${timeInterval}`, setrecentCustomers);
+        fetchData(`reports/all-new-customers?groupBy=${timeInterval}`, setallNewCustomers);
+        fetchData(`reports/all-delivered-orders?groupBy=${timeInterval}`, setDeliverdOrders);
+        fetchData(`reports/product-sales?groupBy=${timeInterval}`, setProductSales);
+        
+    }, [timeInterval , EarningGroupBy]);
 
     useEffect(() => {
         const tempTotal = earningData.reduce((acc, item) => acc + item.value, 0);
@@ -173,7 +205,67 @@ const DashboardFinance = () => {
             },
         },
     };
-
+    const performanceData = [
+        {
+            title: 'New Customers',
+            value: newCustomers,
+            icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
+            color: 'from-blue-500 to-indigo-500' , 
+            popupValues :allNewCustomers ,
+            tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
+        },
+        {
+            title: 'Customers',
+            value: customers,
+            icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
+            color: 'from-yellow-500 to-orange-500' ,
+            popupValues : recentCustomers,
+            tableHeader : ["id" , "name" , "email" , "address" , "phoneNumber"]
+        },
+        {
+            title: 'Orders',
+            value: ordersCard,
+            icon: <MdMoney className="w-12 h-12 text-green-200" />,
+            color: 'from-green-500 to-teal-500',
+            popupValues : newOrders , 
+            tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
+        },
+        {
+            title: 'Products',
+            value: product,
+            icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
+            color: 'from-purple-500 to-pink-500',
+            popupValues : productSales.items ,
+            tableHeader : ["SKU" , "product" , "sold"] ,
+        },
+        {
+            title: 'In Shipping',
+            value: shipping,
+            icon: <FaUserFriends className="w-12 h-12 text-indigo-200" />,
+            color: 'from-blue-500 to-indigo-500'
+        },
+        {
+            title: 'Delivered Orders',
+            value: deliveredOrders,
+            icon: <MdMoney className="w-12 h-12 text-green-200" />,
+            color: 'from-green-500 to-teal-500',
+            popupValues : deliverdOrders , 
+            tableHeader : ["customer name" , "email" , "phoneNumber" , "status" , "total"] ,
+        },
+        {
+            title: 'Revenue',
+            value: sales,
+            icon: <DollarSign className="w-12 h-12 text-yellow-200" />,
+            color: 'from-yellow-500 to-orange-500'
+        },
+        {
+            title: 'Net Profit',
+            value: "0000",
+            // value: netProfit,
+            icon: <ShoppingBasketIcon className="w-12 h-12 text-purple-200" />,
+            color: 'from-purple-500 to-pink-500'
+        }
+    ];
     
     
     const earningSectionRef = useRef(null);
@@ -224,10 +316,7 @@ const DashboardFinance = () => {
         }
     };
     
-    const handlePerformanceClick = (index) => {
-        window.open(`/performance-details/${index}`, '_blank');
-      };
-
+    
     return (
         <div id="dashboard-content" className={`min-h-screen bg-gray-100 p-6 mt-14 md:mt-0 ${isCapturing && 'animate-pulse'} `}>
             <div className="container mx-auto space-y-6">
@@ -258,15 +347,23 @@ const DashboardFinance = () => {
                     animate={ isCapturing ? { opacity: 1, scale: 1} : isVisible ? { opacity: 1, scale: 1 } : {}}
                     transition={isCapturing ? { duration: 0 } : { duration: 0.8 }}
                 >
-                     {performanceData.map((item, index) => (
+                    {performanceData.map((item, index) => (
                         <motion.div
-                            onClick={() => handlePerformanceClick(index)}
+                            onClick={()=>{
+                                console.log(item);
+                                
+                                localStorage.setItem( "performanceData" , JSON.stringify({
+                                    ...item , 
+                                    icon : ""
+                                }));
+                                window.open(`/performance-details/${index}`);
+                            }}
                             key={index}
                             className={`p-6 rounded-xl shadow-lg text-white bg-gradient-to-r ${item.color} flex items-center gap-4`}
                             initial={isCapturing ? false : { opacity: 0, y: 20 }}
                             animate={isCapturing ? { opacity: 1, y: 0 } : isVisible ? { opacity: 1, y: 0 } : {}}
-                            transition={isCapturing ? { duration: 0, delay: 0 } : { duration: 0.6, delay: index * 0.2 }}
-                        >
+                            transition={isCapturing ? { duration: 0 ,delay: 0} : { duration: 0.6, delay: index * 0.2 }}
+                            >
                             <div className="bg-white bg-opacity-20 p-4 rounded-lg">
                                 {item.icon}
                             </div>
@@ -461,6 +558,125 @@ const DashboardFinance = () => {
                         </div>
                 </div>
             </div>
+            {
+                // preformancePopup && (
+                //     <Popup
+                //     width='w-[80vw]'
+                //         title={""}
+                //         onClose={()=>{setPreformancePopup(false)}}
+                //     >
+                //         {
+                //             preformancePopupData < 2 && (
+                //                 <div className='max-h-[80vh] overflow-y-auto'>
+                //                     {
+                //                         <table className="min-w-full table-auto text-sm text-left overflow-y-auto border border-gray-700">
+                //                         <thead className="bg-gray-800 text-gray-200">
+                //                             <tr>
+                //                                 {performanceData[preformancePopupData].tableHeader.map((ele, i) => (
+                //                                     <th key={i} className="px-6 py-3 border-b border-gray-700 font-bold text-center uppercase tracking-wide">
+                //                                         {ele}
+                //                                     </th>
+                //                                 ))}
+                //                             </tr>
+                //                         </thead>
+                //                         <tbody>
+                //                             {performanceData[preformancePopupData].popupValues.map((ele, i) => (
+                //                                 <tr key={i} className="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-all">
+                //                                     {performanceData[preformancePopupData].tableHeader.map((header, index) => (
+                //                                         <td key={index} className="px-6 py-3 text-center text-gray-300">
+                //                                             {ele[header]}
+                //                                         </td>
+                //                                     ))}
+                //                                 </tr>
+                //                             ))}
+                //                         </tbody>
+                //                     </table>
+                                    
+                //                     }
+                //                 </div>
+                //             ) 
+                //         }
+                //         {
+                //             (preformancePopupData == 2 || preformancePopupData == 5 )&& (
+                                
+                //                 <div className="p-4 bg-gray-900 text-gray-200 rounded-lg shadow-lg">
+                //                 <h2 className="text-lg font-bold mb-4">Orders</h2>
+                                
+                //                 {/* Orders Table */}
+                //                 <table className="min-w-full table-auto text-sm text-left border border-gray-700 overflow-y-auto">
+                //                     <thead className="bg-gray-800 text-gray-200">
+                //                         <tr>
+                //                             {
+                //                                 console.log(performanceData[preformancePopupData].tableHeader)
+                //                             }
+                //                             {performanceData[preformancePopupData].tableHeader.map((header, i) => (
+                //                                 <th key={i} className="px-6 py-3 border-b border-gray-700 font-bold text-center uppercase">
+                //                                     {header}
+                //                                 </th>
+                //                             ))}
+                //                         </tr>
+                //                     </thead>
+                //                     <tbody>
+                //                         {
+                //                                 console.log(performanceData[preformancePopupData].popupValues)
+                //                         }
+                //                         {performanceData[preformancePopupData].popupValues.map((order, i) => (
+                //                             <tr key={i} className="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-all">
+                //                                 <td className="px-6 py-3 text-center">{order.customer.name || "N/A"}</td>
+                //                                 <td className="px-6 py-3 text-center">{order.customer.email || "N/A"}</td>
+                //                                 <td className="px-6 py-3 text-center">{order.customer.phoneNumber || "N/A"}</td>
+                //                                 <td className="px-6 py-3 text-center">{order.status || "N/A"}</td>
+                //                                 <td className="px-6 py-3 text-center">{order.total || "N/A"}</td>
+                //                             </tr>
+                //                         ))}
+                //                     </tbody>
+                //                 </table>
+
+                                
+                //             </div>
+
+                //             )
+                //         }
+                //         {
+                //              preformancePopupData == 3 && (
+                //                 <div className="p-4 bg-gray-900 text-gray-200 rounded-lg shadow-lg">
+                //                 <h2 className="text-lg font-bold mb-4">Products</h2>
+                                
+                //                 {/* Orders Table */}
+                //                 <table className="min-w-full table-auto text-sm text-left border border-gray-700 overflow-y-auto">
+                //                     <thead className="bg-gray-800 text-gray-200">
+                //                         <tr>
+                //                             {
+                //                                 console.log(performanceData[preformancePopupData].tableHeader)
+                //                             }
+                //                             {performanceData[preformancePopupData].tableHeader.map((header, i) => (
+                //                                 <th key={i} className="px-6 py-3 border-b border-gray-700 font-bold text-center uppercase">
+                //                                     {header}
+                //                                 </th>
+                //                             ))}
+                //                         </tr>
+                //                     </thead>
+                //                     <tbody>
+                //                         {
+                //                                 console.log(performanceData[preformancePopupData].popupValues)
+                //                         }
+                //                         {performanceData[preformancePopupData].popupValues.map((p, i) => (
+                //                             <tr key={i} className="border-b border-gray-700 odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition-all">
+                //                                 <td className="px-6 py-3 text-center">{p.sku || "N/A"}</td>
+                //                                 <td className="px-6 py-3 text-center">{p.product || "N/A"}</td>
+                //                                 <td className="px-6 py-3 text-center">{p.sold || "N/A"}</td>
+                //                             </tr>
+                //                         ))}
+                //                     </tbody>
+                //                 </table>
+
+                                
+                //             </div>
+                //              )
+                //         }
+                //     </Popup>
+                // )
+            }
         </div>
     );
 };
