@@ -9,7 +9,7 @@ const API = import.meta.env.VITE_API;
 
 const itemSchema = z.object({
   cost: z.number().min(1, "Cost is required"),
-  date: z.string().min(1, "Date is required"),
+  date: z.string().nullable().optional(),
   supplierid: z.string().min(1, "Supplier ID is required"),
   inventoryId: z.number().min(1, "Manager is required"),
   products: z.array(
@@ -27,7 +27,7 @@ const AddNewShipment = () => {
   const [managersData, setManagersData] = useState([]);
   const [formData, setFormData] = useState({
     cost: null,
-    date: "",
+    date: null,
     inventoryId: "",
     supplierid: "",
     products: [{ sku: "", amount: null, cost: null, productId: null }],
@@ -182,7 +182,7 @@ useEffect(() => {
         });
         setFormData({
           cost: null,
-          date: "",
+          date: null,
           inventoryId:"" , 
           supplierid: "",
           products: [{ sku: "", amount: null, cost: null, productId: null }],
@@ -210,9 +210,9 @@ useEffect(() => {
   };
 
   return (
-    <Center className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 p-4">
+    <Center className="bg-gradient-to-br from-gray-900 to-blue-900 p-4">
       <motion.div
-        className="w-full max-w-6xl"
+        className="w-full max-w-6xl overflow-y-auto pb-4 scrollbar-track-slate-500 scrollbar-thumb-slate-800 scrollbar-thin"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -229,7 +229,7 @@ useEffect(() => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Cost */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-gray-300">Cost</label>
               <input
                 type="number"
@@ -242,7 +242,7 @@ useEffect(() => {
             </div>
 
             {/* Date */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-gray-300">Date</label>
               <input
                 type="date"
@@ -255,7 +255,7 @@ useEffect(() => {
             </div>
 
             {/* Supplier */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-gray-300">Supplier</label>
               <select
                 name="supplierid"
@@ -272,7 +272,7 @@ useEffect(() => {
             </div>
 
             {/* Inventory Manager */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-gray-300">Inventory Manager</label>
               <select
                 name="inventoryId"
@@ -290,14 +290,14 @@ useEffect(() => {
           </div>
 
           {/* Products Section */}
-          <div className="space-y-6">
+          <div className="flex flex-col gap-6">
             <h3 className="text-xl font-semibold text-gray-200">Products</h3>
             
             {formData.products.map((item, i) => (
-              <div key={i} className="bg-gray-700 p-4 rounded-lg space-y-4">
+              <div key={i} className="bg-gray-700 p-4 rounded-lg flex flex-col gap-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Product Selection */}
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <label className="text-gray-300">Product</label>
                     <select
                       name="productId"
@@ -314,7 +314,7 @@ useEffect(() => {
                   </div>
 
                   {/* Quantity */}
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <label className="text-gray-300">Quantity</label>
                     <input
                       type="number"
@@ -327,7 +327,7 @@ useEffect(() => {
                   </div>
 
                   {/* Product Cost */}
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <label className="text-gray-300">Unit Cost</label>
                     <input
                       type="number"

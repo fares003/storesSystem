@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import { MdOutlineCancel } from "react-icons/md";
 import { 
@@ -12,6 +12,9 @@ import { useStateContext } from '../contexts/ContextProvider';
 import { useLogin } from '@/contexts/LoginContext';
 import "../App.css";
 import { ArrowDown } from 'lucide-react';
+import axios from 'axios';
+
+const API = import.meta.env.VITE_API;
 
 export default function Sidebar() {
   const { activeMenu, setActiveMenu, screenSize } = useStateContext();
@@ -30,66 +33,24 @@ export default function Sidebar() {
       setActiveMenu(false);
     }
   };
+  
+  const [menuSections , setMenuSections] = useState([]) ;
 
-  const menuSections = [
-    {
-      title: 'Dashboard',
-      items: [
-        { path: '/dashboard', label: 'Dashboard' }
-      ]
-    },
-    {
-      title: 'Orders',
-      items: [
-        { path: '/orders', label: 'Orders' },
-        { path: '/addorder', label: 'Add Order' }
-      ]
-    },
-    {
-      title: 'Storage',
-      items: [
-        { path: '/items', label: 'Items Report' },
-        { path: '/additem', label: 'Add Item' },
-        { path: '/Outbound', label: 'Orders in Fulfillment' },
-        { path: '/deliverInbound', label: 'Deliver' }
-      ]
-    },
-    {
-      title: 'Fulfill',
-      items: [
-        { path: '/addShipment', label: 'Add Inbound Order' }
-      ]
-    },
-    {
-      title: 'Admin Panel',
-      items: [
-        { path: '/adminpanel', label: 'Manage Authority' },
-        { path: '/permission', label: 'Permissions' }
-      ]
-    },
-    {
-      title: 'Inventory',
-      items: [
-        { path: '/viewInventory', label: 'View & Create' }
-      ]
-    },
-    {
-      title: 'Financial',
-      items: [
-        { path: '/Financial', label: 'Inbound Financial' },
-        { path: '/Inbound', label: 'Inbound' }
-      ]
-    },
-    {
-      title: 'Shipping',
-      items: [
-        { path: '/GovPrices', label: 'Shipping Prices' },
-        { path: '/Shipping', label: 'Shipping' },
-        { path: '/Myshipments', label: 'My Shipments' },
-        { path: '/supplierData', label: 'Supplier Data' }
-      ]
+  const sidebarViewPerms = async ()=>{
+    const token = localStorage.getItem("token"); 
+    try{
+      const response = await axios.get(`${API}auth/view-perms`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+      });
+      setMenuSections(response.data)
+      
+    }catch(error){
+      console.log(error);
     }
-  ];
+  }
+  useEffect( ()=>{sidebarViewPerms();},[])
   
   return (
     activeMenu&&(
