@@ -11,121 +11,117 @@ const itemSchema = z.object({
   cost: z.number().min(1, "Cost is required"),
   date: z.string().min(1, "Date is required"),
   supplierid: z.string().min(1, "Supplier ID is required"),
-  inventoryId : z.number().min(1 , "manager is required"), 
-  products: z
-    .array(
-      z.object({
-        amount: z.number().min(1, "Quantity is required"),
-        cost: z.number().min(1, "Cost is required"),
-        productId: z.number().min(1, "Product ID is required"),
-      })
-    )
-    .nonempty("Products array cannot be empty"),
+  inventoryId: z.number().min(1, "Manager is required"),
+  products: z.array(
+    z.object({
+      amount: z.number().min(1, "Quantity is required"),
+      cost: z.number().min(1, "Cost is required"),
+      productId: z.number().min(1, "Product ID is required"),
+    })
+  ).min(1, "At least one product is required"),
 });
 
 const AddNewShipment = () => {
   const [items, setItems] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [managersData, setManagersData] = useState([]);
   const [formData, setFormData] = useState({
     cost: null,
-    date: "", 
-    inventoryId:"",
+    date: "",
+    inventoryId: "",
     supplierid: "",
     products: [{ sku: "", amount: null, cost: null, productId: null }],
   });
-  const [managersData , setManagersData] = useState([]); 
 
-  const fetchItems = async () => {
-    const target = `${API}item`;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  
+const fetchItems = async () => {
+  const target = `${API}item`;
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(target, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (response.status === 200) {
-        setItems(response.data);
-      } else {
-        console.error("Failed to fetch items.");
-      }
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      toast.error("Failed to fetch items. Please try again later.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+    if (response.status === 200) {
+      setItems(response.data);
+    } else {
+      console.error("Failed to fetch items.");
     }
-  };
-
-  const fetchSuppliers = async () => {
-    const target = `${API}InboundOrders/suppliers`;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200) {
-        setSuppliers(response.data);
-      } else {
-        console.error("Failed to fetch suppliers.");
-      }
-    } catch (error) {
-      console.error("Error fetching suppliers:", error);
-      toast.error("Failed to fetch suppliers. Please try again later.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    }
-  };
-  const fetchManagersData = async()=>{
-    const target = `${API}inventory`;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200) {
-        setManagersData(response.data);
-      } else {
-        console.error("Failed to fetch ManagersData.");
-      }
-    } catch (error) {
-      console.error("Error fetching ManagersData:", error);
-      toast.error("Failed to fetch ManagersData. Please try again later.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    }
+  } catch (error) {
+    console.error("Error fetching items:", error);
+    toast.error("Failed to fetch items. Please try again later.", {
+      position: "top-right",
+      autoClose: 3000,
+    });
   }
-  useEffect(() => {
-    fetchItems();
-    fetchSuppliers();
-    fetchManagersData() ;
-  }, []);
+};
+
+const fetchSuppliers = async () => {
+  const target = `${API}InboundOrders/suppliers`;
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(target, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      setSuppliers(response.data);
+    } else {
+      console.error("Failed to fetch suppliers.");
+    }
+  } catch (error) {
+    console.error("Error fetching suppliers:", error);
+    toast.error("Failed to fetch suppliers. Please try again later.", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  }
+};
+const fetchManagersData = async()=>{
+  const target = `${API}inventory`;
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(target, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      setManagersData(response.data);
+    } else {
+      console.error("Failed to fetch ManagersData.");
+    }
+  } catch (error) {
+    console.error("Error fetching ManagersData:", error);
+    toast.error("Failed to fetch ManagersData. Please try again later.", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  }
+}
+useEffect(() => {
+  fetchItems();
+  fetchSuppliers();
+  fetchManagersData() ;
+}, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name);
-    
-    console.log(value);
-    
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: name === "cost" || name === "inventoryId" ? parseInt(value) || null : value, 
+      [name]: name === "cost" || name === "inventoryId" ? parseInt(value) || null : value,
     }));
   };
 
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
-    setFormData((prev) => {
+    setFormData(prev => {
       const updatedProducts = [...prev.products];
       updatedProducts[index] = {
         ...updatedProducts[index],
@@ -214,201 +210,163 @@ const AddNewShipment = () => {
   };
 
   return (
-    <Center>
+    <Center className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 p-4">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-6xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="flex flex-col gap-4 items-center w-full"
       >
-        <motion.h2
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="textGradient text-5xl md:text-6xl font-semibold text-white"
-        >
-          Add inbound orders
-        </motion.h2>
         <motion.form
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
           onSubmit={addShipment}
-          className="grid grid-cols-12 w-[90%] md:w-[60%] gap-y-8 gap-x-4 items-center border shadow-lg shadow-slate-500 border-white rounded-2xl mx-6 md:mx-0 px-4 md:px-8 py-6 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-track-slate-950 scrollbar-thumb-slate-800"
+          className="bg-gray-800 rounded-xl p-6 shadow-2xl"
+          initial={{ y: -50 }}
+          animate={{ y: 0 }}
         >
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="col-span-6 flex flex-col gap-2"
-          >
-            <label className="text-white text-lg">Cost</label>
-            <input
-              type="number"
-              name="cost"
-              className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.cost || ""}
-              onChange={handleInputChange}
-            />
-          </motion.div>
+          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-8">
+            Create New Shipment
+          </h2>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="col-span-6 flex flex-col gap-2"
-          >
-            <label className="text-white text-lg">Date</label>
-            <input
-              type="date"
-              name="date"
-              className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.date}
-              onChange={handleInputChange}
-            />
-          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Cost */}
+            <div className="space-y-2">
+              <label className="text-gray-300">Cost</label>
+              <input
+                type="number"
+                name="cost"
+                className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white
+                  focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                value={formData.cost || ""}
+                onChange={handleInputChange}
+              />
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="col-span-6 flex flex-col gap-2"
-          >
-            <label className="text-white text-lg">Supplier</label>
-            <select
-              name="supplierid"
-              className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.supplierid}
-              onChange={handleInputChange}
-            >
-              <option className="bg-slate-600" value="" disabled>
-                Select a supplier
-              </option>
-              {suppliers.map((ele) => (
-                <option className="bg-slate-600" key={ele.id} value={ele.id}>
-                  {ele.name}
-                </option>
-              ))}
-            </select>
-          </motion.div>
+            {/* Date */}
+            <div className="space-y-2">
+              <label className="text-gray-300">Date</label>
+              <input
+                type="date"
+                name="date"
+                className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white
+                  focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                value={formData.date}
+                onChange={handleInputChange}
+              />
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="col-span-6 flex flex-col gap-2"
-          >
-            <label className="text-white text-lg">inventory</label>
-            <select
-              name="inventoryId"
-              className="p-2 rounded-md bg-transparent border text-white"
-              value={formData.inventoryId}
-              onChange={handleInputChange}
-            >
-              <option className="bg-slate-600" value="" disabled>
-                Select a manager
-              </option>
-              {managersData.map((ele) => (
-                <option className="bg-slate-600" key={ele.id} value={ele.id}>
-                  {ele.manager}
-                </option>
-              ))}
-            </select>
-          </motion.div>
-
-
-          {formData.products.map((item, i) => (
-            <React.Fragment key={i}>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
-                className="col-span-6 flex flex-col gap-2"
+            {/* Supplier */}
+            <div className="space-y-2">
+              <label className="text-gray-300">Supplier</label>
+              <select
+                name="supplierid"
+                className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white
+                  focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                value={formData.supplierid}
+                onChange={handleInputChange}
               >
-                <label className="text-white text-lg">Quantity</label>
-                <input
-                  type="number"
-                  name="amount"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.amount || ""}
-                  onChange={(e) => handleItemChange(i, e)}
-                />
-              </motion.div>
+                <option value="" disabled>Select Supplier</option>
+                {suppliers.map((ele) => (
+                  <option key={ele.id} value={ele.id}>{ele.name}</option>
+                ))}
+              </select>
+            </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
-                className="col-span-6 flex flex-col gap-2"
+            {/* Inventory Manager */}
+            <div className="space-y-2">
+              <label className="text-gray-300">Inventory Manager</label>
+              <select
+                name="inventoryId"
+                className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white
+                  focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                value={formData.inventoryId}
+                onChange={handleInputChange}
               >
-                <label className="text-white text-lg">Cost</label>
-                <input
-                  type="number"
-                  name="cost"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.cost || ""}
-                  onChange={(e) => handleItemChange(i, e)}
-                />
-              </motion.div>
+                <option value="" disabled>Select Manager</option>
+                {managersData.map((ele) => (
+                  <option key={ele.id} value={ele.id}>{ele.manager}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
-                className="col-span-12 flex flex-col gap-2"
-              >
-                <label className="text-white text-lg">Product ID</label>
-                <select
-                  name="productId"
-                  className="p-2 rounded-md bg-transparent border text-white"
-                  value={item.productId || ""}
-                  onChange={(e) => handleItemChange(i, e)}
-                >
-                  <option className="bg-slate-600" value="" disabled>
-                    Select a product
-                  </option>
-                  {items.map((ele) => (
-                    <option className="bg-slate-600" key={ele.id} value={ele.id}>
-                      {ele.name}
-                    </option>
-                  ))}
-                </select>
-              </motion.div>
-            </React.Fragment>
-          ))}
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="col-span-12 flex items-center justify-center gap-4"
-          >
-            <button
-              type="submit"
-              className="text-white px-6 py-2 rounded-lg bg-[#4C5365] hover:bg-[#5A6172] gradient-btn duration-300"
-            >
-              Submit
-            </button>
-
-            <button
-              type="button"
-              aria-label="Add new product"
-              className="text-white text-2xl font-semibold px-6 py-1 rounded-lg bg-green-600 hover:bg-green-800 gradient-btn duration-300"
-              onClick={addNewItem}
-            >
-              +
-            </button>
+          {/* Products Section */}
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-200">Products</h3>
             
-            <button
-              type="button"
-              aria-label="Add new product"
-              className="text-white text-2xl font-semibold px-6 py-1 rounded-lg bg-red-600 hover:bg-red-800 gradient-btn duration-300"
-              onClick={RemoveItem}
-            >
-              -
-            </button>
-          </motion.div>
+            {formData.products.map((item, i) => (
+              <div key={i} className="bg-gray-700 p-4 rounded-lg space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Product Selection */}
+                  <div className="space-y-2">
+                    <label className="text-gray-300">Product</label>
+                    <select
+                      name="productId"
+                      className="w-full px-4 py-3 bg-gray-600 rounded-lg text-white
+                        focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                      value={item.productId || ""}
+                      onChange={(e) => handleItemChange(i, e)}
+                    >
+                      <option value="" disabled>Select Product</option>
+                      {items.map((ele) => (
+                        <option key={ele.id} value={ele.id}>{ele.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Quantity */}
+                  <div className="space-y-2">
+                    <label className="text-gray-300">Quantity</label>
+                    <input
+                      type="number"
+                      name="amount"
+                      className="w-full px-4 py-3 bg-gray-600 rounded-lg text-white
+                        focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                      value={item.amount || ""}
+                      onChange={(e) => handleItemChange(i, e)}
+                    />
+                  </div>
+
+                  {/* Product Cost */}
+                  <div className="space-y-2">
+                    <label className="text-gray-300">Unit Cost</label>
+                    <input
+                      type="number"
+                      name="cost"
+                      className="w-full px-4 py-3 bg-gray-600 rounded-lg text-white
+                        focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                      value={item.cost || ""}
+                      onChange={(e) => handleItemChange(i, e)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={addNewItem}
+                className="px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors"
+              >
+                Add Product
+              </button>
+              <button
+                type="button"
+                onClick={RemoveItem}
+                className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-colors"
+              >
+                Remove Product
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full mt-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg
+              text-white font-semibold hover:opacity-90 transition-opacity"
+          >
+            Create Shipment
+          </button>
         </motion.form>
       </motion.div>
     </Center>

@@ -9,8 +9,6 @@ const PerformanceDetails = ({ performanceData }) => {
     const preformancePopupData = parseInt(index, 10);
 
     console.log("performanceData:", performanceData);
-    console.log("preformancePopupData:", preformancePopupData);
-    console.log("popupValues:", performanceData.popupValues);
 
     if (!performanceData || !performanceData.popupValues) {
         return <Center><Loader/></Center>;
