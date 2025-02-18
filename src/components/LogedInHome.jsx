@@ -38,7 +38,7 @@ const LogedInHome = () => {
         <div className="flex relative bg-[#323949]">
           {/* Sidebar */}
         {activeMenu ? (
-          <div className="z-20 w-72 fixed sidebar dark:bg-secondary-dark-bg bg-[#323949] transition-all duration-300 ease-in-out">
+          <div className="z-20 w-64 fixed sidebar dark:bg-secondary-dark-bg bg-[#323949] transition-all duration-300 ease-in-out">
             <Sidebar />
           </div>
         ) : (
@@ -53,7 +53,7 @@ const LogedInHome = () => {
           {/* Main Content */}
           <div
             className={`dark:bg-main-dark-bg bg-main-bg min-h-screen w-full ${
-              activeMenu ? 'md:ml-72' : 'flex-2'
+              activeMenu ? 'md:ml-64' : 'flex-2'
             }`}
           >
             {/* Navbar */}

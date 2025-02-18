@@ -1,244 +1,196 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import { MdOutlineCancel } from "react-icons/md";
+import { 
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Typography,
+  Button
+} from '@mui/material';
 import { useStateContext } from '../contexts/ContextProvider';
 import { useLogin } from '@/contexts/LoginContext';
-import "../App.css"
+import "../App.css";
+import { ArrowDown } from 'lucide-react';
+
 export default function Sidebar() {
   const { activeMenu, setActiveMenu, screenSize } = useStateContext();
-  const activeLink = "flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-white text-md m-2";
-  const normalLink = "flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-md text-gray-400 hover:text-slate-500 hover:bg-light-gray m-2";
+  const { logout } = useLogin();
+  const [expanded, setExpanded] = useState(null);
 
-  const HandelColseSidebar = () => {
+  const activeLink = "flex items-center gap-3 pl-4 py-2 rounded-lg text-white bg-[#3F465A]";
+  const normalLink = "flex items-center gap-3 pl-4 py-2 rounded-lg text-gray-300 hover:bg-[#3F465A]";
+
+  const handleChange = (panel) => (event, newExpanded) => {
+    setExpanded(newExpanded ? panel : false);
+  };
+
+  const handleCloseSidebar = () => {
     if (activeMenu && screenSize > 900) {
       setActiveMenu(false);
     }
   };
-  const {logout} = useLogin() ;
+
+  const menuSections = [
+    {
+      title: 'Dashboard',
+      items: [
+        { path: '/dashboard', label: 'Dashboard' }
+      ]
+    },
+    {
+      title: 'Orders',
+      items: [
+        { path: '/orders', label: 'Orders' },
+        { path: '/addorder', label: 'Add Order' }
+      ]
+    },
+    {
+      title: 'Storage',
+      items: [
+        { path: '/items', label: 'Items Report' },
+        { path: '/additem', label: 'Add Item' },
+        { path: '/Outbound', label: 'Orders in Fulfillment' },
+        { path: '/deliverInbound', label: 'Deliver' }
+      ]
+    },
+    {
+      title: 'Fulfill',
+      items: [
+        { path: '/addShipment', label: 'Add Inbound Order' }
+      ]
+    },
+    {
+      title: 'Admin Panel',
+      items: [
+        { path: '/adminpanel', label: 'Manage Authority' },
+        { path: '/permission', label: 'Permissions' }
+      ]
+    },
+    {
+      title: 'Inventory',
+      items: [
+        { path: '/viewInventory', label: 'View & Create' }
+      ]
+    },
+    {
+      title: 'Financial',
+      items: [
+        { path: '/Financial', label: 'Inbound Financial' },
+        { path: '/Inbound', label: 'Inbound' }
+      ]
+    },
+    {
+      title: 'Shipping',
+      items: [
+        { path: '/GovPrices', label: 'Shipping Prices' },
+        { path: '/Shipping', label: 'Shipping' },
+        { path: '/Myshipments', label: 'My Shipments' },
+        { path: '/supplierData', label: 'Supplier Data' }
+      ]
+    }
+  ];
+  
   return (
-    <div
-      className={`relative z-[1000] ml-3 h-screen overflow-auto pb-10 shadow-lg transition-all duration-300 ease-in-out scrollbar-custom 
-        ${activeMenu ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+    activeMenu&&(
+      <div
+      className={`relative z-[1000] h-screen overflow-auto pb-10 bg-[#2A2F43] shadow-xl transition-all duration-300 ease-in-out scrollbar-custom md:translate-x-0 w-64`}
     >
       {activeMenu && (
         <>
-          <div className="flex justify-between items-center ">
-            <Link to="/" onClick={HandelColseSidebar} className="items-center gap-3 ml-3 mt-4 flex text-xl font-semibold tracking-tight text-stone-300">
-              <span>stores system</span>
+          <div className="flex justify-between items-center px-4 pt-4">
+            <Link
+              to="/"
+              onClick={handleCloseSidebar}
+              className="text-lg font-semibold text-gray-100"
+            >
+              Stores System
             </Link>
             <button
-              type="button"
               onClick={() => setActiveMenu(false)}
-              className="text-3xl rounded-full p-3 hover:bg-light-gray mt-4 block md:hidden"
+              className="p-2 hover:bg-[#3F465A] rounded-full md:hidden"
             >
-              <MdOutlineCancel className='text-red-400' />
+              <MdOutlineCancel className="text-red-400 text-2xl" />
             </button>
           </div>
 
-          <div className="mt-10 overflow-y-auto">
-            {/* Dashboard Section */}
-            <div>
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                Dashboard
-              </p>
-              <NavLink
-                to={`/dashboard`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+          <div className="mt-4 px-2">
+            {menuSections.map((section, index) => (
+              <Accordion
+                key={index}
+                expanded={expanded === `panel${index}`}
+                onChange={handleChange(`panel${index}`)}
+                sx={{
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none',
+                  color: '#fff',
+                  '&:before': { display: 'none' },
+                  margin: '4px 0'
+                }}
               >
-                <span className="capitalize">dashboard</span>
-              </NavLink>
-            </div>
+                <AccordionSummary
+                  expandIcon={<ArrowDown className='text-[#9CA3AF]' />}
+                  sx={{
+                    minHeight: '48px',
+                    '& .MuiAccordionSummary-content': { margin: '4px 0' },
+                    backgroundColor: expanded === `panel${index}` ? '#3F465A' : 'transparent',
+                    borderRadius: '8px',
+                    '&:hover': { backgroundColor: '#3F465A' }
+                  }}
+                >
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                    {section.title}
+                  </Typography>
+                </AccordionSummary>
 
-            {/* Orders Section */}
-            <div>
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                Orders
-              </p>
-              <NavLink
-                to={`/orders`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Orders</span>
-              </NavLink>
-
-              <NavLink
-                to={`/addorder`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Add Order</span>
-              </NavLink>
-            </div>
-
-            {/* Items Section */}
-            <div>
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                Items
-              </p>
-              <NavLink
-                to={`/items`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Items report</span>
-              </NavLink>
-
-              <NavLink
-                to={`/additem`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Add Item</span>
-              </NavLink>
-            </div>
-
-            {/* Storage Section */}
-            <div>
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                Storage
-              </p>
-              
-              <NavLink
-                to={`/deliverInbound`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">deliver</span>
-              </NavLink>
-
-              <NavLink
-                to={`/Outbound`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Outbound</span>
-              </NavLink>
-
-              <NavLink
-                to={`/addShipment`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Add inbound order</span>
-              </NavLink>
-
-            </div>
-            <div>
-
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                admin panel
-              </p>
-              <NavLink
-                to={`/adminpanel`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">mange Authority</span>
-              </NavLink>
-
-              <NavLink
-                to={`/permission`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">permissions</span>
-              </NavLink>
-
-            </div>
-
-            <div>
-
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                inventory 
-              </p>
-              <NavLink
-                to={`/viewInventory`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">View & Create</span>
-              </NavLink>
-
-            </div>
-
+                <AccordionDetails sx={{ padding: '0 8px 8px' }}>
+                  {section.items.map((item, itemIndex) => (
+                    <NavLink
+                      key={itemIndex}
+                      to={item.path}
+                      onClick={handleCloseSidebar}
+                      className={({ isActive }) => 
+                        isActive ? activeLink : normalLink
+                      }
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <Typography 
+                        sx={{ 
+                          fontSize: '0.875rem',
+                          padding: '8px 0',
+                          width: '100%'
+                        }}
+                      >
+                        {item.label}
+                      </Typography>
+                    </NavLink>
+                  ))}
+                </AccordionDetails>
+              </Accordion>
+            ))}
             
-            <div>
-
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                Financial
-              </p>
-              <NavLink
-                to={`/Financial`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
+            <div className="bottom-0 w-full p-4 bg-[#2A2F43] border-t border-[#3F465A]">
+              <Button
+                fullWidth
+                onClick={logout}
+                sx={{
+                  backgroundColor: '#EF4444',
+                  color: 'white',
+                  '&:hover': { backgroundColor: '#DC2626' },
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                  py: 1
+                }}
               >
-                <span className="capitalize">inbound Financial</span>
-              </NavLink>
-
-              <NavLink
-                to={`/Inbound`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Inbound</span>
-              </NavLink>
-
-            </div>
-
-            <div>
-
-              <p className="text-gray-50 m-3 mt-4 uppercase">
-                Shipping 
-              </p>
-              <NavLink
-                to={`/GovPrices`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">shipping prices</span>
-              </NavLink>
-              
-              <NavLink
-                to={`/Shipping`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">shipping</span>
-              </NavLink>
-              
-              <NavLink
-                to={`/Myshipments`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">Myshipments</span>
-              </NavLink>
+                Logout
+              </Button>
             </div>
           </div>
 
-
-          
-          <div>
-            <p className="text-gray-50 m-3 mt-4 uppercase">
-              Shipping 
-            </p>
-            
-            <NavLink
-                to={`/supplierData`}
-                onClick={HandelColseSidebar}
-                className={({ isActive }) => isActive ? `${activeLink} bg-[#3F465A]` : normalLink}
-              >
-                <span className="capitalize">supplier Data</span>
-            </NavLink>
-          </div>
 
         </>
       )}
-      <div className='w-24 h-8 flex items-center justify-center cursor-pointer rounded-2xl bg-red-600 sticky bottom-[-30px] float-right mx-2 hover:bg-red-800 text-white' onClick={()=>{logout()}}>
-        logout
-      </div>
     </div>
+    )
   );
 }
