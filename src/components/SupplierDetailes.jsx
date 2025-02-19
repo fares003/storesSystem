@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const API = import.meta.env.VITE_API;
 
@@ -9,6 +10,7 @@ const SupplierDetailes = () => {
   const [error, setError] = useState(null);
   const [supplierId, setSupplierId] = useState('');
   const [allSuppliers, setAllSuppliers] = useState([]);
+  const [createSupplierName , setCreateSupplierName] = useState("") ;
 
   const fetchAllsuppliers = async () => {
     try {
@@ -38,7 +40,7 @@ const SupplierDetailes = () => {
     } catch (err) {
       setError(err.message || 'Failed to fetch data. Please try again.');
       setData([]);
-    } finally {
+    }finally {
       setLoading(false);
     }
   };
@@ -47,9 +49,49 @@ const SupplierDetailes = () => {
     e.preventDefault();
     fetchData();
   };
-
+  const HandleCreateSupplier = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.post(
+        `${API}InboundOrders/suppliers/create`,
+        { name: createSupplierName },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCreateSupplierName("")
+      toast.success("Supplier created!");
+    } catch (err) {
+      console.error("Error creating supplier:", err);
+      toast.error(err.response?.data?.message || err.message);
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-4">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Create Supplier</h1>
+          <label htmlFor="supplierName" className="block text-sm font-medium text-gray-700 mb-2">
+            Create Supplier:
+          </label>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <input 
+              type="text"
+              name="supplierName"
+              id="supplierName"
+              value={createSupplierName}
+              onChange={(e)=>{setCreateSupplierName(e.target.value)}}
+              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={HandleCreateSupplier}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >Create</button>
+          </div>
+      </div>
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Supplier Details</h1>
 
