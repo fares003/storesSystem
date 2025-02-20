@@ -10,6 +10,7 @@ const API = import.meta.env.VITE_API;
 const itemSchema = z.object({
   username: z.string().min(1, "Username is required"),
   phonenumber: z.string().min(1, "Phone number is required"),
+  whatsapp : z.nullable(z.string()) ,
   email: z.string().email("Invalid email address"),
   address: z.string().min(1, "Address is required"),
   items: z.array(
@@ -24,6 +25,7 @@ const AddNewOrder = () => {
   const [formData, setFormData] = useState({
     username: "",
     phonenumber: "",
+    whatsapp : null ,
     email: "",
     address: "",
     items: [],
@@ -96,6 +98,7 @@ const AddNewOrder = () => {
         customer: {
           username: parsedData.username,
           phonenumber: parsedData.phonenumber,
+          whatsapp : parsedData.whatsapp ,
           email: parsedData.email,
         },
         default_address: { address1: parsedData.address },
@@ -112,6 +115,7 @@ const AddNewOrder = () => {
         setFormData({
           username: "",
           phonenumber: "",
+          whatsapp : null, 
           email: "",
           address: "",
           items: [],
@@ -119,7 +123,7 @@ const AddNewOrder = () => {
         setQuantities({});
       }
     } catch (error) {
-      // Error handling remains similar
+      toast.error(`there is error Now `)
     }
   };
 
@@ -143,7 +147,7 @@ const AddNewOrder = () => {
           </h2>
 
           <div className="flex flex-col gap-4">
-            {['username', 'phonenumber', 'email', 'address'].map((field) => (
+            {['username', 'phonenumber' , "whatsapp", 'email', 'address'].map((field) => (
               <div key={field} className="space-y-2">
                 <label className="text-gray-300 capitalize">{field.replace('number', ' number')}</label>
                 <input
