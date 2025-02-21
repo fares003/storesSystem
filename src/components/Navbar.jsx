@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MdNotifications } from 'react-icons/md';
 import { FaBars } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
@@ -17,6 +17,12 @@ export default function Navbar() {
     newNotification ,
     setNewNotification, 
   } = useStateContext();
+
+  const [isOn, setIsOn] = useState(false);
+  // handel is on or off 
+  useEffect(()=>{
+
+  },[])
 
   const { logedin} = useLogin();
   const username = localStorage.getItem("username")
@@ -56,6 +62,26 @@ export default function Navbar() {
 
       {logedin ? (
         <div className="flex items-center gap-6">
+          {/* sign on sigin off  */}
+          <div>
+            <button
+              onClick={() => setIsOn(!isOn)}
+              className={`relative w-14 h-7 flex items-center px-1 rounded-full transition-all duration-300 
+                ${isOn ? "bg-blue-600" : "bg-gray-300"}`}
+            >
+              <span
+                className={`absolute w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 
+                  ${isOn ? "translate-x-8" : "translate-x-0"}`}
+              ></span>
+              <span className={`absolute left-3 text-sm font-semibold text-white transition-opacity duration-300 ${isOn ? "opacity-100" : "opacity-0"}`}>
+                On
+              </span>
+              <span className={`absolute right-3 text-sm font-semibold text-gray-600 transition-opacity duration-300 ${isOn ? "opacity-0" : "opacity-100"}`}>
+                Off
+              </span>
+            </button>
+          </div>
+
           <div
             className="relative cursor-pointer"
             onClick={() => {setActiveNotification(!activeNotification) ; setNewNotification(0) ;}}

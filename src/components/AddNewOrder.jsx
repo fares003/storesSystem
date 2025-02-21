@@ -33,7 +33,9 @@ const AddNewOrder = () => {
 
   const [products, setProducts] = useState([]);
   const [quantities, setQuantities] = useState({});
-
+  const [ prices ,setPrices] = useState({});
+  const [totalPrice , setTotalPrice] = useState(0);
+  
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -60,20 +62,27 @@ const AddNewOrder = () => {
       [sku]: Math.max(0, parseInt(value) || 0)
     }));
   };
-
+  const handlePriceCahnge = (sku , value)=>{
+    setPrices((prev)=>({
+      ...prev ,
+      [sku] : Math.max(0 , parseFloat(value) || 0)
+    }))
+  }
   const addProductToOrder = (product) => {
     const quantity = quantities[product.sku] || 0;
+    const price = prices[product.sku] || 0 ; 
     if (quantity < 1) return;
 
     setFormData(prev => ({
       ...prev,
       items: [
         ...prev.items.filter(item => item.sku !== product.sku),
-        { sku: product.sku, quantity }
+        { sku: product.sku, quantity , price } ,
       ]
     }));
 
     setQuantities(prev => ({ ...prev, [product.sku]: 0 }));
+    setQuantities(prev => ({ ...prev, [prices.sku]: 0 }));
   };
 
   const removeItem = (sku) => {
@@ -123,6 +132,7 @@ const AddNewOrder = () => {
         setQuantities({});
       }
     } catch (error) {
+      console.log(error); 
       toast.error(`there is error Now `)
     }
   };
@@ -174,10 +184,15 @@ const AddNewOrder = () => {
                         <div>
                           <p className="text-gray-200">{product?.name}</p>
                           <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
+                          <p className="text-sm text-gray-400">Price: {item.price}</p>
+                          <p className="text-sm text-gray-400">Total : {item.price * item.quantity}</p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => removeItem(item.sku)}
+                          onClick={() => {
+                            removeItem(item.sku) ;
+                            setTotalPrice((prev)=>prev - (item.quantity * item.price))
+                          }}
                           className="text-red-400 hover:text-red-300 transition-colors"
                         >
                           Remove
@@ -185,6 +200,9 @@ const AddNewOrder = () => {
                       </div>
                     );
                   })}
+                  <div className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
+                    <p className="text-white text-xl font-bold">Total : {totalPrice}</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -216,16 +234,35 @@ const AddNewOrder = () => {
                     <p className="text-sm text-blue-300">Available: {product.quantity}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      value={quantities[product.sku] || 0}
-                      onChange={(e) => handleQuantityChange(product.sku, e.target.value)}
-                      className="w-20 px-2 py-1 bg-gray-600 text-white rounded-md text-center"
-                    />
+
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="quantitie" className="text-white">Quantitie</label>
+                      <input
+                        name="quantitie"
+                        type="number"
+                        min="0"
+                        value={quantities[product.sku] || 0}
+                        onChange={(e) => handleQuantityChange(product.sku, e.target.value)}
+                        className="w-20 px-2 py-1 bg-gray-600 text-white rounded-md text-center"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="price" className="text-white">Price</label>
+                      <input
+                        name="price"
+                        type="number"
+                        min="0"
+                        value={prices[product.sku] || 0}
+                        onChange={(e) => handlePriceCahnge(product.sku, e.target.value)}
+                        className="w-20 px-2 py-1 bg-gray-600 text-white rounded-md text-center"
+                      />
+                    </div>
                     <button
                       type="button"
-                      onClick={() => addProductToOrder(product)}
+                      onClick={() => {
+                        addProductToOrder(product);
+                        setTotalPrice((prev)=>prev + (prices[product.sku] * quantities[product.sku]) )
+                      }}
                       className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-md transition-colors"
                     >
                       Add
