@@ -2,251 +2,143 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Center from "@/components/Center";
 import axios from "axios";
-import { Select, Button, MenuItem, InputLabel, FormControl } from '@mui/material';
+import Loader from "./Loader";
+
 const API = import.meta.env.VITE_API;
 
 const AllInventory = () => {
-  const [selectedManager, setSelectedManager] = useState("");
-  const [Authusers, setAuthusers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [sourceInventory, setSourceInventory] = useState("");
-  const [targetInventory, setTargetInventory] = useState("");
-  const [Inventory, setInventory] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState("");
-
-  const [quantity, setQuantity] = useState("");
+  const [transfers, setTransfers] = useState([]);
+  const [inventories, setInventories] = useState([]);
+  const [selectedInventory, setSelectedInventory] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAuthusers();
-    fetchProducts();
-    fetchInventory() ;
+    fetchInventories();
+    fetchTransfers();
   }, []);
 
-  const fetchInventory = async () => {
-    const target = `${API}Inventory`;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  useEffect(() => {
+    fetchTransfers(selectedInventory);
+  }, [selectedInventory]);
 
-      if (response.status === 200) {
-        setInventory(response.data);
-      } else {
-        console.error("Failed to fetch users.");
-      }
+  const fetchInventories = async () => {
+    try {
+      const response = await axios.get(`${API}inventory`);
+      setInventories(response.data);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.log(error);
+      toast.error("Failed to fetch inventories");
     }
   };
 
-
-  const fetchAuthusers = async () => {
-    const target = `${API}auth`;
+  const fetchTransfers = async (inventoryId = "") => {
+    setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200) {
-        setAuthusers(response.data);
-      } else {
-        console.error("Failed to fetch users.");
-      }
+      const url = inventoryId ? `${API}inventory/transfer/${inventoryId}` : `${API}inventory/transfer`;
+      const response = await axios.get(url);
+      setTransfers(response.data);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.log(error);
+      toast.error("Failed to fetch transfers");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchProducts = async () => {
-    const target = `${API}Item`;
+  const handleConfirmReceive = async (transferId) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200) {
-        setProducts(response.data);
-      } else {
-        console.error("Failed to fetch products.");
-      }
+      await axios.put(`${API}inventory/transfer/confirm-receive/${transferId}`);
+      toast.success("Transfer confirmed successfully!");
+      setTransfers(transfers.map(transfer => 
+        transfer.id === transferId ? { ...transfer, received: true, receivedAt: new Date().toISOString() } : transfer
+      ));
     } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
-
-  const handleCreateInventory = async () => {
-    const target = `${API}Inventory/create`;
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        target,
-        { managerId: selectedManager },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success('Inventory created successfully!');
-        fetchAuthusers(); // Refresh the users list
-      } else {
-        toast.error('Failed to create inventory.');
-      }
-    } catch (error) {
-      console.error('Error creating inventory:', error);
-      toast.error('Error creating inventory. Please try again.');
-    }
-  };
-
-  const handleTransferInventory = async () => {
-    const target = `${API}Inventory/transfer`;
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        target,
-        {
-          sourceId: sourceInventory,
-          productId: selectedProduct,
-          targetId: targetInventory,
-          quantity: quantity,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success('Inventory transferred successfully!');
-        // Reset form fields
-        setSourceInventory("");
-        setTargetInventory("");
-        setSelectedProduct("");
-        setQuantity("");
-      } else {
-        toast.error('Failed to transfer inventory.');
-      }
-    } catch (error) {
-      console.error('Error transferring inventory:', error);
-      toast.error('Error transferring inventory. Please try again.');
+      console.log(error);
+      toast.error("Failed to confirm transfer");
     }
   };
 
   return (
-    <Center className={"px-5 bg-gray-200"}>
-      <h2 className="textGradient text-4xl font-bold text-gray-900 mb-4">
-        Inventory Management
-      </h2>
-
-      {/* Create Inventory Section */}
-      <div className="w-full mb-8 p-6 bg-white rounded-lg shadow-md">
-        <h3 className="text-2xl font-semibold mb-4">Create Inventory</h3>
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <FormControl fullWidth>
-            <InputLabel id="select-manager-label">Select Manager</InputLabel>
-            <Select
-              labelId="select-manager-label"
-              value={selectedManager}
-              onChange={(e) => setSelectedManager(e.target.value)}
-              label="Select Manager"
-            >
-              {Authusers.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.username}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCreateInventory}
-            className="w-full md:w-auto"
+    <Center>
+      <div className="w-full min-h-[90vh] overflow-y-auto max-w-8xl p-6 bg-slate-300">
+        <h1 className="text-2xl font-bold text-blue-600 mb-6">Inventory Transfers</h1>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">Select Inventory:</label>
+          <select
+            className="w-full p-2 border rounded-md"
+            value={selectedInventory}
+            onChange={(e) => setSelectedInventory(e.target.value)}
           >
-            Create Inventory
-          </Button>
+            <option value="">All Inventories</option>
+            {inventories.map((inventory) => (
+              <option key={inventory.id} value={inventory.id}>
+                {inventory.manager || `Inventory ${inventory.id}`}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
 
-      {/* Transfer Inventory Section */}
-      <div className="w-full p-6 bg-white rounded-lg shadow-md">
-        <h3 className="text-2xl font-semibold mb-4">Transfer Inventory</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <FormControl fullWidth>
-            <InputLabel id="source-inventory-label">Source Inventory</InputLabel>
-            <Select
-              labelId="source-inventory-label"
-              value={sourceInventory}
-              onChange={(e) => setSourceInventory(e.target.value)}
-              label="Source Inventory"
-            >
-              {Inventory.map((user) => (
-                <MenuItem  key={user.managerId} value={user.managerId}>
-                  {user.manager}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="target-inventory-label">Target Inventory</InputLabel>
-            <Select
-              labelId="target-inventory-label"
-              value={targetInventory}
-              onChange={(e) => setTargetInventory(e.target.value)}
-              label="Target Inventory"
-            >
-              {Inventory.map((user) => (
-                <MenuItem key={user.managerId} value={user.managerId}>
-                  {user.manager}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="product-label">Product</InputLabel>
-            <Select
-              labelId="product-label"
-              value={selectedProduct}
-              onChange={(e) => setSelectedProduct(e.target.value)}
-              label="Product"
-            >
-              {products.map((product) => (
-                <MenuItem key={product.id} value={product.id}>
-                  {product.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="w-full p-2 border rounded"
-              placeholder="Quantity"
-            />
-          </FormControl>
-        </div>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleTransferInventory}
-          className="mt-16 w-full"
-        >
-          Transfer Inventory
-        </Button>
+        {loading ? (
+          <div className="text-blue-600"><Loader/></div>
+        ) : (
+          <div className="bg-white rounded-lg shadow max-h-[80vh] overflow-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-medium">From</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium">To</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium">Items</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium">Sent At</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium">Received At</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {transfers.map((transfer) => (
+                  <tr key={transfer.id} className="hover:bg-blue-50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-gray-800">{transfer.source || `Location ${transfer.sourceId}`}</td>
+                    <td className="px-6 py-4 text-sm text-gray-800">{transfer.destination || `Location ${transfer.destinationId}`}</td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {transfer.items.map((item) => (
+                        <div key={item.productId} className="mb-1">
+                          {item.product} (Qty: {item.quantity})
+                        </div>
+                      ))}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {new Date(transfer.sentAt).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {transfer.receivedAt 
+                        ? new Date(transfer.receivedAt).toLocaleString()
+                        : 'Not received yet'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {transfer.received ? (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                          Completed
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleConfirmReceive(transfer.id)}
+                          className="px-3 py-1 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
+                        >
+                          Confirm Receipt
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {transfers.length === 0 && !loading && (
+              <div className="text-gray-500 p-6 text-center">
+                No inventory transfers found
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Center>
   );

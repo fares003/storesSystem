@@ -50,7 +50,9 @@ export default function Sidebar() {
       console.log(error);
     }
   }
-  useEffect( ()=>{sidebarViewPerms();},[])
+  useEffect( ()=>{
+    sidebarViewPerms();
+  },[])
   
   return (
     activeMenu&&(

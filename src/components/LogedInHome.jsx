@@ -28,6 +28,8 @@ import ShippingServices from '@/pages/ShippingServices';
 import Myshipments from '@/pages/Myshipments';
 import PerformancePage from '@/pages/PerformancePage';
 import SupplierData from '@/pages/SupplierData';
+import Transfer from '@/pages/Transfer';
+import TransferRequests from '@/pages/TransferRequests';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -88,7 +90,9 @@ const LogedInHome = () => {
                 <Route path="/Myshipments" element={<Myshipments/>} />
                 <Route path="/performance-details/:index" element={<PerformancePage/>}/>
                 <Route path="/supplierData" element={<SupplierData />} />
-                </Routes>
+                <Route path="/InventoryTransfer" element={<Transfer />} />
+                <Route path="/TransferRequests" element={<TransferRequests />} />
+              </Routes>
             </div>
           </div>
         </div>
