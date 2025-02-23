@@ -350,8 +350,6 @@ const DashboardFinance = () => {
                     {performanceData.map((item, index) => (
                         <motion.div
                             onClick={()=>{
-                                console.log(item);
-                                
                                 localStorage.setItem( "performanceData" , JSON.stringify({
                                     ...item , 
                                     icon : ""

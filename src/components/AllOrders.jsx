@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Loader from "./Loader";
 import { FiEdit, FiTrash2, FiTruck, FiCheckCircle, FiInfo, FiPackage } from "react-icons/fi";
+import { ArrowDown } from "lucide-react";
 
 function AllOrders() {
   
@@ -14,6 +15,12 @@ function AllOrders() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [AreYouSurePopup, setAreYouSurePopup] = useState({
+    open:false,
+    actions:()=>{}
+  });
   
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API;
@@ -109,7 +116,63 @@ function AllOrders() {
       toast.error("Error deleting order");
     }
   };
-
+  const holdOrder = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const target = `${API}orders/hold/${id}`;
+  
+      const response = await axios.put(
+        target,
+        {Notes:"bla"},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === id ? { ...order, status: "hold" } : order
+          )
+        );
+        toast.success("Order hold successfully!");
+      }
+    } catch (error) {
+      console.error("Error holding order:", error);
+      toast.error("Error holding order");
+    }
+  };
+  const cancelOrder =async (id)=>{
+    try {
+      const token = localStorage.getItem("token");
+      const target = `${API}orders/cancel/${id}`;
+  
+      const response = await axios.delete(
+        target,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === id ? { ...order, status: "cancel" } : order
+          )
+        );
+        toast.success("Order canceled successfully!");
+      }
+    } catch (error) {
+      console.error("Error canceled order:", error);
+      toast.error("Error canceled order");
+    }
+  }
   const confirmOrder = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -280,7 +343,6 @@ const handleSaveCode = async () => {
     };
 
     const { start, end } = getPaginationRange();
-
     
   return (
     <Center className="py-8 px-4">
@@ -346,14 +408,101 @@ const handleSaveCode = async () => {
                     </button>
                     
                     {item.status === "New" && (
-                      <button
-                        onClick={() => confirmOrder(item.id)}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm transition-all"
-                      >
-                        Confirm
-                      </button>
-                    )}
+                      <div className="relative flex">
+                        <button
+                          onClick={() => {
+                            if (selectedAction === 'hold') {
+                              setAreYouSurePopup({open:true , actions:()=>{holdOrder(item.id)}})
+                            } else if (selectedAction === 'cancel') {
+                              setAreYouSurePopup({open:true , actions:()=>{cancelOrder(item.id)}})
+                            } else {
+                              setAreYouSurePopup({open:true , actions:()=>{confirmOrder(item.id)}})
+                            }
+                          }}
+                          className={`px-4 py-2 text-white rounded-l-lg text-sm transition-all ${
+                            selectedAction === 'hold' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                            selectedAction === 'cancel' ? 'bg-red-600 hover:bg-red-500' :
+                            'bg-indigo-600 hover:bg-indigo-500'
+                          }`}
+                        >
+                          {selectedAction === 'hold' ? 'Hold' :
+                          selectedAction === 'cancel' ? 'Cancel' :
+                          'Confirm'}
+                        </button>
 
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenDropdownId(openDropdownId === item.id ? null : item.id)}
+                            className="px-3 py-2 bg-slate-500 hover:bg-slate-400 text-white rounded-r-lg transition-all"
+                          >
+                            <ArrowDown/>
+                          </button>
+
+                          {openDropdownId === item.id && (
+                            <div className="absolute top-full right-0 mt-1 w-full min-w-[120px] bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                              {selectedAction !== 'confirm' && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedAction('confirm');
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                                >
+                                  confirm
+                                </button>
+                              )}
+
+                              {selectedAction !== 'hold' && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedAction('hold');
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                                >
+                                  Hold
+                                </button>
+                              )}
+                              
+                              {selectedAction !== 'cancel' && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedAction('cancel');
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left border-t border-gray-200"
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {/* {
+                      item.status === "pending delivery" && (
+                        <div className="flex gap-2 w-full">
+                          <select
+                            value={selectedService}
+                            onChange={(e) => setSelectedService(e.target.value)}
+                            className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
+                          >
+                            <option value="" disabled>Select Service</option>
+                            {services.map((service) => (
+                              <option key={service} value={service}>{service}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => handledeliver(item.id)}
+                            disabled={!selectedService}
+                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-all disabled:opacity-50"
+                          >
+                            Deliver
+                          </button>
+                      </div>
+                      )
+                    } */}
                     {item.status === "Ready for Shipping" && (
                       <div className="flex gap-2 w-full">
                         <select
@@ -384,12 +533,12 @@ const handleSaveCode = async () => {
                         >
                           <FiEdit className="text-lg" />
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => deleteOrder(item.id)}
                           className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-all"
                         >
                           <FiTrash2 className="text-lg" />
-                        </button>
+                        </button> */}
                       </div>
                     )}
                   </div>
@@ -433,7 +582,7 @@ const handleSaveCode = async () => {
         </div>
       )}
 
-      {/* Popups remain unchanged */}
+      {/* Popups */}
       {popupData && (
         <Popup
           title="Update Order"
@@ -544,6 +693,32 @@ const handleSaveCode = async () => {
           </div>
         </Popup>
       )}
+
+      {
+        AreYouSurePopup.open && (
+          <Popup 
+          title={"Are You Sure"}
+          onClose={() => setAreYouSurePopup({
+            ...AreYouSurePopup , 
+            open : false
+          })}
+          actions={[
+            { label: "Cancel", onClick: () => {
+              setAreYouSurePopup({
+                ...AreYouSurePopup , 
+                open : false
+              })
+            }, type: "secondary" },
+            { label: "Save", onClick: ()=>{AreYouSurePopup.actions(); setAreYouSurePopup({open:false , actions:null})}, type: "primary" },
+          ]}
+          >
+            <div className="flex flex-col items-center gap-4">
+              <p className="font-bold text-xl">Are you sure ?</p>
+              <span className="text-gray-600">You can't undo this</span>
+            </div>
+          </Popup>
+        )
+      }
     </Center>
   );
 }

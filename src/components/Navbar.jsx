@@ -5,6 +5,10 @@ import { NavLink } from 'react-router-dom';
 import { useStateContext } from '../contexts/ContextProvider';
 import { useLogin } from '@/contexts/LoginContext';
 import avatar from "../assets/react.svg";
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
+const API = import.meta.env.VITE_API;
 
 export default function Navbar() {
   const {
@@ -19,11 +23,27 @@ export default function Navbar() {
   } = useStateContext();
 
   const [isOn, setIsOn] = useState(false);
-  // handel is on or off 
-  useEffect(()=>{
 
-  },[])
+  // useEffect(()=>{
+  //   handlOnOff();
+  // },[isOn])
 
+  const handlOnOff = async ()=>{
+    const token = localStorage.getItem("token");
+    const target = isOn ? `${API}Auth/sign-off` : `${API}Auth/sign-on` ;
+
+    try{
+      const response = await axios.get(target, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("status changed")
+    }catch(error){
+      console.log(error);
+      toast.error("faild to change status")
+    }
+  }
   const { logedin} = useLogin();
   const username = localStorage.getItem("username")
   useEffect(() => {

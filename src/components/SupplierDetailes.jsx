@@ -11,6 +11,8 @@ const SupplierDetailes = () => {
   const [supplierId, setSupplierId] = useState('');
   const [allSuppliers, setAllSuppliers] = useState([]);
   const [createSupplierName , setCreateSupplierName] = useState("") ;
+  const [createSupplierAddress , setCreateSupplierAddress] = useState("") ;
+  const [createSupplierContacts , setCreateSupplierContacts] = useState("") ;
 
   const fetchAllsuppliers = async () => {
     try {
@@ -54,7 +56,11 @@ const SupplierDetailes = () => {
     try {
       const response = await axios.post(
         `${API}InboundOrders/suppliers/create`,
-        { name: createSupplierName },
+        { 
+          name: createSupplierName,
+          address: createSupplierAddress,
+          contacts: createSupplierContacts
+         },
         {
           headers: {
             "Content-Type": "application/json",
@@ -82,8 +88,27 @@ const SupplierDetailes = () => {
               type="text"
               name="supplierName"
               id="supplierName"
+              placeholder='name'
               value={createSupplierName}
               onChange={(e)=>{setCreateSupplierName(e.target.value)}}
+              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input 
+              type="text"
+              name="supplierAddress"
+              id="supplierAddress"
+              placeholder='Address'
+              value={createSupplierAddress}
+              onChange={(e)=>{setCreateSupplierAddress(e.target.value)}}
+              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input 
+              type="text"
+              name="supplierContacts"
+              id="supplierContacts"
+              placeholder='Contacts'
+              value={createSupplierContacts}
+              onChange={(e)=>{setCreateSupplierContacts(e.target.value)}}
               className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
