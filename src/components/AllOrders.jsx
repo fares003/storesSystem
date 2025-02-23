@@ -331,6 +331,9 @@ const handlePendingDelivery = async (orderID)=>{
   }
 }
 
+const handleUpdateCart = async (newCart)=>{
+
+}
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -617,79 +620,86 @@ const handlePendingDelivery = async (orderID)=>{
             { label: "Save", onClick: handleSaveChanges, type: "primary" },
           ]}
         >
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm text-gray-300">Order ID</label>
-                <input
-                  value={popupData.id}
-                  onChange={(e) => setPopupData({...popupData, id: e.target.value})}
-                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm text-gray-300">Total</label>
-                <input
-                  type="number"
-                  value={popupData.total}
-                  onChange={(e) => setPopupData({...popupData, total: e.target.value})}
-                  className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-            
+          <div className="flex flex-col gap-1">
+            {/* <div className="flex gap-4 items-center justify-center bg-red-400 transition-all">
+              <span className={``}>update info</span>
+              <span>update cart</span>
+            </div> */}
             <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-400">Customer Information</h4>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-sm text-gray-300">Name</label>
+                  <label className="text-sm text-gray-300">Order ID</label>
                   <input
-                    value={popupData.customer.name}
-                    onChange={(e) => setPopupData({...popupData, customer: {
-                      ...popupData.customer,
-                      name: e.target.value
-                    }})}
+                    value={popupData.id}
+                    onChange={(e) => setPopupData({...popupData, id: e.target.value})}
                     className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Total</label>
+                  <input
+                    type="number"
+                    value={popupData.total}
+                    onChange={(e) => setPopupData({...popupData, total: e.target.value})}
+                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-400">Customer Information</h4>
+                <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-sm text-gray-300">Phone</label>
+                    <label className="text-sm text-gray-300">Name</label>
                     <input
-                      value={popupData.customer.phoneNumber}
+                      value={popupData.customer.name}
                       onChange={(e) => setPopupData({...popupData, customer: {
                         ...popupData.customer,
-                        phoneNumber: e.target.value
+                        name: e.target.value
                       }})}
                       className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-sm text-gray-300">Phone</label>
+                      <input
+                        value={popupData.customer.phoneNumber}
+                        onChange={(e) => setPopupData({...popupData, customer: {
+                          ...popupData.customer,
+                          phoneNumber: e.target.value
+                        }})}
+                        className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm text-gray-300">Email</label>
+                      <input
+                        value={popupData.customer.email}
+                        onChange={(e) => setPopupData({...popupData, customer: {
+                          ...popupData.customer,
+                          email: e.target.value
+                        }})}
+                        className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-1">
-                    <label className="text-sm text-gray-300">Email</label>
+                    <label className="text-sm text-gray-300">Address</label>
                     <input
-                      value={popupData.customer.email}
+                      value={popupData.customer.address}
                       onChange={(e) => setPopupData({...popupData, customer: {
                         ...popupData.customer,
-                        email: e.target.value
+                        address: e.target.value
                       }})}
                       className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-300">Address</label>
-                  <input
-                    value={popupData.customer.address}
-                    onChange={(e) => setPopupData({...popupData, customer: {
-                      ...popupData.customer,
-                      address: e.target.value
-                    }})}
-                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                  />
                 </div>
               </div>
             </div>
           </div>
+
         </Popup>
       )}
 
