@@ -306,6 +306,30 @@ const handleSaveCode = async () => {
   }
 };
 
+const handlePendingDelivery = async (orderID)=>{
+  try{
+    const token = localStorage.getItem("token");
+    const target = `${API}orders/deliver`
+    const dataToBeSent = {
+      "orderId": orderID,
+      "service": selectedService
+    }
+    const response = await axios.post(target , dataToBeSent ,  {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }) ;
+
+    if(response.status === 200){
+      toast.success("successfully!");
+    }
+  }
+  catch(error){
+    console.log("error Pending Delivery" , error);
+    toast.error("error Pending Delivery")
+  }
+}
 
 
   const getStatusColor = (status) => {
@@ -480,7 +504,8 @@ const handleSaveCode = async () => {
                         </div>
                       </div>
                     )}
-                    {/* {
+                    {
+                      // change this status end point to order/deliver 
                       item.status === "pending delivery" && (
                         <div className="flex gap-2 w-full">
                           <select
@@ -494,7 +519,7 @@ const handleSaveCode = async () => {
                             ))}
                           </select>
                           <button
-                            onClick={() => handledeliver(item.id)}
+                            onClick={() => handlePendingDelivery(item.id)}
                             disabled={!selectedService}
                             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-all disabled:opacity-50"
                           >
@@ -502,7 +527,7 @@ const handleSaveCode = async () => {
                           </button>
                       </div>
                       )
-                    } */}
+                    }
                     {item.status === "Ready for Shipping" && (
                       <div className="flex gap-2 w-full">
                         <select
