@@ -31,7 +31,11 @@ function AllOrders() {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [updateCartOrOrder ,setUpdateCartOrOrder] = useState("update order")
   const itemsPerPage = 9;
+  const activePopupWindow = "bg-blue-600 text-white px-2 py-1 rounded-md"
+
+  const [items, setItems] = useState([]);
 
 
   const Authority = async () => {
@@ -76,11 +80,32 @@ function AllOrders() {
       console.error("Error fetching orders:", error);
     }
   };
+  const fetchItems = async () => {
+
+    const target = `${API}item`;
+    try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(target, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (response.status === 200) {
+            setItems(response.data);
+        } else {
+            console.error("Failed to fetch items.");
+        }
+    } catch (error) {
+        console.error("Error fetching items:", error);
+    }
+};
 
   const fetching = async ()=>{
       await fetchOrders();
       await Authority() ;
       await fetchServices()
+      await fetchItems();
   }
 
   useEffect(()=>{
@@ -331,8 +356,29 @@ const handlePendingDelivery = async (orderID)=>{
   }
 }
 
-const handleUpdateCart = async (newCart)=>{
-
+const handleUpdateCart = async ()=>{
+  try{
+    const target = `${API}orders/update-cart` ;
+    const token = localStorage.getItem("token") ;
+    const dataToBeSent = {
+      "orderId": popupData.id ,
+      "productId": Number(popupData.product),
+      "quantity": Number(popupData.quantity)
+    }
+    const response = await axios.post(target , dataToBeSent , {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    if(response.status === 200){
+      toast.success("successfully!");
+    }
+  }
+  catch(error){
+    console.log(error) ;
+    toast.error("error update order cart")
+  }
 }
 
   const getStatusColor = (status) => {
@@ -507,30 +553,54 @@ const handleUpdateCart = async (newCart)=>{
                         </div>
                       </div>
                     )}
-                    {
-                      // change this status end point to order/deliver 
-                      item.status === "pending delivery" && (
-                        <div className="flex gap-2 w-full">
-                          <select
-                            value={selectedService}
-                            onChange={(e) => setSelectedService(e.target.value)}
-                            className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
-                          >
-                            <option value="" disabled>Select Service</option>
-                            {services.map((service) => (
-                              <option key={service} value={service}>{service}</option>
-                            ))}
-                          </select>
+                    {item.status === "pending delivery" && (
+                      <div className="relative flex">
+                        <button
+                          onClick={() => {
+                            if (selectedService) {
+                              setAreYouSurePopup({
+                                open: true,
+                                actions: () => handlePendingDelivery(item.id)
+                              })
+                            }
+                          }}
+                          disabled={!selectedService}
+                          className={`px-4 py-2 text-white rounded-l-lg text-sm transition-all ${
+                            selectedService 
+                              ? 'bg-emerald-600 hover:bg-emerald-500' 
+                              : 'bg-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          {selectedService || 'Services'}
+                        </button>
+
+                        <div className="relative">
                           <button
-                            onClick={() => handlePendingDelivery(item.id)}
-                            disabled={!selectedService}
-                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-all disabled:opacity-50"
+                            onClick={() => setOpenDropdownId(openDropdownId === item.id ? null : item.id)}
+                            className="px-3 py-2 bg-slate-500 hover:bg-slate-400 text-white rounded-r-lg transition-all"
                           >
-                            Deliver
+                            <ArrowDown/>
                           </button>
+
+                          {openDropdownId === item.id && (
+                            <div className="absolute top-full right-0 mt-1 w-full min-w-[120px] bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                              {services.map((service) => (
+                                <button
+                                  key={service}
+                                  onClick={() => {
+                                    setSelectedService(service);
+                                    setOpenDropdownId(null);
+                                  }}
+                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                                >
+                                  {service}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      )
-                    }
+                    )}
                     {item.status === "Ready for Shipping" && (
                       <div className="flex gap-2 w-full">
                         <select
@@ -617,87 +687,129 @@ const handleUpdateCart = async (newCart)=>{
           onClose={() => setPopupData(null)}
           actions={[
             { label: "Cancel", onClick: () => setPopupData(null), type: "secondary" },
-            { label: "Save", onClick: handleSaveChanges, type: "primary" },
+            { label: "Save", onClick: ()=>{
+              updateCartOrOrder==="update order" ? handleSaveChanges() : handleUpdateCart()
+            }, type: "primary" },
           ]}
         >
           <div className="flex flex-col gap-1">
-            {/* <div className="flex gap-4 items-center justify-center bg-red-400 transition-all">
-              <span className={``}>update info</span>
-              <span>update cart</span>
-            </div> */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-300">Order ID</label>
-                  <input
-                    value={popupData.id}
-                    onChange={(e) => setPopupData({...popupData, id: e.target.value})}
-                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-300">Total</label>
-                  <input
-                    type="number"
-                    value={popupData.total}
-                    onChange={(e) => setPopupData({...popupData, total: e.target.value})}
-                    className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-400">Customer Information</h4>
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-sm text-gray-300">Name</label>
-                    <input
-                      value={popupData.customer.name}
-                      onChange={(e) => setPopupData({...popupData, customer: {
-                        ...popupData.customer,
-                        name: e.target.value
-                      }})}
-                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
+            <div className="flex gap-4 items-center justify-center">
+              <span className={`${updateCartOrOrder==="update order" ? activePopupWindow :""} transition-all cursor-pointer`} onClick={()=>setUpdateCartOrOrder("update order")}>update order data</span>
+              <span className={`${updateCartOrOrder==="update cart"  ? activePopupWindow : ""} transition-all cursor-pointer`} onClick={()=>setUpdateCartOrOrder("update cart")}>update cart</span>
+            </div>
+            {
+              updateCartOrOrder === "update order" ? (
+                <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-sm text-gray-300">Phone</label>
+                      <label className="text-sm text-gray-300">Order ID</label>
                       <input
-                        value={popupData.customer.phoneNumber}
-                        onChange={(e) => setPopupData({...popupData, customer: {
-                          ...popupData.customer,
-                          phoneNumber: e.target.value
-                        }})}
+                        value={popupData.id}
+                        onChange={(e) => {e.preventDefault()}}
                         className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-sm text-gray-300">Email</label>
+                      <label className="text-sm text-gray-300">Total</label>
                       <input
-                        value={popupData.customer.email}
-                        onChange={(e) => setPopupData({...popupData, customer: {
-                          ...popupData.customer,
-                          email: e.target.value
-                        }})}
+                        type="number"
+                        value={popupData.total}
+                        onChange={(e) => setPopupData({...popupData, total: e.target.value})}
                         className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-sm text-gray-300">Address</label>
-                    <input
-                      value={popupData.customer.address}
-                      onChange={(e) => setPopupData({...popupData, customer: {
-                        ...popupData.customer,
-                        address: e.target.value
-                      }})}
-                      className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                    />
+                  
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-gray-400">Customer Information</h4>
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-sm text-gray-300">Name</label>
+                        <input
+                          value={popupData.customer.name}
+                          onChange={(e) => setPopupData({...popupData, customer: {
+                            ...popupData.customer,
+                            name: e.target.value
+                          }})}
+                          className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-sm text-gray-300">Phone</label>
+                          <input
+                            value={popupData.customer.phoneNumber}
+                            onChange={(e) => setPopupData({...popupData, customer: {
+                              ...popupData.customer,
+                              phoneNumber: e.target.value
+                            }})}
+                            className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-sm text-gray-300">Email</label>
+                          <input
+                            value={popupData.customer.email}
+                            onChange={(e) => setPopupData({...popupData, customer: {
+                              ...popupData.customer,
+                              email: e.target.value
+                            }})}
+                            className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-sm text-gray-300">Address</label>
+                        <input
+                          value={popupData.customer.address}
+                          onChange={(e) => setPopupData({...popupData, customer: {
+                            ...popupData.customer,
+                            address: e.target.value
+                          }})}
+                          className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              ) : (
+                <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-sm text-gray-300">Order ID</label>
+                      <input
+                        value={popupData.id}
+                        onChange={(e) => {e.preventDefault()}}
+                        className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1 flex flex-col">
+                      <label className="text-sm text-gray-300">Product</label>
+                      <select
+                          value={popupData.product}
+                          onChange={(e) => setPopupData({...popupData , product: e.target.value})}
+                          className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
+                        >
+                          <option value="" disabled>select Product</option>
+                          {items.map((item) => (
+                            <option key={item} value={item.id}>{item.name}</option>
+                          ))}
+                      </select>
+
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <label className="text-sm text-gray-300">Quantity</label>
+                      <input
+                        value={popupData.quantity}
+                        onChange={(e) => {setPopupData({...popupData , quantity : e.target.value})}}
+                        className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    
+                </div>
+              )
+            }
           </div>
 
         </Popup>
