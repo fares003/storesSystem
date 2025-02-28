@@ -27,6 +27,12 @@ function AllOrders() {
   const activePopupWindow = "bg-blue-600 text-white px-2 py-1 rounded-md"
   const {AreYouSurePopup } = useAreYouSure() ;
 
+  // update cart states
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [currentQty, setCurrentQty] = useState(1);
+  const [currentPrice, setCurrentPrice] = useState(0);
+
+
   const [items, setItems] = useState([]);
 
 
@@ -353,10 +359,17 @@ const handleUpdateCart = async ()=>{
   try{
     const target = `${API}orders/update-cart` ;
     const token = localStorage.getItem("token") ;
+    const itemsTobeSent = [];
+    popupData.updatedCart.forEach((ele)=>{
+      itemsTobeSent.push({
+        "productId" : ele.productId,
+        "quantity" : ele.quantity,
+        "price" : ele.price
+      })
+    })
     const dataToBeSent = {
       "orderId": popupData.id ,
-      "productId": Number(popupData.product),
-      "quantity": Number(popupData.quantity)
+      "items" : itemsTobeSent
     }
     const response = await axios.post(target , dataToBeSent , {
       headers: {
@@ -570,40 +583,166 @@ const handleUpdateCart = async ()=>{
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-sm text-gray-300">Order ID</label>
-                      <input
-                        value={popupData.id}
-                        onChange={(e) => {e.preventDefault()}}
-                        className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Order Summary Section */}
+                  
+                  <div className="flex-1 bg-slate-700 p-6 rounded-lg shadow-lg text-white">
+                    <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+                    <div className="space-y-4">
+                      {(() => {
+                        const mergedCart = [...(popupData.cart || [])];
+                        (popupData.updatedCart || []).forEach(updatedItem => {
+                          const index = mergedCart.findIndex(
+                            item => item.productId === updatedItem.productId
+                          );
+                          if (index !== -1) {
+                            mergedCart[index] = updatedItem;
+                          } else {
+                            mergedCart.push(updatedItem);
+                          }
+                        });
 
-                    <div className="space-y-1 flex flex-col">
-                      <label className="text-sm text-gray-300">Product</label>
-                      <select
-                          value={popupData.product}
-                          onChange={(e) => setPopupData({...popupData , product: e.target.value})}
-                          className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
+                        return (
+                          <>
+                            {mergedCart.map((item, index) => {
+                              const product = items.find(i => i.id === Number(item.productId));
+                              return (
+                                <div key={index} className="border-b border-slate-500 pb-2">
+                                  <div className="flex justify-between">
+                                    <span className="font-medium">
+                                      {product?.name || "Unknown Product"}
+                                    </span>
+                                    <span>x{item.quantity}</span>
+                                  </div>
+                                  <div className="flex justify-between text-slate-300">
+                                    <span>Price: ${item.price.toFixed(2)}</span>
+                                    <span>Total: ${(item.quantity * item.price).toFixed(2)}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            
+                            <p className="text-lg pt-4 border-t border-slate-500">
+                              <span className="font-medium">Total:</span> 
+                              ${mergedCart
+                                .reduce((sum, item) => sum + (item.quantity * item.price), 0)
+                                .toFixed(2)}
+                            </p>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Add Item Section */}
+                  <div className="flex-1 bg-slate-400 p-6 rounded-lg shadow-lg text-black">
+                    <h2 className="text-2xl font-bold mb-4">Add/Edit Item</h2>
+                    <div className="space-y-4">
+                      {/* Product Selector */}
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-medium">Product</label>
+                        <select 
+                          className="p-2 rounded border border-gray-300 overflow-x-clip"
+                          value={selectedProduct}
+                          onChange={(e) => {
+                            const productId = Number(e.target.value);
+                            const existingItem = popupData.updatedCart?.find(item => 
+                              Number(item.productId) === productId
+                            );
+                            
+                            setSelectedProduct(productId);
+                            if(existingItem) {
+                              setCurrentQty(existingItem.quantity);
+                              setCurrentPrice(existingItem.price);
+                            } else {
+                              setCurrentQty(1);
+                              setCurrentPrice(items.find(i => i.id === productId)?.price || 0);
+                            }
+                          }}
                         >
-                          <option value="" disabled>select Product</option>
+                          <option value="" disabled>Select Product</option>
                           {items.map((item) => (
-                            <option key={item} value={item.id}>{item.name}</option>
+                            <option key={item.id} value={item.id}>
+                              {item.name} (${item.price.toFixed(2)})
+                            </option>
                           ))}
-                      </select>
+                        </select>
+                      </div>
 
+                      {/* Quantity and Price */}
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <label className="mb-1 block font-medium">Quantity</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={currentQty}
+                            onChange={(e) => setCurrentQty(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-full p-2 rounded border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="mb-1 block font-medium">Price</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={currentPrice}
+                            onChange={(e) => setCurrentPrice(parseFloat(e.target.value) || 0)}
+                            className="w-full p-2 rounded border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition-colors"
+                        onClick={() => {
+                          if(!selectedProduct) return;
+                          
+                          const product = items.find(i => i.id === selectedProduct);
+                          
+                          const newItem = {
+                            productId: selectedProduct,
+                            name: product?.name || "Unknown Product",
+                            quantity: currentQty,
+                            price: currentPrice
+                          };
+
+                          setPopupData(prev => {
+                            const filteredCart = (prev.cart || []).filter(
+                              item => item.productId !== selectedProduct
+                            );
+
+                            const existingIndex = prev.updatedCart?.findIndex(item => 
+                              Number(item.productId) === selectedProduct
+                            ) ?? -1;
+
+                            const newCart = [...(prev.updatedCart || [])];
+                            
+                            if(existingIndex > -1) {
+                              newCart[existingIndex] = newItem;
+                            } else {
+                              newCart.push(newItem);
+                            }
+
+                            return {
+                              ...prev,
+                              cart: filteredCart,
+                              updatedCart: newCart,
+                              total: [...filteredCart, ...newCart]
+                                .reduce((sum, item) => sum + (item.quantity * item.price), 0)
+                            };
+                          });
+
+                          setSelectedProduct("");
+                          setCurrentQty(1);
+                          setCurrentPrice(0);
+                        }}
+                      >
+                        {selectedProduct ? "Update Item" : "Add Item"}
+                      </button>
                     </div>
-                    
-                    <div className="space-y-1">
-                      <label className="text-sm text-gray-300">Quantity</label>
-                      <input
-                        value={popupData.quantity}
-                        onChange={(e) => {setPopupData({...popupData , quantity : e.target.value})}}
-                        className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                    
+                  </div>
                 </div>
               )
             }
