@@ -8,32 +8,24 @@ import { motion } from "framer-motion";
 import Loader from "./Loader";
 import { FiEdit, FiTrash2, FiTruck, FiCheckCircle, FiInfo, FiPackage } from "react-icons/fi";
 import { ArrowDown } from "lucide-react";
+import OrderCard from "./OrderCard";
+import { NewOrderActions, PendingDeliveryActions, ReadyForShippingActions } from "./ActionComponents";
+import { useAreYouSure } from "@/contexts/AreYouSure";
 
 function AllOrders() {
   
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
-  };
-  const [openDropdownId, setOpenDropdownId] = useState(null);
-  const [selectedAction, setSelectedAction] = useState(null);
-  const [AreYouSurePopup, setAreYouSurePopup] = useState({
-    open:false,
-    actions:()=>{}
-  });
-  
-  const navigate = useNavigate();
   const API = import.meta.env.VITE_API;
   const [orders, setOrders] = useState([]);
   const [popupData, setPopupData] = useState(null);
   const [completePopupData, setCompletePopupData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [updateCartOrOrder ,setUpdateCartOrOrder] = useState("update order")
   const itemsPerPage = 9;
+  const [selectedService, setSelectedService] = useState("");
   const activePopupWindow = "bg-blue-600 text-white px-2 py-1 rounded-md"
+  const {AreYouSurePopup } = useAreYouSure() ;
 
   const [items, setItems] = useState([]);
 
@@ -102,7 +94,6 @@ function AllOrders() {
 };
 
   const fetching = async ()=>{
-      await fetchOrders();
       await Authority() ;
       await fetchServices()
       await fetchItems();
@@ -112,6 +103,9 @@ function AllOrders() {
     fetching() ;
   }, []);
 
+  useEffect(()=>{
+    fetchOrders();
+  },[AreYouSurePopup])
 
   const handleCompleteClick = (order) => {
     setCompletePopupData({
@@ -258,7 +252,6 @@ function AllOrders() {
   const handledeliver = async (id) =>{
     await deliverOrder(id);
     // navigate("/Shipping", { state: { orderId: id} })
-
   }
   
   const handleSaveChanges = async () => {
@@ -381,16 +374,6 @@ const handleUpdateCart = async ()=>{
   }
 }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'New': return 'bg-blue-500/20 text-blue-500';
-      case 'Confirmed': return 'bg-purple-500/20 text-purple-500';
-      case 'Ready for Shipping': return 'bg-yellow-500/20 text-yellow-500';
-      case 'Delivered': return 'bg-green-500/20 text-green-500';
-      default: return 'bg-gray-500/20 text-gray-500';
-      
-    }
-  };
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -437,211 +420,25 @@ const handleUpdateCart = async ()=>{
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentOrders.map((item, i) => (
-              <motion.div
-                key={item.id}
-                initial="hidden"
-                animate="visible"
-                variants={cardVariants}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Order #{item.id}</h3>
-                    <p className="text-sm text-gray-400">{item.customer.name}</p>
-                  </div>
-                  <span className={`${getStatusColor(item.status)} px-3 py-1 rounded-full text-sm`}>
-                    {item.status}
-                  </span>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center text-sm">
-                    <FiTruck className="mr-2 text-gray-400" />
-                    <span className="text-gray-300">{item.customer.phoneNumber}</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <FiInfo className="mr-2 text-gray-400" />
-                    <span className="text-gray-300">{item.cart.length} items</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <FiCheckCircle className="mr-2 text-gray-400" />
-                    <span className="text-emerald-400 font-semibold">EGP {item.total}</span>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-700 pt-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <button
-                      onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg transition-all"
-                    >
-                      <FiInfo className="text-base" />
-                      Details
-                    </button>
-                    
-                    {item.status === "New" && (
-                      <div className="relative flex">
-                        <button
-                          onClick={() => {
-                            if (selectedAction === 'hold') {
-                              setAreYouSurePopup({open:true , actions:()=>{holdOrder(item.id)}})
-                            } else if (selectedAction === 'cancel') {
-                              setAreYouSurePopup({open:true , actions:()=>{cancelOrder(item.id)}})
-                            } else {
-                              setAreYouSurePopup({open:true , actions:()=>{confirmOrder(item.id)}})
-                            }
-                          }}
-                          className={`px-4 py-2 text-white rounded-l-lg text-sm transition-all ${
-                            selectedAction === 'hold' ? 'bg-yellow-500 hover:bg-yellow-600' :
-                            selectedAction === 'cancel' ? 'bg-red-600 hover:bg-red-500' :
-                            'bg-indigo-600 hover:bg-indigo-500'
-                          }`}
-                        >
-                          {selectedAction === 'hold' ? 'Hold' :
-                          selectedAction === 'cancel' ? 'Cancel' :
-                          'Confirm'}
-                        </button>
-
-                        <div className="relative">
-                          <button
-                            onClick={() => setOpenDropdownId(openDropdownId === item.id ? null : item.id)}
-                            className="px-3 py-2 bg-slate-500 hover:bg-slate-400 text-white rounded-r-lg transition-all"
-                          >
-                            <ArrowDown/>
-                          </button>
-
-                          {openDropdownId === item.id && (
-                            <div className="absolute top-full right-0 mt-1 w-full min-w-[120px] bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                              {selectedAction !== 'confirm' && (
-                                <button
-                                  onClick={() => {
-                                    setSelectedAction('confirm');
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                                >
-                                  confirm
-                                </button>
-                              )}
-
-                              {selectedAction !== 'hold' && (
-                                <button
-                                  onClick={() => {
-                                    setSelectedAction('hold');
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                                >
-                                  Hold
-                                </button>
-                              )}
-                              
-                              {selectedAction !== 'cancel' && (
-                                <button
-                                  onClick={() => {
-                                    setSelectedAction('cancel');
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left border-t border-gray-200"
-                                >
-                                  Cancel
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {item.status === "pending delivery" && (
-                      <div className="relative flex">
-                        <button
-                          onClick={() => {
-                            if (selectedService) {
-                              setAreYouSurePopup({
-                                open: true,
-                                actions: () => handlePendingDelivery(item.id)
-                              })
-                            }
-                          }}
-                          disabled={!selectedService}
-                          className={`px-4 py-2 text-white rounded-l-lg text-sm transition-all ${
-                            selectedService 
-                              ? 'bg-emerald-600 hover:bg-emerald-500' 
-                              : 'bg-gray-500 cursor-not-allowed'
-                          }`}
-                        >
-                          {selectedService || 'Services'}
-                        </button>
-
-                        <div className="relative">
-                          <button
-                            onClick={() => setOpenDropdownId(openDropdownId === item.id ? null : item.id)}
-                            className="px-3 py-2 bg-slate-500 hover:bg-slate-400 text-white rounded-r-lg transition-all"
-                          >
-                            <ArrowDown/>
-                          </button>
-
-                          {openDropdownId === item.id && (
-                            <div className="absolute top-full right-0 mt-1 w-full min-w-[120px] bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                              {services.map((service) => (
-                                <button
-                                  key={service}
-                                  onClick={() => {
-                                    setSelectedService(service);
-                                    setOpenDropdownId(null);
-                                  }}
-                                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                                >
-                                  {service}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {item.status === "Ready for Shipping" && (
-                      <div className="flex gap-2 w-full">
-                        <select
-                          value={selectedService}
-                          onChange={(e) => setSelectedService(e.target.value)}
-                          className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
-                        >
-                          <option value="" disabled>Select Service</option>
-                          {services.map((service) => (
-                            <option key={service} value={service}>{service}</option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => handledeliver(item.id)}
-                          disabled={!selectedService}
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-all disabled:opacity-50"
-                        >
-                          Deliver
-                        </button>
-                      </div>
-                    )}
-
-                    {isAdmin && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleUpdateOrder(item)}
-                          className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 transition-all"
-                        >
-                          <FiEdit className="text-lg" />
-                        </button>
-                        {/* <button
-                          onClick={() => deleteOrder(item.id)}
-                          className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-all"
-                        >
-                          <FiTrash2 className="text-lg" />
-                        </button> */}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
+              <OrderCard
+                key={i}
+                item={item}
+                i={i}
+                actionsConfig={{
+                  'New': NewOrderActions,
+                  'pending delivery': PendingDeliveryActions,
+                  'Ready for Shipping': ReadyForShippingActions
+                }}
+                handleUpdateOrder={handleUpdateOrder}
+                cancelOrder={cancelOrder}
+                handlePendingDelivery={handlePendingDelivery}
+                confirmOrder={confirmOrder}
+                handledeliver={deliverOrder}
+                holdOrder={holdOrder}
+                shippingServices={services}
+                isAdmin={isAdmin}
+                setSelectedService={setSelectedService}
+              />
             ))}
           </div>
 
@@ -840,37 +637,8 @@ const handleUpdateCart = async ()=>{
           </div>
         </Popup>
       )}
-
-      {
-        AreYouSurePopup.open && (
-          <Popup 
-          title={"Are You Sure"}
-          onClose={() => setAreYouSurePopup({
-            ...AreYouSurePopup , 
-            open : false
-          })}
-          actions={[
-            { label: "Cancel", onClick: () => {
-              setAreYouSurePopup({
-                ...AreYouSurePopup , 
-                open : false
-              })
-            }, type: "secondary" },
-            { label: "Save", onClick: ()=>{AreYouSurePopup.actions(); setAreYouSurePopup({open:false , actions:null})}, type: "primary" },
-          ]}
-          >
-            <div className="flex flex-col items-center gap-4">
-              <p className="font-bold text-xl">Are you sure ?</p>
-              <span className="text-gray-600">You can't undo this</span>
-            </div>
-          </Popup>
-        )
-      }
     </Center>
   );
 }
 
 export default AllOrders;
-
-
-
