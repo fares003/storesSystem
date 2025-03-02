@@ -10,7 +10,9 @@ const OrderCard = ({
     item ,
     i ,
     actionsConfig ,
-    isAdmin = false, 
+    isAdmin = false,
+    isSelected ,  
+    onToggleSelect , 
     handleUpdateOrder ,
     confirmOrder,       
     holdOrder,          
@@ -55,8 +57,20 @@ const OrderCard = ({
         animate="visible"
         variants={cardVariants}
         transition={{ duration: 0.3, delay: i * 0.05 }}
-        className="bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+        className="relative bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
     >
+        {onToggleSelect && (
+                <div className="absolute top-2 left-4 ">
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={onToggleSelect}
+                        className="h-5 w-5 rounded border-gray-300 bg-gray-700 text-blue-600 
+                                   focus:ring-blue-500 cursor-pointer"
+                    />
+                </div>
+        )}
+
         <div className="flex justify-between items-start mb-4">
             <div>
                 <h3 className="text-lg font-semibold text-white">Order #{item.id}</h3>
