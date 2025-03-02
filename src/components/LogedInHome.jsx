@@ -30,6 +30,7 @@ import PerformancePage from '@/pages/PerformancePage';
 import SupplierData from '@/pages/SupplierData';
 import Transfer from '@/pages/Transfer';
 import TransferRequests from '@/pages/TransferRequests';
+import DispatchBulk from '@/pages/DispatchBulk';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -92,6 +93,8 @@ const LogedInHome = () => {
                 <Route path="/supplierData" element={<SupplierData />} />
                 <Route path="/InventoryTransfer" element={<Transfer />} />
                 <Route path="/TransferRequests" element={<TransferRequests />} />
+                <Route path="/outbounds/get-bulk" element={<DispatchBulk />} />
+                
               </Routes>
             </div>
           </div>

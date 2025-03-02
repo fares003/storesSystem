@@ -583,10 +583,10 @@ const handleUpdateCart = async ()=>{
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex flex-col md:flex-row gap-6 max-h-[75vh]">
                   {/* Order Summary Section */}
                   
-                  <div className="flex-1 bg-slate-700 p-6 rounded-lg shadow-lg text-white">
+                  <div className="flex-1 bg-slate-700 p-6 rounded-lg shadow-lg text-white max-h-[32vh] md:max-h-[70vh] overflow-y-auto">
                     <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
                     <div className="space-y-4">
                       {(() => {
@@ -635,7 +635,7 @@ const handleUpdateCart = async ()=>{
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="flex-1 bg-slate-400 p-6 rounded-lg shadow-lg text-black">
+                  <div className="flex-1 bg-slate-400 p-6 rounded-lg shadow-lg text-black max-h-[32vh] md:max-h-[70vh] overflow-y-auto">
                     <h2 className="text-2xl font-bold mb-4">Add/Edit Item</h2>
                     <div className="space-y-4">
                       {/* Product Selector */}
