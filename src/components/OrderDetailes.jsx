@@ -48,7 +48,19 @@ const OrderDetailes = () => {
       console.error("Error fetching order:", error);
     }
   }
-  useEffect(() => {
+  const fetchInvoice = async () => {
+    try {
+      const response = await axios.get(`${API}Orders/invoice/${orderId}`, {
+        responseType: 'blob',
+      });
+      
+      const fileURL = URL.createObjectURL(response.data);
+      window.open(fileURL, '_blank');
+    } catch (error) {
+      console.log('Error fetching invoice:', error);
+    }
+  };
+    useEffect(() => {
     fetchOrder();
     fetchHestory() ; 
   }, []);
@@ -61,7 +73,10 @@ const OrderDetailes = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-8xl mx-auto bg-white rounded-lg shadow-lg p-6">
         {/* Header */}
-        <h1 className="text-3xl font-bold text-indigo-500 mb-6">Order Details</h1>
+        <div className="flex flex-col md:flex-row justify-between md:items-center mb-4">
+          <h1 className="text-3xl font-bold text-indigo-500 mb-6">Order Details</h1>
+          <button className="px-6 py-2 bg-orange-500 rounded-md text-white font-semibold" onClick={fetchInvoice} >invoice</button>
+        </div>
 
         {/* General Order Information */}
         <div className="mb-8">
