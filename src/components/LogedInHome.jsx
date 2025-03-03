@@ -100,7 +100,6 @@ const LogedInHome = () => {
                 <Route path="/Ready-orders" element={<ReadyOrders />} />
                 <Route path="/Employee" element={<Employee />} />
                 <Route path="/CreateInventory" element={<CreateInventory />} />
-
               </Routes>
             </div>
           </div>
