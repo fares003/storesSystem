@@ -201,7 +201,7 @@ const InventoryTransfer = () => {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full lg:w-1/3 bg-white rounded-lg shadow-lg p-6 h-fit lg:sticky lg:top-4"
+          className="w-full lg:w-1/3 bg-white rounded-lg shadow-lg p-6 max-h-[88vh] lg:sticky lg:top-4"
         >
           <h2 className="text-xl font-bold mb-4 text-blue-600">Available Items</h2>
           

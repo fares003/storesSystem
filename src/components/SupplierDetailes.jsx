@@ -106,7 +106,7 @@ const SupplierDetailes = () => {
               type="text"
               name="supplierContacts"
               id="supplierContacts"
-              placeholder='Contacts'
+              placeholder='phone number'
               value={createSupplierContacts}
               onChange={(e)=>{setCreateSupplierContacts(e.target.value)}}
               className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

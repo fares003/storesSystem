@@ -32,6 +32,7 @@ import Transfer from '@/pages/Transfer';
 import TransferRequests from '@/pages/TransferRequests';
 import DispatchBulk from '@/pages/DispatchBulk';
 import ReadyOrders from '@/pages/ReadyOrders';
+import Employee from '@/pages/Employee';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -96,7 +97,8 @@ const LogedInHome = () => {
                 <Route path="/TransferRequests" element={<TransferRequests />} />
                 <Route path="/outbounds/get-bulk" element={<DispatchBulk />} />
                 <Route path="/Ready-orders" element={<ReadyOrders />} />
-                
+                <Route path="/Employee" element={<Employee />} />
+
               </Routes>
             </div>
           </div>
