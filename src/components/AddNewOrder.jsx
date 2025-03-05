@@ -4,6 +4,8 @@ import Center from "@/components/Center";
 import axios from "axios";
 import { z } from "zod";
 import { motion } from 'framer-motion';
+import governorates from "@/Data/governorates.js"
+import cities from "@/Data/cities.js"
 
 const API = import.meta.env.VITE_API;
 
@@ -13,6 +15,8 @@ const itemSchema = z.object({
   whatsapp : z.nullable(z.string()) ,
   email: z.string().email("Invalid email address"),
   address: z.string().min(1, "Address is required"),
+  province : z.string().min(1, "governorat is required"),
+  city : z.string().min(1, "city is required"), 
   items: z.array(
     z.object({
       sku: z.string().min(1, "SKU is required"),
@@ -29,6 +33,8 @@ const AddNewOrder = () => {
     email: "",
     address: "",
     items: [],
+    city : "" , 
+    province : "",
   });
 
   const [products, setProducts] = useState([]);
@@ -36,6 +42,10 @@ const AddNewOrder = () => {
   const [ prices ,setPrices] = useState({});
   const [totalPrice , setTotalPrice] = useState(0);
   
+  
+  const governorateOptions = governorates[2].data;
+  const cityOptions = cities[2].data; 
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -53,7 +63,11 @@ const AddNewOrder = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'province') {
+      setFormData(prev => ({ ...prev, [name]: value, city: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleQuantityChange = (sku, value) => {
@@ -110,7 +124,7 @@ const AddNewOrder = () => {
           whatsapp : parsedData.whatsapp ,
           email: parsedData.email,
         },
-        default_address: { address1: parsedData.address },
+        default_address: { address1: parsedData.address , city : parsedData.city , province : parsedData.province ,},
         line_Items: parsedData.items,
       };
 
@@ -127,12 +141,14 @@ const AddNewOrder = () => {
           whatsapp : null, 
           email: "",
           address: "",
+          province : "", 
+          city : "", 
           items: [],
         });
         setQuantities({});
       }
     } catch (error) {
-      console.log(error); 
+      console.log(error);
       toast.error(`there is error Now `)
     }
   };
@@ -169,7 +185,44 @@ const AddNewOrder = () => {
                 />
               </div>
             ))}
+            <div className="flex gap-4">
+              <div className="space-y-2 w-1/2">
+                <label className="text-gray-300">Governorate</label>
+                <select
+                  name="province"
+                  className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  value={formData.province}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Governorate</option>
+                  {governorateOptions.map((gov) => (
+                    <option key={gov.id} value={gov.id}>
+                      {gov.governorate_name_en}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
+              <div className="space-y-2 w-1/2">
+                <label className="text-gray-300">City</label>
+                <select
+                  name="city"
+                  className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  disabled={!formData.province}
+                >
+                  <option value="">Select City</option>
+                  {cityOptions
+                    .filter(city => city.governorate_id === formData.province)
+                    .map(city => (
+                      <option key={city.id} value={city.city_name_en}>
+                        {city.city_name_en}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
             {/* Selected Items */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-gray-200">Selected Products</h3>
