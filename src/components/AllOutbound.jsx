@@ -89,14 +89,12 @@ const AllOutbound = () => {
                           <div className="flex justify-between mt-4">
                             
 
-                            {(item.status === "In preparation" ||item.status === "pending preparation") && (
                               <button
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={() => navigate("/prepareToShipment", { state: { orderId: item.id} })}
                               >
                                 Prepare
                               </button>
-                            )}
 
                             <button
                               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500 transition"

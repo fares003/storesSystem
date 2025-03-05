@@ -154,33 +154,3 @@ export const PendingDeliveryActions = ({
   )
 }
 
-// Ready for Shipping Actions Component
-export const ReadyForShippingActions = ({
-  item,
-  selectedService,
-  setSelectedService,
-  handledeliver,
-  shippingServices
-}) => {
-  return (
-    <div className="flex gap-2 w-full">
-      <select
-        value={selectedService}
-        onChange={(e) => setSelectedService(e.target.value)}
-        className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm flex-1"
-      >
-        <option value="" disabled>Select Service</option>
-        {shippingServices.map((service) => (
-          <option key={service} value={service}>{service}</option>
-        ))}
-      </select>
-      <button
-        onClick={() => handledeliver(item.id, selectedService)}
-        disabled={!selectedService}
-        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-all disabled:opacity-50"
-      >
-        Deliver
-      </button>
-    </div>
-  )
-}

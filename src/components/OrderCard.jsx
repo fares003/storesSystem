@@ -1,5 +1,4 @@
-import { ArrowDown } from 'lucide-react'
-import { FiCheckCircle, FiEdit, FiInfo, FiTruck } from 'react-icons/fi'
+import { FiCheckCircle, FiEdit, FiInfo, FiPhone } from 'react-icons/fi'
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -12,13 +11,13 @@ const OrderCard = ({
     actionsConfig ,
     isAdmin = false,
     isSelected ,  
-    onToggleSelect , 
+    onToggleSelect ,
+    cardClickable = false ,  
     handleUpdateOrder ,
     confirmOrder,       
     holdOrder,          
     cancelOrder,        
     handlePendingDelivery,
-    handledeliver ,
     shippingServices ,
     selectedService, 
     setSelectedService
@@ -66,7 +65,7 @@ const OrderCard = ({
                         checked={isSelected}
                         onChange={onToggleSelect}
                         className="h-5 w-5 rounded border-gray-300 bg-gray-700 text-blue-600 
-                                   focus:ring-blue-500 cursor-pointer"
+                                focus:ring-blue-500 cursor-pointer"
                     />
                 </div>
         )}
@@ -81,9 +80,14 @@ const OrderCard = ({
             </span>
         </div>
 
-        <div className="space-y-3 mb-6">
+        <div 
+            className="space-y-3 mb-6 cursor-pointer"
+            onClick={()=>{
+                cardClickable && navigate("/OrderPreview", { state: { orderId: item.id } })
+            }}>
+            
             <div className="flex items-center text-sm">
-                <FiTruck className="mr-2 text-gray-400" />
+                <FiPhone className="mr-2 text-gray-400" />
                 <span className="text-gray-300">{item.customer.phoneNumber}</span>
             </div>
         <div className="flex items-center text-sm">
@@ -97,51 +101,50 @@ const OrderCard = ({
         </div>
 
         <div className="border-t border-gray-700 pt-4">
-        <div className="flex items-center justify-between gap-2">
-            <button
-            onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg transition-all"
-            >
-            <FiInfo className="text-base" />
-            Details
-            </button>
-            
-            {ActionComponent && (
-                <ActionComponent
-                    item={item}
-                    selectedAction={selectedAction}
-                    setSelectedAction={setSelectedAction}
-                    openDropdownId={openDropdownId}
-                    setOpenDropdownId={setOpenDropdownId}
-                    selectedService={selectedService}
-                    setSelectedService={setSelectedService}
-                    setAreYouSurePopup={setAreYouSurePopup}
-                    confirmOrder={confirmOrder}
-                    holdOrder={holdOrder}
-                    cancelOrder={cancelOrder}
-                    handlePendingDelivery={handlePendingDelivery}
-                    handledeliver={handledeliver}
-                    shippingServices={shippingServices}
-                />
-          )}
-
-            {isAdmin && (
-                <div className="flex gap-2">
-                    <button
-                    onClick={() => handleUpdateOrder(item)}
-                    className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 transition-all"
-                    >
-                    <FiEdit className="text-lg" />
-                    </button>
-                    {/* <button
-                    onClick={() => deleteOrder(item.id)}
-                    className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-all"
-                    >
-                    <FiTrash2 className="text-lg" />
-                    </button> */}
-                </div>
+            <div className="flex items-center justify-between gap-2">
+                <button
+                onClick={() => navigate("/OrderPreview", { state: { orderId: item.id } })}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg transition-all"
+                >
+                <FiInfo className="text-base" />
+                Details
+                </button>
+                
+                {ActionComponent && (
+                    <ActionComponent
+                        item={item}
+                        selectedAction={selectedAction}
+                        setSelectedAction={setSelectedAction}
+                        openDropdownId={openDropdownId}
+                        setOpenDropdownId={setOpenDropdownId}
+                        selectedService={selectedService}
+                        setSelectedService={setSelectedService}
+                        setAreYouSurePopup={setAreYouSurePopup}
+                        confirmOrder={confirmOrder}
+                        holdOrder={holdOrder}
+                        cancelOrder={cancelOrder}
+                        handlePendingDelivery={handlePendingDelivery}
+                        shippingServices={shippingServices}
+                    />
             )}
-        </div>
+
+                { (isAdmin && item.status=='New') && (
+                    <div className="flex gap-2">
+                        <button
+                        onClick={() => handleUpdateOrder(item)}
+                        className="p-2 hover:bg-gray-700 rounded-lg text-gray-300 transition-all"
+                        >
+                        <FiEdit className="text-lg" /> 
+                        </button>
+                        {/* <button
+                        onClick={() => deleteOrder(item.id)}
+                        className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-all"
+                        >
+                        <FiTrash2 className="text-lg" />
+                        </button> */}
+                    </div>
+                )}
+            </div>
         </div>
     </motion.div>
   )

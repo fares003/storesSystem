@@ -9,7 +9,7 @@ import Loader from "./Loader";
 import { FiEdit, FiTrash2, FiTruck, FiCheckCircle, FiInfo, FiPackage } from "react-icons/fi";
 import { ArrowDown } from "lucide-react";
 import OrderCard from "./OrderCard";
-import { NewOrderActions, PendingDeliveryActions, ReadyForShippingActions } from "./ActionComponents";
+import { NewOrderActions, PendingDeliveryActions} from "./ActionComponents";
 import { useAreYouSure } from "@/contexts/AreYouSure";
 
 function AllOrders() {
@@ -113,34 +113,6 @@ function AllOrders() {
     fetchOrders();
   },[AreYouSurePopup])
 
-  const handleCompleteClick = (order) => {
-    setCompletePopupData({
-      id: order.id,
-      code: "",
-    });
-  };
-
-  const deleteOrder = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      const target = API + "orders/delete/" + id;
-
-      const response = await axios.delete(target, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200) {
-        setOrders((prevOrders) => prevOrders.filter((o) => o.id !== id));
-        toast.success("Order deleted successfully!");
-      }
-    } catch (error) {
-      console.error("Error deleting order:", error);
-      toast.error("Error deleting order");
-    }
-  };
   const holdOrder = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -223,42 +195,6 @@ function AllOrders() {
       toast.error("Error confirming order");
     }
   };
-
-  const deliverOrder = async (orderId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const target = `${API}shipping/deliver`;
-
-      const data = {
-        orderId: orderId,
-        service: selectedService 
-      };
-
-      const response = await axios.post(target, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200) {
-        setOrders((prevOrders) =>
-          prevOrders.map((order) =>
-            order.id === orderId ? { ...order, status: "Delivered" } : order
-          )
-        );
-        toast.success("Order delivered successfully!");
-      }
-    } catch (error) {
-      console.error("Error delivering order:", error);
-      toast.error("Error delivering order");
-    }
-  };
-
-  const handledeliver = async (id) =>{
-    await deliverOrder(id);
-    // navigate("/Shipping", { state: { orderId: id} })
-  }
   
   const handleSaveChanges = async () => {
     try {
@@ -440,13 +376,12 @@ const handleUpdateCart = async ()=>{
                 actionsConfig={{
                   'New': NewOrderActions,
                   'pending delivery': PendingDeliveryActions,
-                  'Ready for Shipping': ReadyForShippingActions
                 }}
+                cardClickable={true}
                 handleUpdateOrder={handleUpdateOrder}
                 cancelOrder={cancelOrder}
                 handlePendingDelivery={handlePendingDelivery}
                 confirmOrder={confirmOrder}
-                handledeliver={deliverOrder}
                 holdOrder={holdOrder}
                 shippingServices={services}
                 isAdmin={isAdmin}
