@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAreYouSure } from '@/contexts/AreYouSure';
+import { Tooltip } from "react-tooltip";
 
 
 const OrderCard = ({
@@ -90,10 +91,17 @@ const OrderCard = ({
                 <FiPhone className="mr-2 text-gray-400" />
                 <span className="text-gray-300">{item.customer.phoneNumber}</span>
             </div>
-        <div className="flex items-center text-sm">
-            <FiInfo className="mr-2 text-gray-400" />
-            <span className="text-gray-300">{item.cart.length} items</span>
-        </div>
+
+            <div className="flex items-center text-sm">
+                <FiInfo className="mr-2 text-gray-400" />
+                <span className="text-gray-300" data-tooltip-id={`tooltip-${item.id}`}>
+                    {item.cart.length} items
+                </span>
+                <Tooltip id={`tooltip-${item.id}`} place="top-start" effect="solid" style={{backgroundColor:"grey" , color:"white"}}>
+                    {item.cart.map(prod => <div key={prod.id}>{prod.name} x {prod.quantity}</div>)}
+                </Tooltip>
+            </div>
+
         <div className="flex items-center text-sm">
             <FiCheckCircle className="mr-2 text-gray-400" />
             <span className="text-emerald-400 font-semibold">EGP {item.total}</span>

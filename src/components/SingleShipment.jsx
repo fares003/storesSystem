@@ -10,7 +10,10 @@ const SingleShipment = () => {
   const { shipmentId } = location.state || {};
 
   const [shipmentData, setShipmentData] = useState({});
-
+  const [width , setWidth] = useState("");
+  const [height , setHeight] = useState("");
+  
+  
   const fetchStorage = async () => {
     try {
       const target = `${API}InboundOrders/${shipmentId}`;
@@ -146,12 +149,14 @@ const SingleShipment = () => {
                       </div>
                     </td>
                     {/* PDF */}
-                    <td>
+                    <td className="flex flex-col items-center justify-center gap-2">
                       <button className="bg-orange-500 hover:bg-orange-700 px-6 py-2 rounded-md"
                       onClick={()=>{ handlePDF(product.id) }}
                       >
                         PDF
                       </button>
+                      <input value={width} onChange={(e)=>setWidth(e.target.value)} className="w-16 border border-indigo-800 rounded-sm" placeholder="width" type="text" />
+                      <input value={height} onChange={(e)=>setHeight(e.target.value)} className="w-16  border border-indigo-800 rounded-sm" placeholder="height" type="text" />
                     </td>
                   </tr>
                 ))}

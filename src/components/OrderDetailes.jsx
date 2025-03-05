@@ -8,7 +8,9 @@ const OrderDetailes = () => {
   const { orderId } = location.state || {};
   const [orderData, setOrderData] = useState();
   const [orderHestory, setOrderHestory] = useState([]);
-  console.log(orderHestory);
+  const [width , setWidth] = useState("");
+  const [height , setHeight] = useState("");
+  
   
   const fetchOrder = async () => {
     const target = `${API}orders/${orderId}`;
@@ -75,7 +77,13 @@ const OrderDetailes = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between md:items-center mb-4">
           <h1 className="text-3xl font-bold text-indigo-500 mb-6">Order Details</h1>
-          <button className="px-6 py-2 bg-orange-500 rounded-md text-white font-semibold" onClick={fetchInvoice} >invoice</button>
+          <div className="flex flex-col gap-2">
+            <button className="px-6 py-2 bg-orange-500 rounded-md text-white font-semibold" onClick={fetchInvoice} >invoice</button>
+            <div className="flex items-center gap-2">
+              <input value={width} onChange={(e)=>setWidth(e.target.value)} className="w-20 border border-indigo-800  rounded-sm" placeholder="width" type="text" />
+              <input value={height} onChange={(e)=>setHeight(e.target.value)} className="w-20 border border-indigo-800  rounded-sm" placeholder="height" type="text" />
+            </div>
+          </div>
         </div>
 
         {/* General Order Information */}
@@ -98,7 +106,7 @@ const OrderDetailes = () => {
             </div>
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <p className="text-sm text-blue-500">Total</p>
-              <p className="text-lg font-medium text-blue-800">${orderData.total}</p>
+              <p className="text-lg font-medium text-blue-800">{orderData.total} EGP</p>
             </div>
           </div>
           <div className="bg-blue-50 p-4 mt-4 rounded-lg border border-blue-100">

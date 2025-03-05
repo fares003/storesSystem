@@ -93,12 +93,12 @@ const EmployeePayments = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{employee.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.completedOrders}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{employee.range}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employee.baseSalary.toLocaleString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${employee.commission.toLocaleString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">EGP {employee.baseSalary.toLocaleString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">EGP {employee.commission.toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ${employee.upsellingAmount.toLocaleString()} ({employee.upsellingOrders} orders)
+                  EGP {employee.upsellingAmount.toLocaleString()} ({employee.upsellingOrders} orders)
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">${employee.total.toLocaleString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">EGP {employee.total.toLocaleString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <button
                     onClick={() => {
