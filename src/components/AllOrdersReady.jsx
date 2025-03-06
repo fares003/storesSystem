@@ -107,7 +107,7 @@ const AllOrdersReady = () => {
         )
         const orderGov = order.customer.province ;
         
-        if(filterGov == null){
+        if(filterGov == null || filterGov == ""){
             return meetsDate
         }
         else{
@@ -120,7 +120,7 @@ const AllOrdersReady = () => {
     })
     const handleClearFilters = ()=>{
         setFilterDate("");
-        setFilterGov(null);
+        setFilterGov("");
     }
     return (
         <div className="max-w-7xl mx-auto p-6 bg-gray-900 min-h-screen">
