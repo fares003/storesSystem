@@ -34,6 +34,7 @@ import DispatchBulk from '@/pages/DispatchBulk';
 import ReadyOrders from '@/pages/ReadyOrders';
 import Employee from '@/pages/Employee';
 import CreateInventory from '@/pages/CreateInventory';
+import Bulks from '@/pages/Bulks';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -100,6 +101,7 @@ const LogedInHome = () => {
                 <Route path="/Ready-orders" element={<ReadyOrders />} />
                 <Route path="/Employee" element={<Employee />} />
                 <Route path="/CreateInventory" element={<CreateInventory />} />
+                <Route path="/bulks" element={<Bulks />} />
               </Routes>
             </div>
           </div>

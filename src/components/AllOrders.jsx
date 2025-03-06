@@ -69,9 +69,16 @@ function AllOrders() {
 
   const fetchOrders = async () => {
     try {
+      const token = localStorage.getItem("token");
       const target = API + "orders";
-      const resp = await fetch(target);
-      const data = await resp.json();
+      const resp = await axios.get(target , {
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      });
+      const data = resp.data;
+      console.log(data);
+      
       setOrders(data);
 
     } catch (error) {

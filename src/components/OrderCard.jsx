@@ -75,7 +75,14 @@ const OrderCard = ({
             <div>
                 <h3 className="text-lg font-semibold text-white">Order #{item.id}</h3>
                 <p className="text-sm text-gray-400">{item.customer.name}</p>
+                <span className="text-sm text-gray-400">{item.customer.province} - {item.customer.city}</span>
             </div>
+            
+            <span className="bg-green-300 text-green-900 px-3 py-1 rounded-full text-sm max-w-26 text-nowrap overflow-hidden text-ellipsis">
+                {item.store}
+            </span>
+
+
             <span className={`${getStatusColor(item.status)} px-3 py-1 rounded-full text-sm`}>
                 {item.status}
             </span>
