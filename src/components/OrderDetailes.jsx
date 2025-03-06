@@ -54,7 +54,11 @@ const OrderDetailes = () => {
   }
   const fetchInvoice = async () => {
     try {
-      const response = await axios.get(`${API}Orders/invoice/${orderId}`, {
+      const response = await axios.post(`${API}Orders/invoice`, {
+        "orderId":orderId,
+        "width" : width , 
+        "height" : height
+      },{
         responseType: 'blob',
       });
       
@@ -163,7 +167,7 @@ const OrderDetailes = () => {
             </div>
             <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
               <p className="text-sm text-indigo-500">Phone Number</p>
-              <p className="flex justify-between text-lg font-medium text-indigo-800">
+              <p className="flex flex-col md:flex-row   justify-between text-lg font-medium text-indigo-800">
                 <span  className="flex items-center gap-2 underline" onClick={()=>{orderData.customer.phoneNumber&&handleCopy(orderData.customer.phoneNumber)}}><Phone size={15}/>{orderData.customer.phoneNumber || "N/A"}</span>
                 <span className="flex items-center gap-2 underline" onClick={()=>{orderData.customer.whatsapp&&handleWhatsApp(orderData.customer.whatsapp)}}><FaWhatsapp/> {orderData.customer.phoneNumber || "N/A"}</span>
               </p>
