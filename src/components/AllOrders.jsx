@@ -11,7 +11,7 @@ import { ArrowDown } from "lucide-react";
 import OrderCard from "./OrderCard";
 import { NewOrderActions, PendingDeliveryActions} from "./ActionComponents";
 import { useAreYouSure } from "@/contexts/AreYouSure";
-
+import { Link } from "react-router-dom";
 function AllOrders() {
   
   const API = import.meta.env.VITE_API;
@@ -116,9 +116,12 @@ function AllOrders() {
     fetching() ;
   }, []);
 
-  useEffect(()=>{
-    fetchOrders();
-  },[AreYouSurePopup])
+  useEffect(() => {
+    const fetchOrdersInterval = setInterval(fetchOrders, 5000);
+  
+    return () => clearInterval(fetchOrdersInterval); // Cleanup interval on component unmount
+  }, []);
+  
 
   const holdOrder = async (id) => {
     try {
@@ -361,12 +364,26 @@ const handleUpdateCart = async ()=>{
       {orders.length === 0 ? (
         <Loader />
       ) : (
-        <div className="w-full overflow-y-auto scrollbar-thin">
+        <div className="w-full overflow-y-auto scrollbar-thin pr-4">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-white">
               <FiPackage className="inline-block mr-3 mb-1" />
               Order Management
             </h1>
+
+            <motion.div
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+>
+  <Link
+    to="/addorder"
+    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg"
+  >
+    <FiEdit />
+    <span>New Order</span>
+  </Link>
+</motion.div>;
+
             <div className="flex items-center gap-4">
               <span className="text-gray-400 text-sm">
                 Showing {Math.min(currentPage * itemsPerPage, orders.length)} of {orders.length} orders

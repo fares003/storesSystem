@@ -76,27 +76,36 @@ const AddNewOrder = () => {
       [sku]: Math.max(0, parseInt(value) || 0)
     }));
   };
-  const handlePriceCahnge = (sku , value)=>{
-    setPrices((prev)=>({
-      ...prev ,
-      [sku] : Math.max(0 , parseFloat(value) || 0)
-    }))
-  }
+  const handlePriceCahnge = (sku, value) => {
+    setPrices((prev) => {
+      const updatedPrices = {
+        ...prev,
+        [sku]: Math.max(0, parseFloat(value) || 0),
+      };
+      console.log(updatedPrices[sku]); // Log the updated price immediately
+      return updatedPrices;
+    });
+  };
+
   const addProductToOrder = (product) => {
     const quantity = quantities[product.sku] || 0;
-    const price = prices[product.sku] || 0 ; 
+    const price = prices[product.sku] || 0;
     if (quantity < 1) return;
-
-    setFormData(prev => ({
-      ...prev,
-      items: [
+  
+    setFormData(prev => {
+      const updatedItems = [
         ...prev.items.filter(item => item.sku !== product.sku),
-        { sku: product.sku, quantity , price } ,
-      ]
-    }));
-
+        { sku: product.sku, quantity, price },
+      ];
+  
+      return {
+        ...prev,
+        items: updatedItems,
+      };
+    });
+  
     setQuantities(prev => ({ ...prev, [product.sku]: 0 }));
-    setQuantities(prev => ({ ...prev, [prices.sku]: 0 }));
+    setPrices(prev => ({ ...prev, [product.sku]: 0 }));
   };
 
   const removeItem = (sku) => {
@@ -105,7 +114,11 @@ const AddNewOrder = () => {
       items: prev.items.filter(item => item.sku !== sku)
     }));
   };
-
+const calculateTotalPrice = () => {
+  return formData.items.reduce((total, item) => {
+    return total + (item.price * item.quantity);
+  }, 0);
+};
   const addOrder = async (e) => {
     e.preventDefault();
     try {
@@ -238,7 +251,7 @@ const AddNewOrder = () => {
                           <p className="text-gray-200">{product?.name}</p>
                           <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
                           <p className="text-sm text-gray-400">Price: {item.price}</p>
-                          <p className="text-sm text-gray-400">Total : {item.price * item.quantity}</p>
+                          <p className="text-sm text-gray-400">Total : {calculateTotalPrice()}</p>
                         </div>
                         <button
                           type="button"
@@ -286,10 +299,10 @@ const AddNewOrder = () => {
                     <p className="text-sm text-gray-400">SKU: {product.sku}</p>
                     <p className="text-sm text-blue-300">Available: {product.quantity}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex  items-center gap-2">
 
                     <div className="flex flex-col gap-1">
-                      <label htmlFor="quantitie" className="text-white">Quantitie</label>
+                      <label htmlFor="quantitie" className="text-white">Quantities</label>
                       <input
                         name="quantitie"
                         type="number"
