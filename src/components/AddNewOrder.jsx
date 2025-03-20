@@ -46,20 +46,7 @@ const AddNewOrder = () => {
   const governorateOptions = governorates[2].data;
   const cityOptions = cities[2].data; 
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`${API}Item`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching items:", error);
-      }
-    };
-    fetchItems();
-  }, []);
+ 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -76,6 +63,29 @@ const AddNewOrder = () => {
       [sku]: Math.max(0, parseInt(value) || 0)
     }));
   };
+
+   useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${API}Item`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProducts(response.data);
+        setPrices((prev) => {
+          const updatedPrices = {};
+          response.data.forEach((product) => {
+            updatedPrices[product.sku] = product.price;
+          });
+          return updatedPrices;
+        });
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      }
+    };
+    fetchItems();
+  }, []);
+
   const handlePriceCahnge = (sku, value) => {
     setPrices((prev) => {
       const updatedPrices = {
@@ -318,7 +328,7 @@ const calculateTotalPrice = () => {
                         name="price"
                         type="number"
                         min="0"
-                        value={prices[product.sku] || 0}
+                        value={prices[product.sku] ||product.price}
                         onChange={(e) => handlePriceCahnge(product.sku, e.target.value)}
                         className="w-20 px-2 py-1 bg-gray-600 text-white rounded-md text-center"
                       />

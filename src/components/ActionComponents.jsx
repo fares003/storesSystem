@@ -99,6 +99,7 @@ export const PendingDeliveryActions = ({
   setSelectedService,
   setAreYouSurePopup,
   handlePendingDelivery,
+  cancelOrder, // Default to an empty function if not provided
   shippingServices
 }) => {
   const [localService, setLocalService] = useState(selectedService)
@@ -147,6 +148,18 @@ export const PendingDeliveryActions = ({
                 {service}
               </button>
             ))}
+            <button
+              onClick={() => {
+                setAreYouSurePopup({
+                  open: true,
+                  actions: () => cancelOrder(item.id)
+                })
+                setOpenDropdownId(null)
+              }}
+              className="block w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 text-left border-t border-gray-200"
+            >
+              Cancel
+            </button>
           </div>
         )}
       </div>

@@ -151,12 +151,6 @@ const OrderCard = ({
                         >
                         <FiEdit className="text-lg" /> 
                         </button>
-                        {/* <button
-                        onClick={() => deleteOrder(item.id)}
-                        className="p-2 hover:bg-red-600/20 text-red-400 rounded-lg transition-all"
-                        >
-                        <FiTrash2 className="text-lg" />
-                        </button> */}
                     </div>
                 )}
             </div>

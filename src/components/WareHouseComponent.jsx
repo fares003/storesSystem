@@ -1,24 +1,22 @@
 import React, { useState } from "react";
-import { FiCheck, FiX, FiAlertTriangle } from "react-icons/fi";
+import { AiFillCheckCircle, AiOutlineCloseCircle } from "react-icons/ai";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 
 function WareHouseComponent() {
-  const [order, setOrder] = useState({ cart: [] });
+  const [order, setOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [barcodes, setBarcodes] = useState([]);
+  const [barcodes, setBarcodes] = useState([]); // Store all items' barcodes
   const [barcodeValidation, setBarcodeValidation] = useState([]);
-  const [barcodeCounts, setBarcodeCounts] = useState({});
-  const [searchError, setSearchError] = useState("");
-  const [orderId, setOrderId] = useState("");
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const API = import.meta.env.VITE_API;
 
   const handleSearch = async () => {
     try {
       const token = localStorage.getItem("token");
       const target = API + "OutboundOrders/by-barcode";
-
       const resp = await axios.post(
         target,
         { barcode: searchTerm },
@@ -32,186 +30,222 @@ function WareHouseComponent() {
 
       const data = resp.data;
       setOrder(data);
-      setOrderId(data.id);
-      setBarcodes(Array(data.cart.reduce((sum, item) => sum + item.quantity, 0)).fill(""));
-      setBarcodeValidation(Array(data.cart.reduce((sum, item) => sum + item.quantity, 0)).fill(null));
-      setBarcodeCounts(data.cart.reduce((acc, item) => {
-        acc[item.name] = 0;
-        return acc;
-      }, {}));
-      setSearchError(""); // Clear any previous error
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setSearchError("Order not found. Please check the barcode and try again.");
-        toast.error("Order not found. Please check the barcode and try again.");
+      setCurrentItemIndex(0);
 
-      } else {
-        console.error("Error fetching orders:", error);
-        setSearchError("An unexpected error occurred. Please try again later.");
-        toast.error(searchError);
-        toast.error("Order not found. Please check the barcode and try again.");
-      }
+      // Initialize barcode storage for all items
+      setBarcodes(data.cart.map((item) => new Array(item.quantity).fill("")));
+      setBarcodeValidation(data.cart.map((item) => new Array(item.quantity).fill(null)));
+
+      setShowModal(true);
+    } catch (error) {
+      toast.error("Order not found. Please check the barcode and try again.");
     }
   };
 
-  const handleBarcodeChange = (index, value) => {
-    const newBarcodes = [...barcodes];
-    newBarcodes[index] = value;
-    setBarcodes(newBarcodes);
+  const handleBarcodeChange = (itemIndex, barcodeIndex, value) => {
+    setBarcodes((prev) => {
+      const newBarcodes = [...prev];
+      newBarcodes[itemIndex] = [...newBarcodes[itemIndex]];
+      newBarcodes[itemIndex][barcodeIndex] = value;
+      return newBarcodes;
+    });
+
+    if (value === "") {
+      setBarcodeValidation((prev) => {
+        const newValidation = [...prev];
+        newValidation[itemIndex] = [...newValidation[itemIndex]];
+        newValidation[itemIndex][barcodeIndex] = null;
+        return newValidation;
+      });
+    }
   };
 
-  const handleCheckBarcode = async (index) => {
+  const handleCheckBarcode = async (itemIndex, barcodeIndex, itemName) => {
+    try {
+      const allBarcodes = barcodes.flat().filter((_, i) => i !== itemIndex * barcodes[itemIndex].length + barcodeIndex);
+      if (barcodes[itemIndex][barcodeIndex] === "") {
+        setBarcodeValidation((prev) => {
+          const newValidation = [...prev];
+          newValidation[itemIndex] = [...newValidation[itemIndex]];
+          newValidation[itemIndex][barcodeIndex] = null;
+          return newValidation;
+        });
+        return; // Exit early if the input is empty
+      }
+
+      if (!allBarcodes.includes(barcodes[itemIndex][barcodeIndex])) {
+        const token = localStorage.getItem("token");
+        const target = API + `OutboundOrders/barcode/${barcodes[itemIndex][barcodeIndex]}`;
+        const resp = await axios.get(target, {
+          headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const validName = resp.data.name;
+        setBarcodeValidation((prev) => {
+          const newValidation = [...prev];
+          newValidation[itemIndex] = [...newValidation[itemIndex]];
+          newValidation[itemIndex][barcodeIndex] = validName === itemName ? "valid" : "invalid";
+          return newValidation;
+        });
+      } else {
+        setBarcodeValidation((prev) => {
+          const newValidation = [...prev];
+          newValidation[itemIndex] = [...newValidation[itemIndex]];
+          newValidation[itemIndex][barcodeIndex] = "invalid";
+          return newValidation;
+        });
+        toast.error("Barcode already exists in another item.");
+      }
+        
+     
+    }
+     catch (error) {
+      setBarcodeValidation((prev) => {
+        const newValidation = [...prev];
+        newValidation[itemIndex] = [...newValidation[itemIndex]];
+        newValidation[itemIndex][barcodeIndex] = "invalid";
+        return newValidation;
+      });
+    }
+  };
+
+  const handleNextItem = () => {
+    if (currentItemIndex < order.cart.length - 1) {
+      setCurrentItemIndex((prev) => prev + 1);
+    } else {
+      setShowModal(false);
+      toast.success("All items verified! Ready to prepare order.");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handlePrepareOrder = async () => {
     try {
       const token = localStorage.getItem("token");
-      const target = API + `OutboundOrders/barcode/${barcodes[index]}`;
-  
-      const resp = await axios.get(
-        target,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const target = API + `OutboundOrders/prepare`;
+
+      // Collect all barcodes from all items
+      const formattedBarcodes = barcodes.flatMap((itemBarcodes) =>
+        itemBarcodes.map((barcode) => ({ barcode }))
       );
-  
-      const validName = resp.data.name;
-      const matchingItem = order.cart.find((item) => item.name === validName);
-  
-      const newValidation = [...barcodeValidation];
-      const newCounts = { ...barcodeCounts };
-  
-      if (matchingItem) {
-        newValidation[index] = "valid";
-  
-        // Increment count for this item
-        newCounts[validName] = (newCounts[validName] || 0) + 1;
-      } else {
-        newValidation[index] = "invalid";
-      }
-  
-      setBarcodeValidation(newValidation);
-      setBarcodeCounts(newCounts);
+
+      const payload = { orderId: order.id, barcodes: formattedBarcodes };
+
+      await axios.post(target, payload, {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Order prepared successfully!");
+      setShowModal(false);
     } catch (error) {
-      const newValidation = [...barcodeValidation];
-      newValidation[index] = "invalid";
-      setBarcodeValidation(newValidation);
+      toast.error("An error occurred while preparing the order.");
     }
   };
-  
-  const isItemCountValid = (itemName, requiredQuantity) => {
-    return barcodeCounts[itemName] === requiredQuantity;
-  };
-const handlePrepairOrder = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const target = API + `OutboundOrders/prepare`;
-    const resp = await axios.post(
-      target,
-      {
-        orderId: orderId,
-        barcodes: barcodes,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    toast.success("Order prepared successfully!");
-  } catch (error) {
-    console.error("Error preparing order:", error);
-    toast.error("An unexpected error occurred. Please try again later.");
-  }
-};
+
   return (
-    <div className="w-full h-screen flex items-start justify-center mt-8 text-white">
-      <div className="w-full max-w-4xl overflow-y-auto scrollbar-thin mx-10">
-        {/* Title */}
-        <div className="flex flex-col items-center text-white mb-8">
-          <h1 className="text-5xl font-extrabold dark:text-white">
-            Warehouse Management
-          </h1>
-        </div>
+    <div className="w-full h-screen flex items-center justify-center text-white">
+      <div className="w-full max-w-xl mx-6">
+        <h1 className="text-4xl font-bold text-center mb-6">Warehouse Management</h1>
 
-        {/* Search Bar */}
-        <div className="flex flex-col items-center w-full">
-          <div className="flex items-center justify-center space-x-4 w-fit pb-4 border-b border-white">
-            <input
-              type="text"
-              placeholder="Enter order barcode here..."
-              className="px-4 py-2 w-80 bg-gray-700 text-white rounded-md outline-none placeholder-gray-400"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button
-              className="px-6 py-2 bg-white text-black font-semibold rounded-md shadow-md hover:bg-gray-200"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
-          </div>
-        </div>
-
-        {/* Display Items and Barcode Inputs */}
-        <div className="mt-6 flex flex-col items-center rounded-lg  w-full">
-          {order.cart.map((item, itemIndex) => (
-            <div key={itemIndex} className="mb-4 w-full max-w-md">
-              <h2 className="text-xl font-semibold mb-3">{item.name} ({barcodeCounts[item.name] || 0}/{item.quantity})</h2>
-              
-              <div className="w-full flex flex-col items-center space-y-3">
-                {Array.from({ length: item.quantity }, (_, index) => {
-                  const globalIndex = order.cart.slice(0, itemIndex).reduce((sum, prevItem) => sum + prevItem.quantity, 0) + index;
-
-                  return (
-                    <div key={globalIndex} className="relative w-80 flex items-center">
-                      <input
-                        type="text"
-                        placeholder={`Barcode ${index + 1}`}
-                        className={`px-4 py-2 w-full bg-white text-black outline-none placeholder-gray-800 rounded-md transition-all 
-                          ${barcodeValidation[globalIndex] === "invalid" ? "border-red-400 shadow-red-400/50 border-2 shadow-lg" : ""}
-                          ${barcodeValidation[globalIndex] === "valid" ? "border-green-500 shadow-green-500/50 border-2 shadow-lg" : ""}
-                        `}
-                        value={barcodes[globalIndex]}
-                        onChange={(e) => handleBarcodeChange(globalIndex, e.target.value)}
-                        onBlur={() => handleCheckBarcode(globalIndex)}
-                      />
-                      {barcodeValidation[globalIndex] === "valid" && (
-                        <FiCheck className="absolute right-3 text-green-500 text-xl" />
-                      )}
-                      {barcodeValidation[globalIndex] === "invalid" && (
-                        <FiX className="absolute right-3 text-red-500 text-xl" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Display Warning if Count is Incorrect */}
-              {!isItemCountValid(item.name, item.quantity) && (
-                <div className="flex items-center mt-2 text-yellow-500">
-                  <FiAlertTriangle className="mr-2" />
-                  <span>Incorrect barcode count for {item.name}!</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-center mt-8">
-          {order.cart.length > 0 &&
-        <motion.div
-          whileHover={barcodes.every((barcode, index) => barcode !== "" && barcodeValidation[index] === "valid") ? { scale: 1.05 } : {}}
-          whileTap={barcodes.every((barcode, index) => barcode !== "" && barcodeValidation[index] === "valid") ? { scale: 0.95 } : {}}
-        >
-          <button
-            className="px-10 py-4 bg-indigo-600 text-white px-4 py-2 rounded-lg"
-            disabled={barcodes.some((barcode) => barcode === "" || barcodeValidation.includes("invalid"))}
-          >
-            Prepare Order
+        <div className="flex space-x-4 items-center justify-center">
+          <input
+            type="text"
+            placeholder="Enter order barcode..."
+            className="px-4 py-2 w-80 bg-gray-700 text-white rounded-md outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-md" onClick={handleSearch}>
+            Search
           </button>
-        </motion.div>
-          }
         </div>
       </div>
+
+      {showModal && order && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg"
+          >
+            <h2 className="text-xl font-semibold mb-3">
+              {order.cart[currentItemIndex].name}
+            </h2>
+
+            <div className="space-y-3">
+              {barcodes[currentItemIndex]?.map((barcode, barcodeIndex) => (
+                <div key={barcodeIndex} className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    placeholder={`Barcode ${barcodeIndex + 1}`}
+                    className={`px-4 py-2 w-full bg-gray-700 text-white rounded-md ${
+                      barcodeValidation[currentItemIndex]?.[barcodeIndex] === "invalid"
+                        ? "border-red-500"
+                        : barcodeValidation[currentItemIndex]?.[barcodeIndex] === "valid"
+                        ? "border-green-500"
+                        : ""
+                    }`}
+                    value={barcode}
+                    onChange={(e) => handleBarcodeChange(currentItemIndex, barcodeIndex, e.target.value)}
+                    onBlur={() => handleCheckBarcode(currentItemIndex, barcodeIndex, order.cart[currentItemIndex].name)}
+                  />
+                  {barcodeValidation[currentItemIndex]?.[barcodeIndex] === "valid" && (
+                    <AiFillCheckCircle className="text-green-500 text-xl" />
+                  )}
+                  {barcodeValidation[currentItemIndex]?.[barcodeIndex] === "invalid" && (
+                    <AiOutlineCloseCircle className="text-red-500 text-xl" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between mt-6">
+              <button className="px-6 py-2 bg-gray-500 text-white rounded-md" onClick={handleCloseModal}>
+                Close
+              </button>
+              {currentItemIndex < order.cart.length - 1 ? (
+                <button
+                  className={`px-6 py-2 rounded-md ${
+                    barcodes[currentItemIndex]?.some((barcode) => barcode === "") ||
+                    barcodeValidation[currentItemIndex]?.some((validation) => validation !== "valid")
+                      ? "bg-blue-300 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 text-white"
+                  }`}
+                  onClick={handleNextItem}
+                  disabled={
+                    barcodes[currentItemIndex]?.some((barcode) => barcode === "") ||
+                    barcodeValidation[currentItemIndex]?.some((validation) => validation !== "valid")
+                  }
+                >
+                  Next Item
+                </button>
+              ) : (
+                <button
+                  className={`px-6 py-2 rounded-md ${
+                    barcodes[currentItemIndex]?.some((barcode) => barcode === "") ||
+                    barcodeValidation[currentItemIndex]?.some((validation) => validation !== "valid")
+                      ? "bg-green-300 text-gray-400 cursor-not-allowed"
+                      : "bg-green-500 text-white"
+                  }`}
+                  onClick={handlePrepareOrder}
+                  disabled={
+                    barcodes[currentItemIndex]?.some((barcode) => barcode === "") ||
+                    barcodeValidation[currentItemIndex]?.some((validation) => validation !== "valid")
+                  }
+                >
+                  Prepare Order
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
