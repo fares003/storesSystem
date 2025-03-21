@@ -81,6 +81,18 @@ const OrderDetailes = () => {
   const handleWhatsApp = (phone) => {
     window.open(`https://wa.me/${phone}`, "_blank");
   };
+  useEffect(() => {
+    const settingsString = localStorage.getItem("settings");
+    try {
+      const settings = settingsString ? JSON.parse(settingsString) : null;
+      if (settings && settings.length > 2) {
+        setWidth(settings[1]?.defaultValue || "");
+        setHeight(settings[2]?.defaultValue || "");
+      }
+    } catch (error) {
+      console.error("Error parsing settings from localStorage:", error);
+    }
+  }, []);
   
   if (!orderData) {
     return <div className="min-h-screen bg-gray-100 p-6">Loading...</div>;
@@ -94,10 +106,7 @@ const OrderDetailes = () => {
           <h1 className="text-3xl font-bold text-indigo-500 mb-6">Order Details</h1>
           <div className="flex flex-col gap-2">
             <button className="px-6 py-2 bg-orange-500 rounded-md text-white font-semibold" onClick={fetchInvoice} >invoice</button>
-            <div className="flex items-center gap-2">
-              <input value={width} onChange={(e)=>setWidth(e.target.value)} className="w-20 border border-indigo-800  rounded-sm" placeholder="width" type="text" />
-              <input value={height} onChange={(e)=>setHeight(e.target.value)} className="w-20 border border-indigo-800  rounded-sm" placeholder="height" type="text" />
-            </div>
+
           </div>
         </div>
 
