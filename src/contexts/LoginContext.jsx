@@ -60,7 +60,26 @@ export const LoginProvider = ({ children }) => {
         }
 
         const data = resp.json();
-        setLogedin(false);
+        setLogedin(true);
+        return data;
+    }
+    async function createAccount(credentials) {
+        const target = api + "auth/signup";
+        console.log(credentials);
+        
+        const resp = await fetch(target, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(credentials),
+        });
+
+        if (!resp.ok) {
+            const error = await resp.text();
+            console.error("Sign-up failed:", error);
+            return false;
+        }
+
+        const data = resp.json();
         return data;
     }
     function logout(){
@@ -68,7 +87,7 @@ export const LoginProvider = ({ children }) => {
         window.location.href = "/" ; 
     }
     return (
-        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout  }}>
+        <loginContext.Provider value={{ logedin, setLogedin, signup, signin , logout , createAccount }}>
             {children}
         </loginContext.Provider>
     );

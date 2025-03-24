@@ -38,6 +38,7 @@ import Bulks from '@/pages/Bulks';
 import WareHouseManagement from '@/pages/WareHouseManagement';
 import EndOfDayPage from '@/pages/EndOfDayPage';
 import SettingsPage from '@/pages/SettingsPage';
+import CreateAccount from '@/pages/CreateAccount';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -108,6 +109,7 @@ const LogedInHome = () => {
                 <Route path="/fulfillment/tasks" element={<WareHouseManagement />} />
                 <Route path="/fulfillment/endOfDay" element={<EndOfDayPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/createAccount" element={<CreateAccount />} />
 
 
               </Routes>
