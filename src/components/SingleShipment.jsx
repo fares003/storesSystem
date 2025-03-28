@@ -27,10 +27,17 @@ const SingleShipment = () => {
   };
 
   const handlePDF = async (id) => {
-    const target = `${API}inboundOrders/barcodes/${id}`;
+    const target = `${API}inboundOrders/barcodes/`;
     try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(target, {
+        const reqBody={
+            id: id,
+            width: width,
+            height: height,
+        }
+        const response = await axios.post(target,
+          
+          reqBody, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -48,7 +55,19 @@ const SingleShipment = () => {
         console.error("Error fetching PDF:", error);
     }
   };
-
+useEffect(() => {
+    const settings = JSON.parse(localStorage.getItem("settings"));
+    if (settings) {
+      const barcodeWidth = settings.find((setting) => setting.name === "barcode width");
+      const barcodeHeight = settings.find((setting) => setting.name === "barcode height");
+      if (barcodeWidth&&barcodeHeight) {
+        setWidth(barcodeWidth.defaultValue);
+        setHeight(barcodeHeight.defaultValue);
+      }else{
+        toast.error("Please set the barcode width and height in settings.");
+    }
+  }
+}, []);
   useEffect(() => {
     fetchStorage();
   }, []);
@@ -149,14 +168,13 @@ const SingleShipment = () => {
                       </div>
                     </td>
                     {/* PDF */}
-                    <td className="flex flex-col items-center justify-center gap-2">
+                    <td className="flex flex-col items-center justify-center px-6 py-8">
                       <button className="bg-orange-500 hover:bg-orange-700 px-6 py-2 rounded-md"
                       onClick={()=>{ handlePDF(product.id) }}
                       >
                         PDF
                       </button>
-                      <input value={width} onChange={(e)=>setWidth(e.target.value)} className="w-16 border border-indigo-800 rounded-sm" placeholder="width" type="text" />
-                      <input value={height} onChange={(e)=>setHeight(e.target.value)} className="w-16  border border-indigo-800 rounded-sm" placeholder="height" type="text" />
+                   
                     </td>
                   </tr>
                 ))}

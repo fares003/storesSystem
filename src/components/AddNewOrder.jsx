@@ -51,7 +51,7 @@ const AddNewOrder = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'province') {
-      setFormData(prev => ({ ...prev, [name]: value, city: '' }));
+      setFormData(prev => ({ ...prev, [name]:value , city: '' }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -146,8 +146,9 @@ const calculateTotalPrice = () => {
           phonenumber: parsedData.phonenumber,
           whatsapp : parsedData.whatsapp ,
           email: parsedData.email,
+          default_address: { address1: parsedData.address , city : parsedData.city , province :governorates[2].data[parsedData.province-1].governorate_name_en  ,},
         },
-        default_address: { address1: parsedData.address , city : parsedData.city , province : parsedData.province ,},
+        
         line_Items: parsedData.items,
       };
 

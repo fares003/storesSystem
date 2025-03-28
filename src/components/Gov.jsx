@@ -1,194 +1,184 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const API = import.meta.env.VITE_API;
 
-const Gov = () => {
-  const [deliveredID, setDeliveredID] = useState(0);
-  const [cancelledAfterDeliveryID, setCancelledAfterDeliveryID] = useState(0);
-  const [cancelledBeforeDeliveryID, setCancelledBeforeDeliveryID] = useState(0);
-
+const GovShipping = () => {
   const [shippingData, setShippingData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [editingRow, setEditingRow] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     govId: 0,
-    statusId: 0,
-    price: 0,
+    delivered: null,
+    cancelledAfterDelivery: null,
+    cancelledBeforeDelivery: null
   });
 
-  const fetchData = async () => {
+  // Fetch shipping data
+  const fetchShippingData = async () => {
     try {
-      const response = await fetch(`${API}Gov/shipping`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await response.json();
-      setShippingData(data);
-
-      // Set the IDs based on the first item in the response (assuming they are consistent across all rows)
-      if (data.length > 0) {
-        setDeliveredID(data[0].deliveredId);
-        setCancelledAfterDeliveryID(data[0].cancelledAfterDeliveryId);
-        setCancelledBeforeDeliveryID(data[0].cancelledBeforeDeliveryId);
-      }
+      const response = await axios.get(`${API}Gov/shipping`);
+      setShippingData(response.data);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchShippingData();
   }, []);
 
-  const handleEdit = (row) => {
-    setEditingRow(row.governorateId);
+  const handleEdit = (gov) => {
+    setEditingId(gov.governorateId);
     setFormData({
-      govId: row.governorateId,
-      statusId: 0,
-      price: 0,
+      govId: gov.governorateId,
+      delivered: gov.delivered || null,
+      cancelledAfterDelivery: gov.cancelledAfterDelivery || null,
+      cancelledBeforeDelivery: gov.cancelledBeforeDelivery || null
     });
   };
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: Number(value),
-    });
+    setFormData(prev => ({
+      ...prev,
+      [name]: Number(value) || 0
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
-
+    
     try {
-      const response = await fetch(`${API}Gov/shipping`, {
-        method: 'POST',
+      // Prepare the request body exactly as your backend expects
+      const requestBody = {
+        govId: formData.govId,
+        delivered: formData.delivered,
+        cancelledAfterDelivery: formData.cancelledAfterDelivery,
+        cancelledBeforeDelivery: formData.cancelledBeforeDelivery
+      };
+
+      const response = await axios.post(`${API}Gov/shipping`, requestBody, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update data');
+      if (response.status !== 200) {
+        throw new Error(response.data.message || 'Failed to update shipping data');
       }
 
-      const updatedData = shippingData.map((item) => {
-        if (item.governorateId === formData.govId) {
-          return {
-            ...item,
-            delivered:
-              formData.statusId === deliveredID ? formData.price : item.delivered,
-            cancelledAfterDelivery:
-              formData.statusId === cancelledAfterDeliveryID ? formData.price : item.cancelledAfterDelivery,
-            cancelledBeforeDelivery:
-              formData.statusId === cancelledBeforeDeliveryID ? formData.price : item.cancelledBeforeDelivery,
-          };
-        }
-        return item;
-      });
-      setShippingData(updatedData);
-
-      setSuccessMessage('Data updated successfully!');
-      setEditingRow(null);
+      // Refresh data after successful update
+      await fetchShippingData();
+      setEditingId(null);
     } catch (err) {
       setError(err.message);
     }
   };
 
+  const handleCancel = () => {
+    setEditingId(null);
+  };
+
+  if (loading) return <div className="text-center py-8">Loading...</div>;
+  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
+
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-8xl">
-        <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">Governorate Shipping Data</h1>
-
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
-            {error}
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
-            {successMessage}
-          </div>
-        )}
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="p-3 text-left">Governorate</th>
-                <th className="p-3 text-left">Delivered</th>
-                <th className="p-3 text-left">Cancelled After Delivery</th>
-                <th className="p-3 text-left">Cancelled Before Delivery</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shippingData.map((row) => (
-                <tr key={row.governorateId} className="border-b border-gray-200 hover:bg-blue-50">
-                  <td className="p-3">{row.governorate}</td>
-                  <td className="p-3">{row.delivered}</td>
-                  <td className="p-3">{row.cancelledAfterDelivery}</td>
-                  <td className="p-3">{row.cancelledBeforeDelivery}</td>
-                  <td className="p-3">
-                    {editingRow === row.governorateId ? (
-                      <form onSubmit={handleSubmit} className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-                        <select
-                          name="statusId"
-                          value={formData.statusId}
-                          onChange={handleInputChange}
-                          className="w-full sm:w-40 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        >
-                          <option value={0} disabled>Select Status</option>
-                          <option value={deliveredID}>Delivered</option>
-                          <option value={cancelledAfterDeliveryID}>Cancelled After Delivery</option>
-                          <option value={cancelledBeforeDeliveryID}>Cancelled Before Delivery</option>
-                        </select>
-                        <input
-                          type="number"
-                          name="price"
-                          value={formData.price}
-                          onChange={handleInputChange}
-                          className="w-full sm:w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="Price"
-                          required
-                        />
-                        <button
-                          type="submit"
-                          className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingRow(null)}
-                          className="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        >
-                          Cancel
-                        </button>
-                      </form>
-                    ) : (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Shipping Cost Management</h1>
+      
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Governorate</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivered</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cancelled After Delivery</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cancelled Before Delivery</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {shippingData.map((gov) => (
+              <tr key={gov.governorateId} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">{gov.governorate}</td>
+                
+                {editingId === gov.governorateId ? (
+                  <>
+                    <td className="px-6 py-4">
+                      <input
+                        type="number"
+                        name="delivered"
+                        value={formData.delivered}
+                        onChange={handleChange}
+                        className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                        step="0.01"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <input
+                        type="number"
+                        name="cancelledAfterDelivery"
+                        value={formData.cancelledAfterDelivery}
+                        onChange={handleChange}
+                        className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                        step="0.01"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <input
+                        type="number"
+                        name="cancelledBeforeDelivery"
+                        value={formData.cancelledBeforeDelivery}
+                        onChange={handleChange}
+                        className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                        step="0.01"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap space-x-2">
                       <button
-                        onClick={() => handleEdit(row)}
-                        className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={handleSubmit}
+                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="px-6 py-4">{gov.delivered || 0}</td>
+                    <td className="px-6 py-4">{gov.cancelledAfterDelivery || 0}</td>
+                    <td className="px-6 py-4">{gov.cancelledBeforeDelivery || 0}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleEdit(gov)}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                       >
                         Edit
                       </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export default Gov;
+export default GovShipping;

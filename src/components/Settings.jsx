@@ -8,8 +8,10 @@ const API = import.meta.env.VITE_API;
 function Settings() {
   const [settings, setSettings] = useState([
     { name: "Inventory name", editing: false, defaultValue: "" },
-    { name: "PDF width", editing: false, defaultValue: "0" },
-    { name: "PDF height", editing: false, defaultValue: "0" },
+    { name: "invoice width", editing: false, defaultValue: "0" },
+    { name: "invoice height", editing: false, defaultValue: "0" },
+    { name: "barcode width", editing: false, defaultValue: "0" },
+    { name: "barcode height", editing: false, defaultValue: "0" },
   ]);
 
   const [inventories, setInventories] = useState([]);

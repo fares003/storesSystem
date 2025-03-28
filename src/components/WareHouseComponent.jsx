@@ -62,8 +62,9 @@ function WareHouseComponent() {
 
   const handleCheckBarcode = async (itemIndex, barcodeIndex, itemName) => {
     try {
-      const allBarcodes = barcodes.flat().filter((_, i) => i !== itemIndex * barcodes[itemIndex].length + barcodeIndex);
-      if (barcodes[itemIndex][barcodeIndex] === "") {
+      const currentBarcode = barcodes[itemIndex][barcodeIndex];
+      
+      if (currentBarcode === "") {
         setBarcodeValidation((prev) => {
           const newValidation = [...prev];
           newValidation[itemIndex] = [...newValidation[itemIndex]];
@@ -72,25 +73,13 @@ function WareHouseComponent() {
         });
         return; // Exit early if the input is empty
       }
-
-      if (!allBarcodes.includes(barcodes[itemIndex][barcodeIndex])) {
-        const token = localStorage.getItem("token");
-        const target = API + `OutboundOrders/barcode/${barcodes[itemIndex][barcodeIndex]}`;
-        const resp = await axios.get(target, {
-          headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const validName = resp.data.name;
-        setBarcodeValidation((prev) => {
-          const newValidation = [...prev];
-          newValidation[itemIndex] = [...newValidation[itemIndex]];
-          newValidation[itemIndex][barcodeIndex] = validName === itemName ? "valid" : "invalid";
-          return newValidation;
-        });
-      } else {
+  
+      // Check if this barcode exists in any other position (excluding itself)
+      const barcodeExistsElsewhere = barcodes.some((itemBarcodes, i) => 
+        i !== itemIndex && itemBarcodes.includes(currentBarcode)
+      );
+  
+      if (barcodeExistsElsewhere) {
         setBarcodeValidation((prev) => {
           const newValidation = [...prev];
           newValidation[itemIndex] = [...newValidation[itemIndex]];
@@ -98,11 +87,26 @@ function WareHouseComponent() {
           return newValidation;
         });
         toast.error("Barcode already exists in another item.");
+        return;
       }
-        
-     
-    }
-     catch (error) {
+  
+      const token = localStorage.getItem("token");
+      const target = API + `OutboundOrders/barcode/${currentBarcode}`;
+      const resp = await axios.get(target, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      const validName = resp.data.name;
+      setBarcodeValidation((prev) => {
+        const newValidation = [...prev];
+        newValidation[itemIndex] = [...newValidation[itemIndex]];
+        newValidation[itemIndex][barcodeIndex] = validName === itemName ? "valid" : "invalid";
+        return newValidation;
+      });
+    } catch (error) {
       setBarcodeValidation((prev) => {
         const newValidation = [...prev];
         newValidation[itemIndex] = [...newValidation[itemIndex]];
@@ -111,7 +115,6 @@ function WareHouseComponent() {
       });
     }
   };
-
   const handleNextItem = () => {
     if (currentItemIndex < order.cart.length - 1) {
       setCurrentItemIndex((prev) => prev + 1);
@@ -144,7 +147,11 @@ function WareHouseComponent() {
       toast.success("Order prepared successfully!");
       setShowModal(false);
     } catch (error) {
-      toast.error("An error occurred while preparing the order.");
+      if (error.response && error.response.status === 400) {
+        toast.error("The order has already been prepared.");
+      } else {
+        toast.error("An error occurred while preparing the order.");
+      }
     }
   };
 
