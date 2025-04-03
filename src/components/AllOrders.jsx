@@ -371,18 +371,34 @@ const handleUpdateCart = async ()=>{
               Order Management
             </h1>
 
-            <motion.div
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
->
-  <Link
-    to="/addorder"
-    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg"
+            <motion.div className="flex items-center gap-4">
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="flex items-center"
   >
-    <FiEdit />
-    <span>New Order</span>
-  </Link>
-</motion.div>;
+    <Link
+      to="/addorder"
+      className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg"
+    >
+      <FiEdit />
+      <span>New Order</span>
+    </Link>
+  </motion.div>
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="flex items-center"
+  >
+    <Link
+      to="/options"
+      className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg shadow-md transition-all duration-200"
+    >
+      <FiEdit className="text-lg" />
+      <span className="font-semibold">Manage Options</span>
+    </Link>
+  </motion.div>
+</motion.div>
 
             <div className="flex items-center gap-4">
               <span className="text-gray-400 text-sm">

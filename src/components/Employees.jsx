@@ -124,7 +124,7 @@ function Employees() {
                     {employee.store}
                   </td>
                   <td className="p-3 text-sm border border-gray-700 text-center">
-                    ${employee.salary}
+                    {employee.salary}
                   </td>
                   <td className="p-3 text-sm border border-gray-700 text-center">
                     {employee.roles ? employee.roles.join(", ") : "N/A"}

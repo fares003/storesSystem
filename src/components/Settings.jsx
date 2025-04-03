@@ -13,6 +13,7 @@ function Settings() {
     { name: "barcode width", editing: false, defaultValue: "0" },
     { name: "barcode height", editing: false, defaultValue: "0" },
   ]);
+const [statement,setStatement]=useState({value:"",editing:false})
 
   const [inventories, setInventories] = useState([]);
 
@@ -40,7 +41,49 @@ function Settings() {
     localStorage.setItem("settings", JSON.stringify(newSettings));
     setSettings(newSettings);
   };
+  const handleStatementSave=async() => {
+    try {
+      const token = localStorage.getItem("token");
+      const target = API + "Legal";
+      const resp = await axios.post(target,{message:statement.value} 
+        , {
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      });
+      if (resp.status === 200) {
+        setStatement({ ...statement, editing: false });
+      }
+      else {
+        console.error("Failed to fetch statement.");
+      }
 
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  }
+  useEffect(() => {
+    const getStatement = async () => {
+
+    try {
+      const token = localStorage.getItem("token");
+      const target = API + "Legal";
+      const resp = await axios.get(target, {
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      });
+      if (resp.status === 200) {
+        setStatement({ ...statement, value: resp.data.message });
+      } else {
+        console.error("Failed to fetch statement.");
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+    };
+    getStatement();
+  }, []);
   useEffect(() => {
     const savedSettings = JSON.parse(localStorage.getItem("settings"));
     if (savedSettings) {
@@ -79,7 +122,7 @@ function Settings() {
 
   return (
     <div className="w-full h-screen flex items-center flex-col text-white p-8">
-      <div className="w-full flex bg-[#525969] pt-5 rounded-md items-center flex-col gap-y-4">
+      <div className="w-full flex bg-[#525969] pt-5 rounded-md items-center flex-col gap-y-4  overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
         <div className="w-full flex items-center justify-center gap-x-4">
           <h1 className="text-2xl font-bold">Settings</h1>
           <IoIosSettings size={45} />
@@ -94,25 +137,24 @@ function Settings() {
 
                 {/* Dropdown for "Inventory Id" */}
                 {setting.name === "Inventory name" ? (
-   <select
-   id={setting.name}
-   className={`bg-transparent p-2 mr-9  rounded text-white outline-none w-full max-w-[300px] ${
-     setting.editing ? "cursor-pointer border focus:border-white" : "cursor-not-allowed opacity-50"
-   }`}
-   value={setting.defaultValue}
-   disabled={!setting.editing}
-   onChange={handleInventoryChange}
- >
-   <option value="" disabled>Select an inventory</option>
-   <div className="max-h-48 overflow-y-auto">
-     {inventories.map((inventory) => (
-       <option key={inventory.id} className="bg-gray-800 text-white hover:bg-gray-600" value={inventory.id}>
-         {inventory.manager}
-       </option>
-     ))}
-   </div>
- </select>
- 
+                  <select
+                    id={setting.name}
+                    className={`bg-transparent p-2 mr-9 rounded text-white outline-none w-full max-w-[300px] ${
+                      setting.editing ? "cursor-pointer border focus:border-white" : "cursor-not-allowed opacity-50"
+                    }`}
+                    value={setting.defaultValue}
+                    disabled={!setting.editing}
+                    onChange={handleInventoryChange}
+                  >
+                    <option value="" disabled>Select an inventory</option>
+                    <div className="max-h-48 overflow-y-auto">
+                      {inventories.map((inventory) => (
+                        <option key={inventory.id} className="bg-gray-800 text-white hover:bg-gray-600" value={inventory.id}>
+                          {inventory.manager}
+                        </option>
+                      ))}
+                    </div>
+                  </select>
                 ) : (
                   <input
                     id={setting.name}
@@ -126,6 +168,7 @@ function Settings() {
                     onChange={(e) => handleInput(e, index)}
                   />
                 )}
+       
               </div>
 
               {/* Change Button */}
@@ -152,6 +195,43 @@ function Settings() {
               </button>
             </div>
           ))}
+           <div key={"statement"} className="mb-4 w-full flex items-center justify-center gap-x-4">
+              <div className="mb-4">
+                <label htmlFor={"statement"} className="block text-sm font-medium mb-2">
+                    statement:
+                </label>
+                    <input
+                    id={"statement"}
+                    type="text"
+                    value={statement.value}
+                    className={`bg-transparent p-2 rounded text-white outline-none ${
+                      statement.editing ? "cursor-text border focus:border-white" : "cursor-not-allowed opacity-50"
+                    }`}
+                     readOnly={!statement.editing}
+                    disabled={!statement.editing}
+                     onChange={(e) => setStatement({ ...statement, value: e.target.value })}  
+                  />
+                  </div>
+                           <button
+                className={`px-6 py-2 rounded-3xl ${
+                  statement.editing
+                    ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                    : "bg-transparent text-black opacity-70 border border-black hover:bg-black hover:text-white hover:opacity-100 transition-all duration-300"
+                }`}
+                onClick={() => setStatement({ ...statement, editing: true })}
+                disabled={0}
+              >
+                {statement.editing ? "Editing..." : "Change"}
+              </button>
+                    <button
+                className={`px-6 py-2 bg-green-500 text-white font-semibold rounded-3xl ${
+                  statement.editing ? "" : "hidden"
+                } ${statement.editing ? "cursor-pointer" : "cursor-not-allowed"}`}
+                onClick={() => handleStatementSave(statement.value)}
+              >
+                Save
+              </button>
+              </div>
         </div>
       </div>
     </div>

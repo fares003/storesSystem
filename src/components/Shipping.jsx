@@ -111,7 +111,7 @@ const Shipping = () => {
                       <ul className="list-disc list-inside">
                         {order.cart.map((item, index) => (
                           <li key={index}>
-                            {item.name} - {item.quantity} x ${item.price}
+                            {item.name} - {item.quantity} x {item.price}
                           </li>
                         ))}
                       </ul>
@@ -119,7 +119,7 @@ const Shipping = () => {
                       <span className="text-gray-500">No items</span>
                     )}
                   </td>
-                  <td className="p-3">${order.total}</td>
+                  <td className="p-3">{order.total}</td>
                   <td className="p-3">
                     <div className="flex items-center space-x-2">
                       <select

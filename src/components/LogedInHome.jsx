@@ -41,6 +41,8 @@ import SettingsPage from '@/pages/SettingsPage';
 import CreateAccount from '@/pages/CreateAccount';
 import EmployeesPage from '@/pages/EmployeesPage';
 import EmployeePage from '@/pages/EmployeePage';
+import CreateBundle from '@/pages/CreateBundle';
+import Options from '@/pages/Options';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -114,6 +116,8 @@ const LogedInHome = () => {
                 <Route path="/createAccount" element={<CreateAccount />} />
                 <Route path="/Employees" element={<EmployeesPage />} />
                 <Route path="/employees/info/:id" element={<EmployeePage />} />
+                <Route path="/create-bundle" element={<CreateBundle />} />
+                <Route path="/options" element={<Options />} />
 
 
               </Routes>

@@ -12,11 +12,11 @@ const API = import.meta.env.VITE_API;
 const itemSchema = z.object({
   username: z.string().min(1, "Username is required"),
   phonenumber: z.string().min(1, "Phone number is required"),
-  whatsapp : z.nullable(z.string()) ,
-  email: z.string().email("Invalid email address"),
+  whatsapp: z.nullable(z.string()),
+  email: z.nullable(z.string().email("Invalid email address").or(z.literal(""))), // Made email optional
   address: z.string().min(1, "Address is required"),
-  province : z.string().min(1, "governorat is required"),
-  city : z.string().min(1, "city is required"), 
+  province: z.string().min(1, "governorat is required"),
+  city: z.string().min(1, "city is required"), 
   items: z.array(
     z.object({
       sku: z.string().min(1, "SKU is required"),
@@ -29,29 +29,29 @@ const AddNewOrder = () => {
   const [formData, setFormData] = useState({
     username: "",
     phonenumber: "",
-    whatsapp : null ,
-    email: "",
+    whatsapp: null,
+    email: null, // Initialize as null
     address: "",
     items: [],
-    city : "" , 
-    province : "",
+    city: "",
+    province: "",
   });
 
   const [products, setProducts] = useState([]);
   const [quantities, setQuantities] = useState({});
-  const [ prices ,setPrices] = useState({});
-  const [totalPrice , setTotalPrice] = useState(0);
-  
+  const [prices, setPrices] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
   
   const governorateOptions = governorates[2].data;
-  const cityOptions = cities[2].data; 
-
- 
+  const cityOptions = cities[2].data;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'province') {
-      setFormData(prev => ({ ...prev, [name]:value , city: '' }));
+      setFormData(prev => ({ ...prev, [name]: value, city: '' }));
+    } else if (name === 'email') {
+      // Set to null if empty, otherwise set the value
+      setFormData(prev => ({ ...prev, [name]: value.trim() === '' ? null : value }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -64,7 +64,7 @@ const AddNewOrder = () => {
     }));
   };
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchItems = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -86,13 +86,12 @@ const AddNewOrder = () => {
     fetchItems();
   }, []);
 
-  const handlePriceCahnge = (sku, value) => {
+  const handlePriceChange = (sku, value) => {
     setPrices((prev) => {
       const updatedPrices = {
         ...prev,
         [sku]: Math.max(0, parseFloat(value) || 0),
       };
-      console.log(updatedPrices[sku]); // Log the updated price immediately
       return updatedPrices;
     });
   };
@@ -116,19 +115,27 @@ const AddNewOrder = () => {
   
     setQuantities(prev => ({ ...prev, [product.sku]: 0 }));
     setPrices(prev => ({ ...prev, [product.sku]: 0 }));
+    setTotalPrice(prev => prev + (price * quantity));
   };
 
   const removeItem = (sku) => {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter(item => item.sku !== sku)
-    }));
+    setFormData(prev => {
+      const itemToRemove = prev.items.find(item => item.sku === sku);
+      return {
+        ...prev,
+        items: prev.items.filter(item => item.sku !== sku)
+      };
+    });
+    // Recalculate total price after removal
+    setTotalPrice(calculateTotalPrice());
   };
-const calculateTotalPrice = () => {
-  return formData.items.reduce((total, item) => {
-    return total + (item.price * item.quantity);
-  }, 0);
-};
+
+  const calculateTotalPrice = () => {
+    return formData.items.reduce((total, item) => {
+      return total + (item.price * item.quantity);
+    }, 0);
+  };
+
   const addOrder = async (e) => {
     e.preventDefault();
     try {
@@ -144,11 +151,14 @@ const calculateTotalPrice = () => {
         customer: {
           username: parsedData.username,
           phonenumber: parsedData.phonenumber,
-          whatsapp : parsedData.whatsapp ,
-          email: parsedData.email,
-          default_address: { address1: parsedData.address , city : parsedData.city , province :governorates[2].data[parsedData.province-1].governorate_name_en  ,},
+          whatsapp: parsedData.whatsapp,
+          email: parsedData.email, // Will be null if not provided
+          default_address: { 
+            address1: parsedData.address, 
+            city: parsedData.city, 
+            province: governorates[2].data[parsedData.province-1].governorate_name_en,
+          },
         },
-        
         line_Items: parsedData.items,
       };
 
@@ -162,18 +172,20 @@ const calculateTotalPrice = () => {
         setFormData({
           username: "",
           phonenumber: "",
-          whatsapp : null, 
-          email: "",
+          whatsapp: null,
+          email: null,
           address: "",
-          province : "", 
-          city : "", 
+          province: "",
+          city: "",
           items: [],
         });
         setQuantities({});
+        setPrices({});
+        setTotalPrice(0);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(`there is error Now `)
+      console.error("Error creating order:", error);
+      toast.error(error.response?.data?.message || "Failed to create order");
     }
   };
 
@@ -197,18 +209,27 @@ const calculateTotalPrice = () => {
           </h2>
 
           <div className="flex flex-col gap-4">
-            {['username', 'phonenumber' , "whatsapp", 'email', 'address'].map((field) => (
+            {['username', 'phonenumber', "whatsapp", 'email', 'address'].map((field) => (
               <div key={field} className="space-y-2">
-                <label className="text-gray-300 capitalize">{field.replace('number', ' number')}</label>
+                <label className="text-gray-300 capitalize">
+                  {field === 'username' ? 'Client Name' : 
+                   field === 'phonenumber' ? 'Phone Number' : 
+                   field.charAt(0).toUpperCase() + field.slice(1)}
+                  {field === 'email' && ' (Optional)'}
+                </label>
                 <input
                   name={field}
+                  type={field === 'email' ? 'email' : field === 'phonenumber' || field === 'whatsapp' ? 'tel' : 'text'}
                   className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white
                     focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                  value={formData[field]}
+                  value={formData[field] || ''}
                   onChange={handleInputChange}
+                  required={field !== 'email' && field !== 'whatsapp'}
+                  placeholder={field === 'email' ? 'Optional' : ''}
                 />
               </div>
             ))}
+
             <div className="flex gap-4">
               <div className="space-y-2 w-1/2">
                 <label className="text-gray-300">Governorate</label>
@@ -217,6 +238,7 @@ const calculateTotalPrice = () => {
                   className="w-full px-4 py-3 bg-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={formData.province}
                   onChange={handleInputChange}
+                  required
                 >
                   <option value="">Select Governorate</option>
                   {governorateOptions.map((gov) => (
@@ -235,6 +257,7 @@ const calculateTotalPrice = () => {
                   value={formData.city}
                   onChange={handleInputChange}
                   disabled={!formData.province}
+                  required
                 >
                   <option value="">Select City</option>
                   {cityOptions
@@ -247,6 +270,7 @@ const calculateTotalPrice = () => {
                 </select>
               </div>
             </div>
+
             {/* Selected Items */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-gray-200">Selected Products</h3>
@@ -262,14 +286,11 @@ const calculateTotalPrice = () => {
                           <p className="text-gray-200">{product?.name}</p>
                           <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
                           <p className="text-sm text-gray-400">Price: {item.price}</p>
-                          <p className="text-sm text-gray-400">Total : {calculateTotalPrice()}</p>
+                          <p className="text-sm text-gray-400">Total: {(item.price * item.quantity).toFixed(2)}</p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            removeItem(item.sku) ;
-                            setTotalPrice((prev)=>prev - (item.quantity * item.price))
-                          }}
+                          onClick={() => removeItem(item.sku)}
                           className="text-red-400 hover:text-red-300 transition-colors"
                         >
                           Remove
@@ -278,7 +299,7 @@ const calculateTotalPrice = () => {
                     );
                   })}
                   <div className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
-                    <p className="text-white text-xl font-bold">Total : {totalPrice}</p>
+                    <p className="text-white text-xl font-bold">Total: {totalPrice.toFixed(2)}</p>
                   </div>
                 </div>
               )}
@@ -310,12 +331,11 @@ const calculateTotalPrice = () => {
                     <p className="text-sm text-gray-400">SKU: {product.sku}</p>
                     <p className="text-sm text-blue-300">Available: {product.quantity}</p>
                   </div>
-                  <div className="flex  items-center gap-2">
-
+                  <div className="flex items-center gap-2">
                     <div className="flex flex-col gap-1">
-                      <label htmlFor="quantitie" className="text-white">Quantities</label>
+                      <label htmlFor="quantity" className="text-white">Quantity</label>
                       <input
-                        name="quantitie"
+                        name="quantity"
                         type="number"
                         min="0"
                         value={quantities[product.sku] || 0}
@@ -329,17 +349,14 @@ const calculateTotalPrice = () => {
                         name="price"
                         type="number"
                         min="0"
-                        value={prices[product.sku] ||product.price}
-                        onChange={(e) => handlePriceCahnge(product.sku, e.target.value)}
+                        value={prices[product.sku] || product.price}
+                        onChange={(e) => handlePriceChange(product.sku, e.target.value)}
                         className="w-20 px-2 py-1 bg-gray-600 text-white rounded-md text-center"
                       />
                     </div>
                     <button
                       type="button"
-                      onClick={() => {
-                        addProductToOrder(product);
-                        setTotalPrice((prev)=>prev + (prices[product.sku] * quantities[product.sku]) )
-                      }}
+                      onClick={() => addProductToOrder(product)}
                       className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-md transition-colors"
                     >
                       Add

@@ -17,9 +17,17 @@ const BulkBarcodeDispatch = () => {
         setSuccessMessage('');
     
         try {
+        const token = localStorage.getItem("token");
+
             const response = await axios.post(`${API}OutboundOrders/get-bulk`, {
-                barcode: barcode
-            });
+                barcode: barcode,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
     
             setProductData(response.data);
         } catch (err) {

@@ -24,13 +24,10 @@ export default function Navbar() {
 
   const [isOn, setIsOn] = useState(false);
 
-  // useEffect(()=>{
-  //   handlOnOff();
-  // },[isOn])
 
-  const handlOnOff = async ()=>{
+  const handleOn = async ()=>{
     const token = localStorage.getItem("token");
-    const target = isOn ? `${API}Auth/sign-off` : `${API}Auth/sign-on` ;
+    const target = `${API}Auth/sign-on` ;
 
     try{
       const response = await axios.get(target, {
@@ -38,7 +35,27 @@ export default function Navbar() {
             Authorization: `Bearer ${token}`,
         },
       });
-      toast.success("status changed")
+      if(response.status === 200){
+        setIsOn(true);
+      }
+    }catch(error){
+      console.log(error);
+      toast.error("faild to change status")
+    }
+  }
+  const handleOff = async ()=>{
+    const token = localStorage.getItem("token");
+    const target =  `${API}Auth/sign-off` ;
+
+    try{
+      const response = await axios.get(target, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+      });
+      if(response.status === 200){
+        setIsOn(false);
+      }
     }catch(error){
       console.log(error);
       toast.error("faild to change status")
@@ -84,23 +101,29 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           {/* sign on sigin off  */}
           <div>
-            <button
-              onClick={() => setIsOn(!isOn)}
-              className={`relative w-14 h-7 flex items-center px-1 rounded-full transition-all duration-300 
-                ${isOn ? "bg-blue-600" : "bg-gray-300"}`}
-            >
-              <span
-                className={`absolute w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 
-                  ${isOn ? "translate-x-8" : "translate-x-0"}`}
-              ></span>
-              <span className={`absolute left-3 text-sm font-semibold text-white transition-opacity duration-300 ${isOn ? "opacity-100" : "opacity-0"}`}>
-                On
-              </span>
-              <span className={`absolute right-3 text-sm font-semibold text-gray-600 transition-opacity duration-300 ${isOn ? "opacity-0" : "opacity-100"}`}>
-                Off
-              </span>
-            </button>
-          </div>
+  <button
+    onClick={isOn ? handleOff : handleOn} // Toggle between On and Off
+    className={`relative w-16 h-8 flex items-center px-1 rounded-full transition-all duration-300 
+      ${isOn ? "bg-green-500" : "bg-red-500"}`} // Green for "On", Red for "Off"
+  >
+    <span
+      className={`absolute w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 
+        ${isOn ? "translate-x-8" : "translate-x-0"}`} // Toggle position of the slider
+    ></span>
+    <span
+      className={`absolute left-2 text-xs font-semibold text-white transition-opacity duration-300 
+        ${isOn ? "opacity-100" : "opacity-0"}`} // Show "On" text when active
+    >
+      On
+    </span>
+    <span
+      className={`absolute right-2 text-xs font-semibold text-white transition-opacity duration-300 
+        ${isOn ? "opacity-0" : "opacity-100"}`} // Show "Off" text when inactive
+    >
+      Off
+    </span>
+  </button>
+</div>
 
           <div
             className="relative cursor-pointer"

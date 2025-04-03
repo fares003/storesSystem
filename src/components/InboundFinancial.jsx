@@ -69,9 +69,9 @@ const InboundFinancial = () => {
               <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 text-sm text-gray-900">{order.id}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{order.supplier}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">${order.totalCost}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">${order.paid}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">${order.remaining}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{order.totalCost}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{order.paid}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{order.remaining}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   <ul className="space-y-2">
                     {order.products.map((product) => (

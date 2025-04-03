@@ -220,7 +220,7 @@ function EmployeeInfo() {
           {/* Salary */}
           <div className="relative">
             <label className="block text-sm font-medium mb-1" htmlFor="salary">
-              Salary ($)
+              Salary 
             </label>
             <div className="flex items-center">
               <input
