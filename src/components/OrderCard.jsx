@@ -40,12 +40,35 @@ const OrderCard = ({
 
     const getStatusColor = (status) => {
         switch (status) {
-        case 'New': return 'bg-blue-500/20 text-blue-500';
-        case 'Confirmed': return 'bg-purple-500/20 text-purple-500';
-        case 'Ready for Shipping': return 'bg-yellow-500/20 text-yellow-500';
-        case 'Delivered': return 'bg-green-500/20 text-green-500';
-        default: return 'bg-gray-500/20 text-gray-500';
-        
+            case 'New': 
+                return 'bg-blue-500/20 text-blue-500';
+            case 'Confirmed': 
+                return 'bg-purple-500/20 text-purple-500';
+            case 'Cancelled': 
+                return 'bg-red-500/20 text-red-500';
+            case 'In preparation': 
+                return 'bg-amber-500/20 text-amber-500';
+            case 'Ready for Shipping':
+            case 'ready for shipment': 
+                return 'bg-yellow-500/20 text-yellow-500';
+            case 'In Transit': 
+                return 'bg-indigo-500/20 text-indigo-500';
+            case 'Delivered': 
+                return 'bg-green-500/20 text-green-500';
+            case 'Returned': 
+                return 'bg-rose-500/20 text-rose-500';
+            case 'Partially Delivered': 
+                return 'bg-teal-500/20 text-teal-500';
+            case 'Complete': 
+                return 'bg-emerald-500/20 text-emerald-500';
+            case 'pending delivery': 
+                return 'bg-sky-500/20 text-sky-500';
+            case 'pending preparation': 
+                return 'bg-orange-500/20 text-orange-500';
+            case 'hold': 
+                return 'bg-gray-500/20 text-gray-500';
+            default: 
+                return 'bg-gray-500/20 text-gray-500';
         }
     };
 

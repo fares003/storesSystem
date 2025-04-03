@@ -43,6 +43,9 @@ import EmployeesPage from '@/pages/EmployeesPage';
 import EmployeePage from '@/pages/EmployeePage';
 import CreateBundle from '@/pages/CreateBundle';
 import Options from '@/pages/Options';
+import Store from '@/pages/Store';
+import Companies from '@/pages/Companies';
+import Refund from '@/pages/Refund';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -118,6 +121,10 @@ const LogedInHome = () => {
                 <Route path="/employees/info/:id" element={<EmployeePage />} />
                 <Route path="/create-bundle" element={<CreateBundle />} />
                 <Route path="/options" element={<Options />} />
+                <Route path="/stores" element={<Store />} />
+                <Route path="/Companies" element={<Companies />} />
+                <Route path="/refund" element={<Refund />} />
+
 
 
               </Routes>
