@@ -124,7 +124,7 @@ function StoreComponent() {
             })
 
             if (response.status === 200 || response.status === 201) {
-                setStores([...stores, response.data])
+                window.location.reload();
                 setNewStore({
                     name: "",
                     inventoryId: ""

@@ -40,14 +40,10 @@ const ShippingBulks = () => {
     return colors[barcode.charCodeAt(0) % colors.length];
   };
 
-  const downloadBulkPDF = async (barcode) => {
+  const downloadBulkPDF = async (id,barcode) => {
     setDownloadingBarcode(barcode); // Set the currently downloading barcode
     try {
-      const response = await axios.post(`${API}Orders/invoice`, {
-        "orderId": orderId,
-        "width": width, 
-        "height": height
-      }, {
+      const response = await axios.get(`${API}Legal/statement/${id}`, {
         responseType: 'blob',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -169,7 +165,7 @@ const ShippingBulks = () => {
                     </div>
                     
                     <button
-    onClick={() => downloadBulkPDF(bulk.barcode)}
+    onClick={() => downloadBulkPDF(bulk.id,bulk.barcode)}
     disabled={downloadingBarcode === bulk.barcode}
     className={`flex items-center px-4 py-2 rounded-lg transition-all
       ${downloadingBarcode === bulk.barcode ? 
