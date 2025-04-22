@@ -9,9 +9,15 @@ import Loader from "./Loader";
 import { FiEdit, FiTrash2, FiTruck, FiCheckCircle, FiInfo, FiPackage } from "react-icons/fi";
 import { ArrowDown } from "lucide-react";
 import OrderCard from "./OrderCard";
-import { NewOrderActions, PendingDeliveryActions} from "./ActionComponents";
+import { InTransitOrderActions, NewOrderActions, PendingDeliveryActions} from "./ActionComponents";
 import { useAreYouSure } from "@/contexts/AreYouSure";
 import { Link } from "react-router-dom";
+import { FaFilter } from "react-icons/fa";
+import { IoIosCloseCircle } from "react-icons/io";
+import { FiCheck } from 'react-icons/fi' 
+import Swal from 'sweetalert2';
+
+
 function AllOrders() {
   
   const API = import.meta.env.VITE_API;
@@ -26,16 +32,96 @@ function AllOrders() {
   const [selectedService, setSelectedService] = useState("");
   const activePopupWindow = "bg-blue-600 text-white px-2 py-1 rounded-md"
   const {AreYouSurePopup } = useAreYouSure() ;
-
+const [filtersOn, setFiltersOn] = useState(false) ;
   // update cart states
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentQty, setCurrentQty] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
+  const [stores, setStores] = useState([]);
+  const [governments, setGovernments] = useState([]);
+  const [select,setSelect]=useState(false);
+   const statuses = [
+    'New',
+    'Confirmed',
+    'Cancelled',
+    'In preparation',
+    'Ready for Shipping',
+    'ready for shipment',
+    'In Transit',
+    'Delivered',
+    'Returned',
+    'Partially Delivered',
+    'Complete',
+    'pending delivery',
+    'pending preparation',
+    'hold'
+  ];
+const [filters, setFilters] = useState({
+    status: [],
+    date: [],
+    store: "",
+    address: "",
+})
+const changeStatusFilter = (status) => {
+  setFilters((prevFilters) => {
+      const newStatus = prevFilters.status.includes(status)
+          ? prevFilters.status.filter((s) => s !== status)
+          : [...prevFilters.status, status];
+      
+      console.log('New status array:', newStatus);  // Log before return
+      return { ...prevFilters, status: newStatus };
+  });
+};
+const changeDateFilter = (date) => {
+  setFilters((prevFilters) => {
 
-
+      const newDate = prevFilters.date.includes(date)
+          ? prevFilters.date.filter((d) => d !== date)
+          : [...prevFilters.date, date];
+      return { ...prevFilters, date: newDate };
+  });
+};
   const [items, setItems] = useState([]);
+const fetchStores= async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const target = `${API}store`;
+    const response = await axios.get(target, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = response.data;
+    console.log(data);
+    setStores(data);
+  } catch (error) {
+    console.error("Error fetching stores:", error);
+  }
+};
+const fetchGovernment = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const target = `${API}Gov`;
+    const response = await axios.get(target, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = response.data;
+    console.log(data);
+    setGovernments(data);
+  } catch (error) {
+    console.error("Error fetching stores:", error);
+  }
+};
 
-
+const openFilterPopup = () => {
+  setFiltersOn(true);
+  fetchStores() ;
+  fetchGovernment() ;
+}
   const Authority = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -67,22 +153,34 @@ function AllOrders() {
     }
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (filters = {}) => {
     try {
       const token = localStorage.getItem("token");
-      const target = API + "orders";
-      const resp = await axios.get(target , {
-        headers : {
-          Authorization : `Bearer ${token}`
-        }
-      });
-      const data = resp.data;
-      console.log(data);
+      const target = API + "Orders";  // Note capitalization to match your endpoint
       
+      // Prepare query parameters (all optional)
+      const params = {
+        ...(filters.status && { status: filters.status }),
+        ...(filters.fromDate && { fromDate: filters.fromDate }),
+        ...(filters.toDate && { toDate: filters.toDate }),
+        ...(filters.store && { store: filters.store }),
+        ...(filters.address && { address: filters.address })
+      };
+  
+      const resp = await axios.get(target, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: params  // Add query parameters
+      });
+  
+      const data = resp.data;
       setOrders(data);
-
+      return data;
+  
     } catch (error) {
       console.error("Error fetching orders:", error);
+      throw error;  // Re-throw to allow handling in calling code
     }
   };
   const fetchItems = async () => {
@@ -116,12 +214,15 @@ function AllOrders() {
     fetching() ;
   }, []);
 
+  // useEffect(() => {
+  //   const fetchOrdersInterval = setInterval(fetchOrders, 5000);
+  
+  //   return () => clearInterval(fetchOrdersInterval); // Cleanup interval on component unmount
+  // }, []);
   useEffect(() => {
-    const fetchOrdersInterval = setInterval(fetchOrders, 5000);
-  
-    return () => clearInterval(fetchOrdersInterval); // Cleanup interval on component unmount
+      fetchOrders(filters)
+
   }, []);
-  
 
   const holdOrder = async (id) => {
     try {
@@ -300,7 +401,16 @@ const handlePendingDelivery = async (orderID)=>{
     toast.error("error Pending Delivery")
   }
 }
+// In parent component
+const [selectedOrders, setSelectedOrders] = useState([]);
 
+const handleToggleSelect = (orderId) => {
+  setSelectedOrders(prev => 
+    prev.includes(orderId) 
+      ? prev.filter(id => id !== orderId) 
+      : [...prev, orderId]
+  );
+};
 const handleUpdateCart = async ()=>{
   try{
     const target = `${API}orders/update-cart` ;
@@ -356,6 +466,40 @@ const handleUpdateCart = async ()=>{
     const handlePageChange = (pageNumber) => {
       setCurrentPage(pageNumber);
     };
+    const handleSelectOption=()=>{
+      if(select){
+        setSelectedOrders([]) ;
+        setSelect(false) ;
+      }else{
+  
+        setSelect(true) ;
+
+      }
+      setSelect(!select) ;
+    }
+    const handleCancelMultipleOrders = async () => {
+      try {
+      const token = localStorage.getItem("token");
+      let response = null;
+      for (const orderId of selectedOrders) {
+        const target = `${API}orders/cancel/${orderId}`;
+    
+        response = await axios.delete(target, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        });
+      }
+if (response.status === 200) {
+        toast.success("Selected orders canceled successfully!");
+      }
+      setSelectedOrders([]); // Clear selected orders after processing
+      } catch (error) {
+      console.error("Error canceling orders:", error);
+      toast.error("Error canceling orders");
+      }
+    };
 
     const { start, end } = getPaginationRange();
     
@@ -398,6 +542,193 @@ const handleUpdateCart = async ()=>{
       <span className="font-semibold">Manage Options</span>
     </Link>
   </motion.div>
+  <div className="text-white cursor-pointer hover:opacity-[50%] flex gap-3 items-center" onClick={()=>openFilterPopup()}>
+  <FaFilter />
+<span >| Filters</span>
+</div>
+<div className="flex items-center">
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input 
+      type="checkbox" 
+      className="hidden peer"
+      onChange={(e) => {
+        handleSelectOption()
+      }
+    }
+    />
+    <div className={`
+      w-5 h-5 rounded-md border-2
+      border-indigo-600 bg-white
+      flex items-center justify-center
+      peer-checked:bg-blue-500 peer-checked:border-indigo-700
+      transition-colors duration-200
+    `}>
+  
+    
+      
+    </div>
+    <span className="text-white font-[500]">Select</span>
+  </label>
+</div>
+<motion.div>
+
+<button className="px-4 py-2 bg-red-600 text-white font-bold hover:opacity-[90%] rounded-lg" onClick={()=>{
+  if (selectedOrders.length === 0) {
+    toast.error("Please select orders to delete");
+  } else {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action will delete the selected orders.",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) {
+        handleCancelMultipleOrders();
+      }
+    });
+  }
+}}>
+  <FiTrash2 className="inline-block mr-1" />
+  Delete Selected
+</button>
+</motion.div>
+
+{filtersOn && (
+<div className="fixed bg-black inset-0 bg-opacity-50 flex flex-col items-center z-50">
+<div className="bg-white mt-6 p-6 rounded-lg shadow-xl w-full max-w-md h-[600px]
+ overflow-y-auto ">
+<IoIosCloseCircle className="text-lg cursor-pointer hover:opacity-[90%]" onClick={()=>setFiltersOn(false)}/>
+<div className="flex flex-col gap-4 mt-4">
+  <h2 className="text-lg font-semibold">Filter by Status</h2>
+  <div className="grid grid-cols-2 gap-2">
+    {statuses.map((status,index) => (
+      <div key={status} className="flex items-center gap-2">
+        <input
+
+          type="checkbox"
+          id={status}
+          value={status}
+          onChange={(e) => {
+            const selectedStatus = e.target.value;
+     
+              changeStatusFilter(selectedStatus);
+         
+          }}
+          className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+        />
+        <label htmlFor={status} className="text-sm text-gray-700 cursor-pointer">
+          {status}
+        </label>
+        </div>
+    ))}
+    </div>
+    <hr className="my-2" />
+    <h2 className="text-lg font-semibold">Filter by Date</h2>
+    <div className="grid grid-cols-2 gap-2">
+    <input
+  type="date"
+  onChange={(e) => changeDateFilter(e.target.value)}
+  className="
+    p-2 
+    rounded 
+    border 
+    border-gray-300 
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-blue-500 
+    focus:border-transparent
+    w-full
+    text-gray-700
+  "
+/>      </div>
+      <hr className="my-2" />
+    <h2 className="text-lg font-semibold">Filter by Store</h2>
+      <label htmlFor="">Choose a store</label>
+      <select   className="
+    p-2 
+    rounded 
+    border 
+    border-gray-300 
+    bg-white
+    shadow-sm
+    text-gray-700
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-blue-500 
+    focus:border-transparent
+    transition-all
+    duration-150
+    ease-in-out
+    cursor-pointer
+  " onChange={(e)=>{
+        const selectedStore = e.target.value;
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          store: selectedStore,
+        }));
+      }
+      }>
+        <option value="" disabled>Select Store</option>
+        {stores.map((store) => (
+          <option key={store.id} value={store.name}>
+            {store.name}
+          </option>
+        ))}
+      </select>
+      <hr className="my-2" />
+    <h2 className="text-lg font-semibold">Filter by government</h2>
+      <label htmlFor="">Choose a government</label>
+      <select   className="
+    p-2 
+    rounded 
+    border 
+    border-gray-300 
+    bg-white
+    shadow-sm
+    text-gray-700
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-blue-500 
+    focus:border-transparent
+    transition-all
+    duration-150
+    ease-in-out
+    cursor-pointer
+  " onChange={(e)=>{
+        const selectedGov = e.target.value;
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          address: selectedGov,
+        }));
+      }
+      }>
+        <option value="" disabled>Select government</option>
+        {governments.map((Gov) => (
+          <option key={Gov.id} value={Gov.name}>
+            {Gov.name}
+          </option>
+        ))}
+      </select>
+
+    </div>
+<button className="px-4  py-2 bg-blue-600 text-white font-bold w-full mt-4 hover:opacity-[90%]" onClick={()=>{
+      setFiltersOn(false) ;
+      fetchOrders(filters) ;
+      setCurrentPage(1) ;
+      setFilters({
+        status: [],
+        date: [],
+        store: "",
+        address: "",
+      })
+
+
+}}>Apply</button>
+
+</div>
+</div>
+)}
 </motion.div>
 
             <div className="flex items-center gap-4">
@@ -416,6 +747,7 @@ const handleUpdateCart = async ()=>{
                 actionsConfig={{
                   'New': NewOrderActions,
                   'pending delivery': PendingDeliveryActions,
+                  'In Transit':InTransitOrderActions,
                 }}
                 cardClickable={true}
                 handleUpdateOrder={handleUpdateOrder}
@@ -426,6 +758,9 @@ const handleUpdateCart = async ()=>{
                 shippingServices={services}
                 isAdmin={isAdmin}
                 setSelectedService={setSelectedService}
+                isSelectAll={select}
+                isSelected={selectedOrders.includes(item.id)}
+                onToggleSelect={() => handleToggleSelect(item.id)}
               />
             ))}
           </div>

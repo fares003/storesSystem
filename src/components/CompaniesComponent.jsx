@@ -161,7 +161,8 @@ function CompaniesComponent() {
                             companies.map((company) => (
                                 <tr
                                     key={company.id}
-                                    className="border border-gray-600 hover:bg-[#1E293B] transition duration-300"
+                                    className="border cursor-pointer border-gray-600 hover:bg-[#1E293B] transition duration-300"
+                                    
                                 >
                                     <td className="p-3 text-sm border border-gray-700 text-center">
                                         {company.id}

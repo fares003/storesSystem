@@ -46,6 +46,7 @@ import Options from '@/pages/Options';
 import Store from '@/pages/Store';
 import Companies from '@/pages/Companies';
 import Refund from '@/pages/Refund';
+import OrdersOverviewPage from '@/pages/OrdersOverviewPage';
 
 const LogedInHome = () => {
   const { activeMenu } = useStateContext();
@@ -124,6 +125,7 @@ const LogedInHome = () => {
                 <Route path="/stores" element={<Store />} />
                 <Route path="/Companies" element={<Companies />} />
                 <Route path="/refund" element={<Refund />} />
+                <Route path="/orders/overview" element={<OrdersOverviewPage />} />
 
 
 

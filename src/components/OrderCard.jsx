@@ -21,13 +21,16 @@ const OrderCard = ({
     handlePendingDelivery,
     shippingServices ,
     selectedService, 
-    setSelectedService
+    setSelectedService,
+    isSelectAll,
+
 }) => {
 
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [selectedAction, setSelectedAction] = useState(null);
     
     const {setAreYouSurePopup} = useAreYouSure() ; 
+    const [isChecked, setIsChecked] = useState(false);
 
 
     const navigate = useNavigate();
@@ -80,19 +83,47 @@ const OrderCard = ({
         animate="visible"
         variants={cardVariants}
         transition={{ duration: 0.3, delay: i * 0.05 }}
-        className="relative bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+        className={`relative bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow ${isSelected ? 'border-2 border-purple-500' : 'border-0'} `}
     >
-        {onToggleSelect && (
-                <div className="absolute top-2 left-4 ">
-                    <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={onToggleSelect}
-                        className="h-5 w-5 rounded border-gray-300 bg-gray-700 text-blue-600 
-                                focus:ring-blue-500 cursor-pointer"
-                    />
-                </div>
-        )}
+     {isSelectAll && (
+        <div className="flex items-center mb-2">
+          <input
+            id={`checkbox-${item.id}`}
+            type="checkbox"
+            checked={isSelected}
+            onChange={onToggleSelect}
+            className="hidden peer"
+          />
+          <label
+            htmlFor={`checkbox-${item.id}`}
+            className="flex items-center cursor-pointer"
+          >
+            <div className={`
+              w-5 h-5 rounded-sm border-2
+              ${isSelected ? 'bg-purple-500 border-purple-700' : 'bg-white border-gray-300'}
+              flex items-center justify-center
+              transition-colors duration-200
+            `}>
+              {isSelected && (
+                <svg
+                className="w-3 h-3 text-white"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
+                <path
+                  d="M16.6666 5L7.49992 14.1667L3.33325 10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              )}
+            </div>
+            <span className="ml-2 text-white font-500">Select</span>
+          </label>
+        </div>
+      )}
 
         <div className="flex justify-between items-start mb-4">
             <div>
