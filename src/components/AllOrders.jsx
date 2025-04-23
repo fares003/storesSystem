@@ -9,7 +9,7 @@ import Loader from "./Loader";
 import { FiEdit, FiTrash2, FiTruck, FiCheckCircle, FiInfo, FiPackage } from "react-icons/fi";
 import { ArrowDown } from "lucide-react";
 import OrderCard from "./OrderCard";
-import { InTransitOrderActions, NewOrderActions, PendingDeliveryActions} from "./ActionComponents";
+import { canceledOrderActions, completeActionOrderActions, deliveredActionOrderActions, holdActionOrderActions, inPreparationOrderActions, InTransitOrderActions, NewOrderActions, PartiallyDeliveredActionOrderActions, PendingDeliveryActions, pendingPreparationOrderActions, readyForShipmentActionOrderActions, ReturnedActionOrderActions} from "./ActionComponents";
 import { useAreYouSure } from "@/contexts/AreYouSure";
 import { Link } from "react-router-dom";
 import { FaFilter } from "react-icons/fa";
@@ -40,6 +40,9 @@ const [filtersOn, setFiltersOn] = useState(false) ;
   const [stores, setStores] = useState([]);
   const [governments, setGovernments] = useState([]);
   const [select,setSelect]=useState(false);
+    const [width , setWidth] = useState("");
+    const [height , setHeight] = useState("");
+    
    const statuses = [
     'New',
     'Confirmed',
@@ -62,6 +65,18 @@ const [filters, setFilters] = useState({
     store: "",
     address: "",
 })
+ useEffect(() => {
+    const settingsString = localStorage.getItem("settings");
+    try {
+      const settings = settingsString ? JSON.parse(settingsString) : null;
+      if (settings && settings.length > 2) {
+        setWidth(settings[1]?.defaultValue || "");
+        setHeight(settings[2]?.defaultValue || "");
+      }
+    } catch (error) {
+      console.error("Error parsing settings from localStorage:", error);
+    }
+  }, []);
 const changeStatusFilter = (status) => {
   setFilters((prevFilters) => {
       const newStatus = prevFilters.status.includes(status)
@@ -306,7 +321,23 @@ const openFilterPopup = () => {
       toast.error("Error confirming order");
     }
   };
-  
+  const invoiceOrder = async (id) => {
+    try {
+      console.log(id)
+      const response = await axios.post(`${API}Orders/invoice`, {
+        "orderId":[id],
+        "width" : width , 
+        "height" : height
+      },{
+        responseType: 'blob',
+      });
+      
+      const fileURL = URL.createObjectURL(response.data);
+      window.open(fileURL, '_blank');
+    } catch (error) {
+      console.log('Error fetching invoice:', error);
+    }
+  };
   const handleSaveChanges = async () => {
     try {
       const updatedOrders = orders.map((order) =>
@@ -500,7 +531,45 @@ if (response.status === 200) {
       toast.error("Error canceling orders");
       }
     };
-
+    const handleConfirmMultipleOrders= async () => {
+      try {
+        const token = localStorage.getItem("token");
+        let response = null;
+        for (const orderId of selectedOrders) {
+          const target = `${API}orders/confirm/${orderId}`;
+      
+          response = await axios.get(target, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          });
+        }
+  if (response.status === 200) {
+          toast.success("Selected orders confirming successfully!");
+        }
+        setSelectedOrders([]); // Clear selected orders after processing
+        } catch (error) {
+        console.error("Error confirming orders:", error);
+        toast.error("Error confirming orders");
+        }
+    }
+    const handleInvoiceMultipleOrders = async () => {
+      try {
+        const response = await axios.post(`${API}Orders/invoice`, {
+          "orderId":selectedOrders,
+          "width" : width , 
+          "height" : height
+        },{
+          responseType: 'blob',
+        });
+        
+        const fileURL = URL.createObjectURL(response.data);
+        window.open(fileURL, '_blank');
+      } catch (error) {
+        console.log('Error fetching invoice:', error);
+      }
+    }
     const { start, end } = getPaginationRange();
     
   return (
@@ -572,26 +641,39 @@ if (response.status === 200) {
 </div>
 <motion.div>
 
-<button className="px-4 py-2 bg-red-600 text-white font-bold hover:opacity-[90%] rounded-lg" onClick={()=>{
-  if (selectedOrders.length === 0) {
-    toast.error("Please select orders to delete");
-  } else {
+<select 
+  className="px-4 py-2 border rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  onChange={(e) => {
+    const action = e.target.value;
+    if (action === "") return; // Do nothing if empty option selected
+    
+    if (selectedOrders.length === 0) {
+      toast.error(`Please select orders to ${action}`);
+      e.target.value = ""; // Reset selection
+      return;
+    }
+
     Swal.fire({
-      title: "Are you sure?",
-      text: "This action will delete the selected orders.",
-      icon: "warning",
+      title: `Are you sure?`,
+      text: `This will ${action} the selected orders.`,
+      icon: action === "cancel" ? "warning" : "question",
       buttons: true,
-      dangerMode: true,
-    }).then((willDelete) => {
-      if (willDelete) {
-        handleCancelMultipleOrders();
+      dangerMode: action === "cancel",
+    }).then((confirmed) => {
+      if (confirmed) {
+        if (action === "cancel") handleCancelMultipleOrders();
+        else if (action === "confirm") handleConfirmMultipleOrders();
+        else if (action === "invoice") handleInvoiceMultipleOrders();
       }
+      e.target.value = ""; // Reset after action
     });
-  }
-}}>
-  <FiTrash2 className="inline-block mr-1" />
-  Delete Selected
-</button>
+  }}
+>
+  <option value="">Select Action</option>
+  <option value="confirm">Confirm Orders</option>
+  <option value="cancel">Cancel Orders</option>
+  <option value="invoice">Invoice Orders</option>
+</select>
 </motion.div>
 
 {filtersOn && (
@@ -748,6 +830,15 @@ if (response.status === 200) {
                   'New': NewOrderActions,
                   'pending delivery': PendingDeliveryActions,
                   'In Transit':InTransitOrderActions,
+                  'pending preparation':pendingPreparationOrderActions,
+                  'Cancelled':canceledOrderActions,
+                  'hold':holdActionOrderActions,
+                  'In preparation':inPreparationOrderActions,
+                  'Delivered':deliveredActionOrderActions,
+                  'Returned':ReturnedActionOrderActions,
+                  'Partially Delivered':PartiallyDeliveredActionOrderActions,
+                  'Complete':completeActionOrderActions,
+                  'ready for shipment':readyForShipmentActionOrderActions
                 }}
                 cardClickable={true}
                 handleUpdateOrder={handleUpdateOrder}
@@ -755,6 +846,7 @@ if (response.status === 200) {
                 handlePendingDelivery={handlePendingDelivery}
                 confirmOrder={confirmOrder}
                 holdOrder={holdOrder}
+                invoiceOrder={invoiceOrder}
                 shippingServices={services}
                 isAdmin={isAdmin}
                 setSelectedService={setSelectedService}

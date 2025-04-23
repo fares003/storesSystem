@@ -23,6 +23,7 @@ const OrderCard = ({
     selectedService, 
     setSelectedService,
     isSelectAll,
+    invoiceOrder
 
 }) => {
 
@@ -194,6 +195,7 @@ const OrderCard = ({
                         cancelOrder={cancelOrder}
                         handlePendingDelivery={handlePendingDelivery}
                         shippingServices={shippingServices}
+                        invoiceOrder={invoiceOrder}
                     />
             )}
 
