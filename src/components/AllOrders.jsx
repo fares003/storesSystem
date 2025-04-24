@@ -42,7 +42,8 @@ const [filtersOn, setFiltersOn] = useState(false) ;
   const [select,setSelect]=useState(false);
     const [width , setWidth] = useState("");
     const [height , setHeight] = useState("");
-    
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState("");
    const statuses = [
     'New',
     'Confirmed',
@@ -61,7 +62,8 @@ const [filtersOn, setFiltersOn] = useState(false) ;
   ];
 const [filters, setFilters] = useState({
     status: [],
-    date: [],
+    fromDate: null,
+    toDate: null,
     store: "",
     address: "",
 })
@@ -87,14 +89,20 @@ const changeStatusFilter = (status) => {
       return { ...prevFilters, status: newStatus };
   });
 };
-const changeDateFilter = (date) => {
-  setFilters((prevFilters) => {
+const changeFromDateFilter = (date) => {
+  setFilters(prevFilters => ({
+    ...prevFilters,
+    fromDate: prevFilters.fromDate === date ? null : date // Toggle date
+  }));
+};
 
-      const newDate = prevFilters.date.includes(date)
-          ? prevFilters.date.filter((d) => d !== date)
-          : [...prevFilters.date, date];
-      return { ...prevFilters, date: newDate };
-  });
+const changeToDateFilter = (date) => {
+  setFilters(prevFilters => ({
+    ...prevFilters,
+    toDate: prevFilters.toDate === date ? null : date 
+
+  }));
+
 };
   const [items, setItems] = useState([]);
 const fetchStores= async () => {
@@ -188,7 +196,13 @@ const openFilterPopup = () => {
         },
         params: params  // Add query parameters
       });
-  
+if(resp.status === 200){
+  setIsLoading(false);
+  if(resp.data.length === 0){
+    toast.error("No orders found with the selected filters.");
+    return;
+  }
+}
       const data = resp.data;
       setOrders(data);
       return data;
@@ -574,11 +588,11 @@ if (response.status === 200) {
     
   return (
     <Center className="py-8 px-4">
-      {orders.length === 0 ? (
+      {isLoading === 0 ? (
         <Loader />
       ) : (
         <div className="w-full overflow-y-auto scrollbar-thin pr-4">
-          <div className="flex items-center justify-between mb-8">
+          <div className={`flex justify-between mb-8 ${errorMsg ? " relative top-0 " : ""}`}>
             <h1 className="text-3xl font-bold text-white">
               <FiPackage className="inline-block mr-3 mb-1" />
               Order Management
@@ -677,9 +691,12 @@ if (response.status === 200) {
 </motion.div>
 
 {filtersOn && (
-<div className="fixed bg-black inset-0 bg-opacity-50 flex flex-col items-center z-50">
+<div className="fixed bg-black inset-0 bg-opacity-50 flex flex-col items-center z-50" onClick={()=>setFiltersOn(false)}>
 <div className="bg-white mt-6 p-6 rounded-lg shadow-xl w-full max-w-md h-[600px]
- overflow-y-auto ">
+ overflow-y-auto "
+ onClick={(e) => { e.stopPropagation() }}
+ 
+ >
 <IoIosCloseCircle className="text-lg cursor-pointer hover:opacity-[90%]" onClick={()=>setFiltersOn(false)}/>
 <div className="flex flex-col gap-4 mt-4">
   <h2 className="text-lg font-semibold">Filter by Status</h2>
@@ -706,11 +723,31 @@ if (response.status === 200) {
     ))}
     </div>
     <hr className="my-2" />
-    <h2 className="text-lg font-semibold">Filter by Date</h2>
+    <h2 className="text-lg font-semibold">From date</h2>
     <div className="grid grid-cols-2 gap-2">
     <input
   type="date"
-  onChange={(e) => changeDateFilter(e.target.value)}
+  onChange={(e) => changeFromDateFilter(e.target.value)
+  
+  }
+  className="
+    p-2 
+    rounded 
+    border 
+    border-gray-300 
+    focus:outline-none 
+    focus:ring-2 
+    focus:ring-blue-500 
+    focus:border-transparent
+    w-full
+    text-gray-700
+  "
+/>      </div>
+<h2 className="text-lg font-semibold">To date</h2>
+    <div className="grid grid-cols-2 gap-2">
+    <input
+  type="date"
+  onChange={(e) => changeToDateFilter(e.target.value)}
   className="
     p-2 
     rounded 
@@ -727,7 +764,8 @@ if (response.status === 200) {
       <hr className="my-2" />
     <h2 className="text-lg font-semibold">Filter by Store</h2>
       <label htmlFor="">Choose a store</label>
-      <select   className="
+      <select  
+  className="
     p-2 
     rounded 
     border 
@@ -743,25 +781,29 @@ if (response.status === 200) {
     duration-150
     ease-in-out
     cursor-pointer
-  " onChange={(e)=>{
-        const selectedStore = e.target.value;
-        setFilters((prevFilters) => ({
-          ...prevFilters,
-          store: selectedStore,
-        }));
-      }
-      }>
-        <option value="" disabled>Select Store</option>
-        {stores.map((store) => (
-          <option key={store.id} value={store.name}>
-            {store.name}
-          </option>
-        ))}
-      </select>
+  " 
+  value={filters.store || "Select Store"}
+  onChange={(e) => {
+    const selectedStore = e.target.value;
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      store: selectedStore,
+    }));
+  }}
+  onClick={(e) => { e.stopPropagation() }}
+>
+  <option value="Select Store" disabled>Select Store</option>
+  {stores.map((store) => (
+    <option key={store.id} value={store.name}>
+      {store.name}
+    </option>
+  ))}
+</select>
       <hr className="my-2" />
     <h2 className="text-lg font-semibold">Filter by government</h2>
       <label htmlFor="">Choose a government</label>
-      <select   className="
+      <select  
+  className="
     p-2 
     rounded 
     border 
@@ -777,21 +819,24 @@ if (response.status === 200) {
     duration-150
     ease-in-out
     cursor-pointer
-  " onChange={(e)=>{
-        const selectedGov = e.target.value;
-        setFilters((prevFilters) => ({
-          ...prevFilters,
-          address: selectedGov,
-        }));
-      }
-      }>
-        <option value="" disabled>Select government</option>
-        {governments.map((Gov) => (
-          <option key={Gov.id} value={Gov.name}>
-            {Gov.name}
-          </option>
-        ))}
-      </select>
+  " 
+  value={filters.address || "Gov"} 
+  onChange={(e) => {
+    const selectedGov = e.target.value;
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      address: selectedGov,
+    }));
+  }}
+  onClick={(e) => { e.stopPropagation() }}
+>
+  <option value="Gov" disabled>Select government</option> {/* Changed to value="" */}
+  {governments.map((Gov) => (
+    <option key={Gov.id} value={Gov.name}>
+      {Gov.name}
+    </option>
+  ))}
+</select>
 
     </div>
 <button className="px-4  py-2 bg-blue-600 text-white font-bold w-full mt-4 hover:opacity-[90%]" onClick={()=>{
