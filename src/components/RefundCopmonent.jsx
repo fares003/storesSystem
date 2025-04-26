@@ -8,6 +8,7 @@ function RefundComponent() {
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [item, setItem] = useState(null);
   const [refundReason, setRefundReason] = useState('');
+  const [reusable, setReusable] = useState(false);
   const API = import.meta.env.VITE_API;
 
   const handleSubmit = async (e) => {
@@ -16,6 +17,7 @@ function RefundComponent() {
       const target = API + `Inventory/refund`;
       const response = await axios.post(target,{
         barcode: searchQuery,
+        reason: refundReason,
       }, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -105,31 +107,28 @@ function RefundComponent() {
               
               <div className="bg-gray-700 p-4 rounded-lg">
                 <label htmlFor="reason" className="text-sm text-gray-400 mb-1 block">Refund Reason</label>
-                <select
+                <input
                   id="reason"
                   className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
                   required
-                >
-                  <option value="">Select a reason</option>
-                  <option value="defective">Defective Product</option>
-                  <option value="wrong_item">Wrong Item Shipped</option>
-                  <option value="return">Customer Return</option>
-                  <option value="other">Other</option>
-                </select>
+                  
+                />
               </div>
-              
-              {refundReason === 'other' && (
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <label htmlFor="customReason" className="text-sm text-gray-400 mb-1 block">Please specify</label>
-                  <textarea
-                    id="customReason"
-                    rows={3}
-                    className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={reusable}
+                    onChange={(e) => setReusable(e.target.checked)}
+                    className="w-4 h-4 text-yellow-500 border-gray-600 rounded focus:ring-yellow-500"
                   />
+                  <span className="text-sm text-gray-400">Item is reusable</span>
+                </label>
                 </div>
-              )}
+              
+              
             </div>
             
             <div className="flex space-x-4">

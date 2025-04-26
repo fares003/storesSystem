@@ -3,9 +3,7 @@ import { Phone } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
-import { CiExport } from "react-icons/ci";
-import { CiImport } from "react-icons/ci";
-import { toast } from "react-toastify";
+
 
 const API = import.meta.env.VITE_API;
 
@@ -59,7 +57,7 @@ const OrderDetailes = () => {
   const fetchInvoice = async () => {
     try {
       const response = await axios.post(`${API}Orders/invoice`, {
-        "orderId":orderId,
+        "orderId":[orderId],
         "width" : width , 
         "height" : height
       },{
@@ -84,41 +82,7 @@ const OrderDetailes = () => {
 
   const [fileInputKey, setFileInputKey] = useState(Date.now()); // Add this state
 
-const handleFileChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
 
-  // Check if file is Excel
-  if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
-    toast.error('Please upload an Excel file (.xlsx, .xls, or .csv)');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', file); // Changed from 'excelFile' to 'file' to match your backend
-
-  try {
-    const response = await axios.post(`${API}Shipping/company/report`, formData, { 
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (response.status === 200) { // Changed from response.ok to response.status
-      toast.success('File imported successfully!');
-      // Reset the file input
-      e.target.value = ''; // This allows selecting the same file again
-      setFileInputKey(Date.now()); // Force re-render if needed
-    } else {
-      toast.error('Something went wrong, please try again later');
-    }
-  } catch (error) {
-    console.error('Import error:', error);
-    toast.error(`Import failed: something went wrong please try again later`);
-    e.target.value = ''; // Clear on error too
-  }
-};
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       alert("تم نسخ الرقم!");
@@ -140,17 +104,7 @@ const handleFileChange = async (e) => {
     }
   }, []);
   
-  const handleExportExcel = async(orderId) => {
-    try {
-      const response = await axios.get(`${API}Shipping/create-report/${orderId}`, {
-        responseType: 'blob',
-      });
-      const fileURL = URL.createObjectURL(response.data);
-      window.open(fileURL, '_blank');
-    }catch (error) {
-      console.error('Error exporting Excel:', error);
-    }
-  };  
+ 
 
   if (!orderData) {
     return <div className="min-h-screen bg-gray-100 p-6">Loading...</div>;
@@ -284,30 +238,7 @@ const handleFileChange = async (e) => {
             </table>
           </div>
         </div>
-        <div className="flex mt-4">
-  {/* Export Excel Button - Corrected */}
-  <button 
-    onClick={() => handleExportExcel(orderId)}
-    className="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-indigo-700 ml-2"
-  >
-    Export Excel <CiExport className="inline font-bold ml-2 text-xl"/>
-  </button>
-  
-  {/* Import Excel Button - Corrected */}
-  <input
-    type="file"
-    ref={fileInputRef}
-    onChange={handleFileChange}
-    accept=".xlsx,.xls,.csv"
-    className="hidden"
-  />
-  <button
-    onClick={handleButtonClick}
-    className="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-indigo-700 ml-2"
-  >
-    Import Excel <CiImport className="inline font-bold ml-2 text-xl"/>
-  </button>
-</div>
+       
       </div>
     </div>
   );
